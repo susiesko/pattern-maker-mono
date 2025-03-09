@@ -7,6 +7,6 @@ class CreateBeadColorLinks < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :bead_color_links, [:bead_id, :color_id], unique: true
+    add_index :bead_color_links, [ :bead_id, :color_id ], unique: true
   end
 end

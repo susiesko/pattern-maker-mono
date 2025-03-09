@@ -63,7 +63,7 @@ group :test do
 end
 
 # postgres
-gem 'pg'
+gem "pg"
 
 # rack-cors
-gem 'rack-cors'
+gem "rack-cors"

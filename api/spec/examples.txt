@@ -1,0 +1,28 @@
+example_id                                                   | status | run_time        |
+------------------------------------------------------------ | ------ | --------------- |
+./spec/models/catalog/bead_brand_spec.rb[1:1]                | passed | 0.0015 seconds  |
+./spec/models/catalog/bead_brand_spec.rb[1:2]                | passed | 0.00132 seconds |
+./spec/models/catalog/bead_brand_spec.rb[1:3]                | passed | 0.00135 seconds |
+./spec/models/catalog/bead_brand_spec.rb[1:4]                | passed | 0.0035 seconds  |
+./spec/models/catalog/bead_brand_spec.rb[1:5:1]              | passed | 0.00163 seconds |
+./spec/queries/catalog/bead_query_spec.rb[1:1:1:1]           | passed | 0.0499 seconds  |
+./spec/queries/catalog/bead_query_spec.rb[1:1:2:1]           | passed | 0.0462 seconds  |
+./spec/queries/catalog/bead_query_spec.rb[1:1:3:1]           | passed | 0.0419 seconds  |
+./spec/queries/catalog/bead_query_spec.rb[1:1:3:2]           | passed | 0.049 seconds   |
+./spec/queries/catalog/bead_query_spec.rb[1:1:4:1]           | passed | 0.0449 seconds  |
+./spec/queries/catalog/bead_query_spec.rb[1:1:4:2]           | passed | 0.04483 seconds |
+./spec/requests/api/v1/beads_spec.rb[1:1:1]                  | failed | 0.08077 seconds |
+./spec/requests/api/v1/beads_spec.rb[1:1:2]                  | failed | 0.08258 seconds |
+./spec/requests/api/v1/beads_spec.rb[1:1:3]                  | failed | 0.0818 seconds  |
+./spec/requests/api/v1/beads_spec.rb[1:2:1:1]                | failed | 0.54035 seconds |
+./spec/requests/api/v1/beads_spec.rb[1:2:1:2]                | passed | 0.10066 seconds |
+./spec/requests/api/v1/beads_spec.rb[1:2:2:1]                | passed | 0.08377 seconds |
+./spec/requests/api/v1/beads_spec.rb[1:2:2:2]                | passed | 0.08699 seconds |
+./spec/requests/api/v1/beads_spec.rb[1:3:1:1]                | failed | 0.08492 seconds |
+./spec/services/catalog/fetch_bead_service_spec.rb[1:1:1:1]  | failed | 0.02292 seconds |
+./spec/services/catalog/fetch_bead_service_spec.rb[1:1:1:2]  | passed | 0.02488 seconds |
+./spec/services/catalog/fetch_bead_service_spec.rb[1:1:2:1]  | passed | 0.00371 seconds |
+./spec/services/catalog/fetch_beads_service_spec.rb[1:1:1:1] | passed | 0.17414 seconds |
+./spec/services/catalog/fetch_beads_service_spec.rb[1:1:1:2] | passed | 0.19236 seconds |
+./spec/services/catalog/fetch_beads_service_spec.rb[1:1:1:3] | passed | 0.19477 seconds |
+./spec/services/catalog/fetch_beads_service_spec.rb[1:1:2:1] | passed | 0.66484 seconds |

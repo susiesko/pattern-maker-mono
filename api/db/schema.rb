@@ -81,8 +81,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "image"
+    t.bigint "type_id", null: false
     t.index ["brand_id"], name: "index_beads_on_brand_id"
     t.index ["size_id"], name: "index_beads_on_size_id"
+    t.index ["type_id"], name: "index_beads_on_type_id"
   end
 
   add_foreign_key "bead_color_links", "bead_colors", column: "color_id"
@@ -94,4 +96,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
   add_foreign_key "bead_types", "bead_brands", column: "brand_id"
   add_foreign_key "beads", "bead_brands", column: "brand_id"
   add_foreign_key "beads", "bead_sizes", column: "size_id"
+  add_foreign_key "beads", "bead_types", column: "type_id"
 end

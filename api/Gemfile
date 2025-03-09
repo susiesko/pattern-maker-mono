@@ -67,3 +67,17 @@ gem "pg"
 
 # rack-cors
 gem "rack-cors"
+
+group :development, :test do
+  gem 'rspec-rails'
+  gem 'factory_bot_rails'
+  gem 'faker'
+  gem 'shoulda-matchers'
+  gem 'database_cleaner-active_record'
+end
+
+# pagy
+gem "pagy"
+
+# active_model_serializers
+gem "active_model_serializers"

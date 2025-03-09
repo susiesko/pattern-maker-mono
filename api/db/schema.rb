@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_09_163336) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -33,7 +33,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_163336) do
 
   create_table "bead_colors", force: :cascade do |t|
     t.string "name", null: false
-    t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -50,14 +49,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_163336) do
 
   create_table "bead_finishes", force: :cascade do |t|
     t.string "name", null: false
-    t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "bead_sizes", force: :cascade do |t|
     t.string "size", null: false
-    t.text "description"
     t.json "metadata"
     t.bigint "brand_id", null: false
     t.bigint "type_id", null: false

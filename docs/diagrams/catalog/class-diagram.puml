@@ -1,0 +1,128 @@
+@startuml Bead Catalog Class Diagram
+
+' Style settings
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classFontSize 14
+skinparam classBackgroundColor #F8F9FA
+skinparam classBorderColor #DEE2E6
+skinparam arrowColor #6C757D
+skinparam packageBackgroundColor #E9ECEF
+
+package "Catalog" {
+  class BeadBrand {
+    id: integer
+    name: string
+    website: string
+    created_at: datetime
+    updated_at: datetime
+    --
+    bead_types(): has_many
+    bead_sizes(): has_many
+    beads(): has_many
+  }
+
+  class BeadType {
+    id: integer
+    name: string
+    brand_id: integer
+    created_at: datetime
+    updated_at: datetime
+    --
+    brand(): belongs_to
+    bead_sizes(): has_many
+  }
+
+  class BeadSize {
+    id: integer
+    size: string
+    metadata: json
+    brand_id: integer
+    type_id: integer
+    created_at: datetime
+    updated_at: datetime
+    --
+    brand(): belongs_to
+    type(): belongs_to
+    beads(): has_many
+  }
+
+  class Bead {
+    id: integer
+    name: string
+    brand_product_code: string
+    metadata: json
+    brand_id: integer
+    size_id: integer
+    image: string
+    created_at: datetime
+    updated_at: datetime
+    --
+    brand(): belongs_to
+    type(): belongs_to
+    size(): belongs_to
+    colors(): has_many through bead_color_links
+    finishes(): has_many through bead_finish_links
+  }
+
+  class BeadColor {
+    id: integer
+    name: string
+    created_at: datetime
+    updated_at: datetime
+    --
+    beads(): has_many through bead_color_links
+  }
+
+  class BeadFinish {
+    id: integer
+    name: string
+    created_at: datetime
+    updated_at: datetime
+    --
+    beads(): has_many through bead_finish_links
+  }
+
+  class BeadColorLink {
+    id: integer
+    bead_id: integer
+    color_id: integer
+    created_at: datetime
+    updated_at: datetime
+    --
+    bead(): belongs_to
+    color(): belongs_to
+  }
+
+  class BeadFinishLink {
+    id: integer
+    bead_id: integer
+    finish_id: integer
+    created_at: datetime
+    updated_at: datetime
+    --
+    bead(): belongs_to
+    finish(): belongs_to
+  }
+}
+
+' Relationships
+BeadBrand "1" -- "many" BeadType : has many >
+BeadBrand "1" -- "many" BeadSize : has many >
+BeadBrand "1" -- "many" Bead : has many >
+
+BeadType "1" -- "many" BeadSize : has many >
+BeadType "1" -- "many" Bead : has many through BeadSize >
+
+BeadSize "1" -- "many" Bead : has many >
+
+Bead "many" -- "many" BeadColor : has many through >
+Bead "many" -- "many" BeadFinish : has many through >
+
+Bead "1" -- "many" BeadColorLink : has many >
+BeadColor "1" -- "many" BeadColorLink : has many >
+
+Bead "1" -- "many" BeadFinishLink : has many >
+BeadFinish "1" -- "many" BeadFinishLink : has many >
+
+@enduml

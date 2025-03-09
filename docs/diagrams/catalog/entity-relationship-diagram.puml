@@ -1,0 +1,109 @@
+@startuml Bead Catalog ERD
+
+' Style settings
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <b>x</b>
+!define foreign_key(x) <u>x</u>
+!define column(x) <i>x</i>
+!define not_null(x) <b><color:red>*</color></b> x
+
+skinparam class {
+  BackgroundColor #ECECEC
+  BorderColor #000000
+  ArrowColor #333333
+}
+
+' Tables
+table(bead_brands) {
+  primary_key(id) : integer
+  not_null(name) : string
+  column(website) : string
+  column(created_at) : datetime
+  column(updated_at) : datetime
+}
+
+table(bead_types) {
+  primary_key(id) : integer
+  not_null(name) : string
+  foreign_key(brand_id) : integer <<FK>>
+  column(created_at) : datetime
+  column(updated_at) : datetime
+}
+
+table(bead_sizes) {
+  primary_key(id) : integer
+  not_null(size) : string
+  column(metadata) : json
+  foreign_key(brand_id) : integer <<FK>>
+  foreign_key(type_id) : integer <<FK>>
+  column(created_at) : datetime
+  column(updated_at) : datetime
+}
+
+table(beads) {
+  primary_key(id) : integer
+  not_null(name) : string
+  not_null(brand_product_code) : string
+  column(metadata) : json
+  foreign_key(brand_id) : integer <<FK>>
+  foreign_key(size_id) : integer <<FK>>
+  column(image) : string
+  column(created_at) : datetime
+  column(updated_at) : datetime
+}
+
+table(bead_colors) {
+  primary_key(id) : integer
+  not_null(name) : string
+  column(created_at) : datetime
+  column(updated_at) : datetime
+}
+
+table(bead_finishes) {
+  primary_key(id) : integer
+  not_null(name) : string
+  column(created_at) : datetime
+  column(updated_at) : datetime
+}
+
+table(bead_color_links) {
+  primary_key(id) : integer
+  foreign_key(bead_id) : integer <<FK>>
+  foreign_key(color_id) : integer <<FK>>
+  column(created_at) : datetime
+  column(updated_at) : datetime
+}
+
+table(bead_finish_links) {
+  primary_key(id) : integer
+  foreign_key(bead_id) : integer <<FK>>
+  foreign_key(finish_id) : integer <<FK>>
+  column(created_at) : datetime
+  column(updated_at) : datetime
+}
+
+' Relationships with proper cardinality
+bead_brands ||--o{ bead_types : "has many"
+bead_brands ||--o{ bead_sizes : "has many"
+bead_brands ||--o{ beads : "has many"
+
+bead_types ||--o{ bead_sizes : "has many"
+
+bead_sizes ||--o{ beads : "has many"
+
+beads ||--o{ bead_color_links : "has many"
+bead_colors ||--o{ bead_color_links : "has many"
+
+beads ||--o{ bead_finish_links : "has many"
+bead_finishes ||--o{ bead_finish_links : "has many"
+
+' Unique constraints
+note bottom of bead_color_links
+  Unique constraint on (bead_id, color_id)
+end note
+
+note bottom of bead_finish_links
+  Unique constraint on (bead_id, finish_id)
+end note
+
+@enduml

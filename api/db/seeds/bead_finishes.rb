@@ -13,7 +13,7 @@ bead_finishes = [
   { name: "Luster" },
   { name: "Ceylon" },
   { name: "Opaque" },
-  { name: "Lined" },
+  { name: "Color-Lined" },
   { name: "Silver-Lined" },
   { name: "Gold-Lined" },
   { name: "Iris" },
@@ -26,15 +26,3 @@ bead_finishes.each do |finish_attrs|
 end
 
 puts "Bead finishes seeded. Total count: #{Catalog::BeadFinish.count}"
-
-# Example of adding brand-specific finishes
-# 
-# miyuki_specific_finishes = [
-#   { name: "Duracoat Galvanized", description: "Miyuki's durable galvanized finish" }
-# ]
-# 
-# miyuki_specific_finishes.each do |finish_attrs|
-#   Catalog::BeadFinish.find_or_create_by!(name: finish_attrs[:name]) do |finish|
-#     finish.description = finish_attrs[:description]
-#   end
-# end

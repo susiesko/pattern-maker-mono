@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateBeadTypes < ActiveRecord::Migration[8.0]
   def change
     create_table :bead_types do |t|

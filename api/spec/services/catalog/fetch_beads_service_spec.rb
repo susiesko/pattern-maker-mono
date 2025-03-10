@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Catalog::FetchBeadsService do
@@ -6,9 +8,9 @@ RSpec.describe Catalog::FetchBeadsService do
   let!(:size) { create(:bead_size, brand: brand, type: type) }
   let!(:beads) { create_list(:bead, 25, brand: brand, type: type, size: size) }
 
-  describe "#call" do
-    context "without controller" do
-      it "returns paginated beads" do
+  describe '#call' do
+    context 'without controller' do
+      it 'returns paginated beads' do
         pagy, result = described_class.new(page: 1, items: 10).call
 
         expect(result.count).to eq(10)
@@ -18,14 +20,14 @@ RSpec.describe Catalog::FetchBeadsService do
         expect(pagy.pages).to eq(3)
       end
 
-      it "handles page parameter" do
+      it 'handles page parameter' do
         pagy, result = described_class.new(page: 2, items: 10).call
 
         expect(result.count).to eq(10)
         expect(pagy.page).to eq(2)
       end
 
-      it "applies filters" do
+      it 'applies filters' do
         _pagy, result = described_class.new(brand_id: brand.id).call
 
         expect(result.count).to eq(20) # Default items per page is 20
@@ -33,13 +35,13 @@ RSpec.describe Catalog::FetchBeadsService do
       end
     end
 
-    context "with controller" do
-      let(:controller) { double("controller") }
-      let(:pagy_double) { double("pagy", page: 1, items: 20, pages: 2, count: 25, next: 2, prev: nil) }
+    context 'with controller' do
+      let(:controller) { double('controller') }
+      let(:pagy_double) { double('pagy', page: 1, items: 20, pages: 2, count: 25, next: 2, prev: nil) }
       let(:paginated_beads) { beads.first(20) }
 
       before do
-        allow(controller).to receive(:pagy).and_return([ pagy_double, paginated_beads ])
+        allow(controller).to receive(:pagy).and_return([pagy_double, paginated_beads])
       end
 
       it "uses controller's pagy method" do

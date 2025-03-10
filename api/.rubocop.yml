@@ -1,8 +1,57 @@
-# Omakase Ruby styling for Rails
-inherit_gem: { rubocop-rails-omakase: rubocop.yml }
+AllCops:
+  TargetRubyVersion: 3.2.2
+  NewCops: enable
+  Exclude:
+    - 'bin/*'
 
-# Overwrite or add rules to create your own house style
-#
-# # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
-# Layout/SpaceInsideArrayLiteralBrackets:
-#   Enabled: false
+# Line length is often customized (default is 80)
+Layout/LineLength:
+  Max: 120
+  # Exclude certain files where longer lines are acceptable
+  Exclude:
+    - 'spec/**/*.rb'
+    - 'db/schema.rb'
+
+# Indentation settings
+Layout/IndentationWidth:
+  Width: 2
+
+Layout/IndentationConsistency:
+  EnforcedStyle: indented_internal_methods
+
+# Hash alignment
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: key
+  EnforcedColonStyle: key
+
+# Parameter alignment
+Layout/ParameterAlignment:
+  EnforcedStyle: with_first_parameter
+
+# String literals configuration
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+  ConsistentQuotesInMultiline: true
+
+# Documentation requirements
+Style/Documentation:
+  Enabled: false  # Often disabled in internal projects
+
+# Use safe navigation operator
+Style/SafeNavigation:
+  Enabled: true
+
+# Symbol array syntax preference
+Style/SymbolArray:
+  EnforcedStyle: brackets  # or 'percent' for %i syntax
+
+# Class structure preferences
+Style/ClassAndModuleChildren:
+  EnforcedStyle: nested  # or 'compact'
+
+Metrics/BlockLength:
+  Max: 50
+  Exclude:
+    - 'spec/**/*'
+    - 'db/*.rb'
+    - 'bin/*'

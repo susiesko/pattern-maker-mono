@@ -1,24 +1,26 @@
+# frozen_string_literal: true
+
 # db/seeds/bead_finishes.rb
 # Seed bead finishes
 
-puts "Seeding bead finishes..."
+puts 'Seeding bead finishes...'
 
 # Common bead finishes across brands
 bead_finishes = [
-  { name: "Matte" },
-  { name: "Glossy" },
-  { name: "Metallic" },
-  { name: "Galvanized" },
-  { name: "AB (Aurora Borealis)" },
-  { name: "Luster" },
-  { name: "Ceylon" },
-  { name: "Opaque" },
-  { name: "Color-Lined" },
-  { name: "Silver-Lined" },
-  { name: "Gold-Lined" },
-  { name: "Iris" },
-  { name: "Duracoat" },
-  { name: "Picasso"  }
+  { name: 'Matte' },
+  { name: 'Glossy' },
+  { name: 'Metallic' },
+  { name: 'Galvanized' },
+  { name: 'AB (Aurora Borealis)' },
+  { name: 'Luster' },
+  { name: 'Ceylon' },
+  { name: 'Opaque' },
+  { name: 'Color-Lined' },
+  { name: 'Silver-Lined' },
+  { name: 'Gold-Lined' },
+  { name: 'Iris' },
+  { name: 'Duracoat' },
+  { name: 'Picasso'  }
 ]
 
 bead_finishes.each do |finish_attrs|

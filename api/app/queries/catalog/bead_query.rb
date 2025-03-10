@@ -1,5 +1,11 @@
+# frozen_string_literal: true
+
 module Catalog
   class BeadQuery
+    VALID_SORT_COLUMNS = %w[name brand_product_code created_at updated_at].freeze
+    DEFAULT_SORT_COLUMN = 'created_at'
+    DEFAULT_SORT_DIRECTION = 'desc'
+
     attr_reader :relation
 
     def initialize(relation = Catalog::Bead.all)
@@ -8,66 +14,56 @@ module Catalog
 
     def call(params = {})
       result = relation
-      result = filter_by_brand(result, params[:brand_id])
-      result = filter_by_type(result, params[:type_id])
-      result = filter_by_size(result, params[:size_id])
-      result = filter_by_color(result, params[:color_id])
-      result = filter_by_finish(result, params[:finish_id])
+
+      # Apply direct attribute filters
+      [:brand_id, :type_id, :size_id].each do |attribute|
+        result = filter_by_attribute(result, attribute, params[attribute])
+      end
+
+      # Apply association filters
+      result = filter_by_association(result, :bead_color_links, :color_id, params[:color_id])
+      result = filter_by_association(result, :bead_finish_links, :finish_id, params[:finish_id])
+
+      # Apply search and sort
       result = search(result, params[:search])
       result = sort(result, params[:sort_by], params[:sort_direction])
-      result = includes_associations(result)
-      result
+
+      includes_associations(result)
     end
 
     private
 
-    def filter_by_brand(relation, brand_id)
-      return relation if brand_id.blank?
-      relation.where(brand_id: brand_id)
-    end
+      def filter_by_attribute(relation, attribute, value)
+        return relation if value.blank?
 
-    def filter_by_type(relation, type_id)
-      return relation if type_id.blank?
-      relation.where(type_id: type_id)
-    end
+        relation.where(attribute => value)
+      end
 
-    def filter_by_size(relation, size_id)
-      return relation if size_id.blank?
-      relation.where(size_id: size_id)
-    end
+      def filter_by_association(relation, join_table, attribute, value)
+        return relation if value.blank?
 
-    def filter_by_color(relation, color_id)
-      return relation if color_id.blank?
-      relation.joins(:bead_color_links).where(bead_color_links: { color_id: color_id }).distinct
-    end
+        relation.joins(join_table).where(join_table => { attribute => value }).distinct
+      end
 
-    def filter_by_finish(relation, finish_id)
-      return relation if finish_id.blank?
-      relation.joins(:bead_finish_links).where(bead_finish_links: { finish_id: finish_id }).distinct
-    end
+      def search(relation, search_term)
+        return relation if search_term.blank?
 
-    def search(relation, search_term)
-      return relation if search_term.blank?
-      term = "%#{search_term}%"
-      relation.where("name ILIKE ? OR brand_product_code ILIKE ?", term, term)
-    end
+        term = "%#{search_term}%"
+        relation.where('name ILIKE ? OR brand_product_code ILIKE ?', term, term)
+      end
 
-    def sort(relation, sort_by, sort_direction)
-      sort_column = sort_by || 'created_at'
-      sort_direction = sort_direction || 'desc'
-      
-      # Ensure sort_column is a valid column to prevent SQL injection
-      valid_columns = ['name', 'brand_product_code', 'created_at', 'updated_at']
-      sort_column = 'created_at' unless valid_columns.include?(sort_column)
-      
-      # Ensure sort_direction is either 'asc' or 'desc'
-      sort_direction = sort_direction.to_s.downcase == 'asc' ? 'asc' : 'desc'
-      
-      relation.order("#{sort_column} #{sort_direction}")
-    end
+      def sort(relation, sort_by, sort_direction)
+        # Validate sort column
+        sort_column = VALID_SORT_COLUMNS.include?(sort_by) ? sort_by : DEFAULT_SORT_COLUMN
 
-    def includes_associations(relation)
-      relation.includes(:brand, :size, :type, :colors, :finishes)
-    end
+        # Validate sort direction
+        sort_direction = sort_direction.to_s.downcase == 'asc' ? 'asc' : DEFAULT_SORT_DIRECTION
+
+        relation.order("#{sort_column} #{sort_direction}")
+      end
+
+      def includes_associations(relation)
+        relation.includes(:brand, :size, :type, :colors, :finishes)
+      end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Catalog
   class BeadBrand < ApplicationRecord
     has_many :bead_types, foreign_key: :brand_id, dependent: :destroy

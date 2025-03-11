@@ -57,6 +57,9 @@ group :development, :test do
   gem 'faker'
   gem 'rspec-rails'
   gem 'shoulda-matchers'
+  gem 'pry'
+  gem 'pry-rails'  # Rails integration
+  gem 'pry-byebug' # Adds step debugging
 end
 
 group :development do

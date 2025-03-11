@@ -16,10 +16,10 @@ Rails.application.routes.draw do
     namespace :v1 do
       # Main resources
       resources :beads, only: [:index, :show]
+      resources :bead_types, only: [:index, :show], path: 'types'
 
       # Additional catalog resources
       # resources :bead_brands, only: [:index, :show], path: 'brands'
-      # resources :bead_types, only: [:index, :show], path: 'types'
       # resources :bead_sizes, only: [:index, :show], path: 'sizes'
       # resources :bead_colors, only: [:index, :show], path: 'colors'
       # resources :bead_finishes, only: [:index, :show], path: 'finishes'

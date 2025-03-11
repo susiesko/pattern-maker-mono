@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateBeadFinishLinks < ActiveRecord::Migration[8.0]
   def change
     create_table :bead_finish_links do |t|
@@ -7,6 +9,6 @@ class CreateBeadFinishLinks < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :bead_finish_links, [ :bead_id, :finish_id ], unique: true
+    add_index :bead_finish_links, [:bead_id, :finish_id], unique: true
   end
 end

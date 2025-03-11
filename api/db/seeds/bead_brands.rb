@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 # db/seeds/bead_brands.rb
 # Seed bead brands
 
-puts "Seeding bead brands..."
+puts 'Seeding bead brands...'
 
 bead_brands = [
-  { name: "Miyuki", website: "https://www.miyuki-beads.co.jp/english/" },
-  { name: "Toho", website: "https://www.toho-beads.co.jp/english/" },
-  { name: "Preciosa", website: "https://www.preciosa-ornela.com" }
+  { name: 'Miyuki', website: 'https://www.miyuki-beads.co.jp/english/' },
+  { name: 'Toho', website: 'https://www.toho-beads.co.jp/english/' },
+  { name: 'Preciosa', website: 'https://www.preciosa-ornela.com' }
 ]
 
 bead_brands.each do |brand_attrs|

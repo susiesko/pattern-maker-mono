@@ -20,7 +20,7 @@ module Api
             prev_page: pagy.prev,
             total_pages: pagy.pages,
             total_count: pagy.count,
-            per_page: pagy.items
+            per_page: pagy.vars[:items]
           }
         end
     end

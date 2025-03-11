@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
+require 'ostruct'
+
 module Catalog
   class FetchBeadsService
+    include Pagy::Frontend
+
     DEFAULT_ITEMS_PER_PAGE = 20
     DEFAULT_PAGE = 1
 
@@ -18,6 +22,7 @@ module Catalog
       if controller.present?
         paginate_with_controller(beads)
       else
+        params[:items].present? ? params[:items].to_i : 20
         paginate_manually(beads)
       end
     end

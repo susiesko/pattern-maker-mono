@@ -55,11 +55,11 @@ group :development, :test do
   gem 'database_cleaner-active_record'
   gem 'factory_bot_rails'
   gem 'faker'
+  gem 'pry'
+  gem 'pry-byebug' # Adds step debugging
+  gem 'pry-rails'  # Rails integration
   gem 'rspec-rails'
   gem 'shoulda-matchers'
-  gem 'pry'
-  gem 'pry-rails'  # Rails integration
-  gem 'pry-byebug' # Adds step debugging
 end
 
 group :development do

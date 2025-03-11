@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Catalog
   class FetchBeadTypeService
     attr_reader :id

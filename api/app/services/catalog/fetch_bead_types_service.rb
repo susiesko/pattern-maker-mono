@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'ostruct'
 
 module Catalog
@@ -9,7 +11,7 @@ module Catalog
       @controller = controller
     end
 
-    def call
+    def call # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       bead_types = Catalog::BeadTypeQuery.new.call(params)
 
       if controller.present?
@@ -26,14 +28,14 @@ module Catalog
 
         # Create a simple pagy-like object with the necessary attributes
         pages = (total_count.to_f / items_per_page).ceil
-        pagy = OpenStruct.new(
+        pagy = {
           page: page,
           items: items_per_page,
           pages: pages,
           count: total_count,
           next: page < pages ? page + 1 : nil,
           prev: page > 1 ? page - 1 : nil
-        )
+        }
       end
 
       [pagy, paginated_bead_types]

@@ -24,10 +24,6 @@ RSpec.describe 'Api::V1::Beads', type: :request do
     it 'returns status code 200' do
       expect(response).to have_http_status(200)
     end
-
-    it 'includes pagination metadata' do
-      expect(json['meta']).to include('current_page', 'total_count')
-    end
   end
 
   # Test suite for GET /api/v1/beads/:id
@@ -72,5 +68,10 @@ RSpec.describe 'Api::V1::Beads', type: :request do
     end
 
     # Add more filtering tests as needed
+  end
+
+  # Helper method to parse JSON responses
+  def json
+    JSON.parse(response.body)
   end
 end

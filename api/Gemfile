@@ -79,8 +79,8 @@ gem 'pg'
 # rack-cors
 gem 'rack-cors'
 
-# pagy
-gem 'pagy'
+# pagy was removed
+# gem 'pagy'
 
 # active_model_serializers
 gem 'active_model_serializers'

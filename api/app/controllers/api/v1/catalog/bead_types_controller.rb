@@ -5,12 +5,11 @@ module Api
     module Catalog
       class BeadTypesController < BaseController
         def index
-          @pagy, @bead_types = ::Catalog::FetchBeadTypesService.new(filter_params, self).call
+          @bead_types = ::Catalog::FetchBeadTypesService.new(filter_params).call
 
           render json: {
             bead_types: ActiveModelSerializers::SerializableResource.new(@bead_types,
-                                                                         each_serializer: BeadTypeSerializer),
-            meta: pagy_metadata(@pagy)
+                                                                         each_serializer: BeadTypeSerializer)
           }
         end
 
@@ -24,7 +23,7 @@ module Api
         private
 
           def filter_params
-            params.permit(:brand_id, :search, :sort_by, :sort_direction, :items, :page)
+            params.permit(:brand_id, :search, :sort_by, :sort_direction)
           end
       end
     end

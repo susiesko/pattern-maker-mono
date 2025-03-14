@@ -18,10 +18,6 @@ RSpec.describe 'Api::V1::Catalog::BeadTypes', type: :request do
     it 'returns status code 200' do
       expect(response).to have_http_status(200)
     end
-
-    it 'includes pagination metadata' do
-      expect(json['meta']).to include('current_page', 'total_count')
-    end
   end
 
   describe 'GET /api/v1/catalog/types/:id' do
@@ -82,20 +78,6 @@ RSpec.describe 'Api::V1::Catalog::BeadTypes', type: :request do
         expect(json['bead_types']).not_to be_empty
         names = json['bead_types'].map { |bt| bt['name'] }
         expect(names).to eq(names.sort)
-      end
-    end
-
-    context 'with pagination' do
-      before { get '/api/v1/catalog/types?page=1&items=5' }
-
-      it 'returns the specified number of items' do
-        expect(json['bead_types'].size).to eq(5)
-      end
-
-      it 'includes correct pagination metadata' do
-        expect(json['meta']['current_page']).to eq(1)
-        expect(json['meta']['per_page']).to eq(5)
-        expect(json['meta']['total_count']).to eq(10)
       end
     end
   end

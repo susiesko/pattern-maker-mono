@@ -19,14 +19,7 @@ RSpec.describe Api::V1::Catalog::BeadTypesController, type: :controller do
       expect(json_response).to have_key('bead_types')
       expect(json_response['bead_types'].size).to eq(10)
     end
-
-    it 'includes pagination metadata' do
-      json_response = JSON.parse(response.body)
-      expect(json_response).to have_key('meta')
-      expect(json_response['meta']).to include('current_page', 'total_count')
-    end
-
-    context 'with filtering parameters' do
+context 'with filtering parameters' do
       it 'filters by brand_id' do
         get :index, params: { brand_id: brand.id }
         json_response = JSON.parse(response.body)
@@ -45,13 +38,6 @@ RSpec.describe Api::V1::Catalog::BeadTypesController, type: :controller do
         json_response = JSON.parse(response.body)
         names = json_response['bead_types'].map { |bt| bt['name'] }
         expect(names).to eq(names.sort)
-      end
-
-      it 'paginates results' do
-        get :index, params: { page: 1, items: 5 }
-        json_response = JSON.parse(response.body)
-        expect(json_response['bead_types'].size).to eq(5)
-        expect(json_response['meta']['current_page']).to eq(1)
       end
     end
   end

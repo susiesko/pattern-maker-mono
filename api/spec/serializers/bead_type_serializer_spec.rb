@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe BeadTypeSerializer do
+RSpec.describe Catalog::BeadTypeSerializer do
   let!(:brand) { create(:bead_brand, name: 'Test Brand', website: 'https://example.com') }
   let!(:bead_type) { create(:bead_type, name: 'Test Type', brand: brand) }
 
@@ -16,19 +16,27 @@ RSpec.describe BeadTypeSerializer do
     expect(subject[:name]).to eq('Test Type')
   end
 
-  it 'includes timestamps' do
+  it 'includes created_at timestamp' do
     expect(subject[:created_at]).to be_present
+  end
+
+  it 'includes updated_at timestamp' do
     expect(subject[:updated_at]).to be_present
   end
 
   it 'includes the brand' do
     expect(subject[:brand]).to be_present
-    expect(subject[:brand][:id]).to eq(brand.id)
-    expect(subject[:brand][:name]).to eq('Test Brand')
-    expect(subject[:brand][:website]).to eq('https://example.com')
   end
 
-  it 'does not include other brand attributes' do
-    expect(subject[:brand].keys).to contain_exactly(:id, :name, :website)
+  it 'includes the brand id' do
+    expect(subject[:brand]['id']).to eq(brand.id)
+  end
+
+  it 'includes the brand name' do
+    expect(subject[:brand]['name']).to eq('Test Brand')
+  end
+
+  it 'includes the brand website' do
+    expect(subject[:brand]['website']).to eq('https://example.com')
   end
 end

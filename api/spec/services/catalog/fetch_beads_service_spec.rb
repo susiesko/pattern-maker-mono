@@ -9,7 +9,7 @@ RSpec.describe Catalog::FetchBeadsService do
   let!(:beads) { create_list(:bead, 25, brand: brand, type: type, size: size) }
 
   describe '#call' do
-    it "returns all beads' do
+    it 'returns all beads' do
       result = described_class.new.call
       expect(result.count).to eq(25)
     end
@@ -19,14 +19,14 @@ RSpec.describe Catalog::FetchBeadsService do
       expect(result.all? { |b| b.brand_id == brand.id }).to be true
     end
 
-    it "applies search filter" do
+    it 'applies search filter' do
       search_term = beads.first.name[0..2]
       result = described_class.new(search: search_term).call
       expect(result.all? { |b| b.name.downcase.include?(search_term.downcase) }).to be true
     end
 
-    it "applies sorting" do
-      result = described_class.new(sort_by: "name", sort_direction: "asc").call
+    it 'applies sorting' do
+      result = described_class.new(sort_by: 'name', sort_direction: 'asc').call
       names = result.map(&:name)
       expect(names).to eq(names.sort)
     end

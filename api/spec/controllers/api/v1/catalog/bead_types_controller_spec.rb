@@ -14,12 +14,20 @@ RSpec.describe Api::V1::Catalog::BeadTypesController, type: :controller do
       expect(response).to be_successful
     end
 
-    it 'returns bead types in the response' do
+    it 'returns bead types key in the response' do
       json_response = JSON.parse(response.body)
       expect(json_response).to have_key('bead_types')
+    end
+
+    it 'returns the correct number of bead types in the response' do
+      json_response = JSON.parse(response.body)
       expect(json_response['bead_types'].size).to eq(10)
     end
-context 'with filtering parameters' do
+
+    context 'with filtering parameters' do
+      it 'returns a successful response' do
+        expect(response).to be_successful
+      end
       it 'filters by brand_id' do
         get :index, params: { brand_id: brand.id }
         json_response = JSON.parse(response.body)
@@ -50,14 +58,18 @@ context 'with filtering parameters' do
         expect(response).to be_successful
       end
 
-      it 'returns the bead type in the response' do
+      it 'returns the bead type id in the response' do
         json_response = JSON.parse(response.body)
         expect(json_response['id']).to eq(bead_type_id)
       end
 
-      it 'includes the brand information' do
+      it 'includes the brand key in the response' do
         json_response = JSON.parse(response.body)
         expect(json_response).to have_key('brand')
+      end
+
+      it 'includes the brand id in the response' do
+        json_response = JSON.parse(response.body)
         expect(json_response['brand']['id']).to eq(brand.id)
       end
     end
@@ -69,9 +81,13 @@ context 'with filtering parameters' do
         expect(response).to have_http_status(:not_found)
       end
 
-      it 'returns an error message' do
+      it 'returns an error key in the response' do
         json_response = JSON.parse(response.body)
         expect(json_response).to have_key('error')
+      end
+
+      it 'returns an error message indicating not found' do
+        json_response = JSON.parse(response.body)
         expect(json_response['error']).to match(/not found/)
       end
     end

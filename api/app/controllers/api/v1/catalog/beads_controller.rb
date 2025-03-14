@@ -5,10 +5,10 @@ module Api
     module Catalog
       class BeadsController < BaseController
         def index
-          beads = ::Catalog::FetchBeadsService.new(filter_params).call
+          @beads = ::Catalog::FetchBeadsService.new(filter_params).call
 
           render json: {
-            beads: ActiveModelSerializers::SerializableResource.new(beads, each_serializer: BeadSerializer)
+            beads: ActiveModelSerializers::SerializableResource.new(@beads, each_serializer: BeadSerializer)
           }
         end
 

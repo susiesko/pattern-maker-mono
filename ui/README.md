@@ -1,4 +1,98 @@
-# React + TypeScript + Vite
+# Pattern Maker UI
+
+A React application for the Pattern Maker project, built with:
+- React
+- TypeScript
+- React Query for data fetching
+- Styled Components for styling
+- Vite for fast development
+- Vitest for testing
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or later)
+- npm or yarn
+- The Pattern Maker API running locally (Rails backend)
+
+### Installation
+
+1. Clone the repository
+2. Navigate to the ui directory:
+   ```
+   cd pattern-maker-mono/ui
+   ```
+3. Install dependencies:
+   ```
+   npm install
+   # or
+   yarn
+   ```
+
+### Development
+
+Start the development server:
+```
+npm run dev
+# or
+yarn dev
+```
+
+This will start the Vite development server, typically at http://localhost:5173.
+
+### Building for Production
+
+Build the application for production:
+```
+npm run build
+# or
+yarn build
+```
+
+This will create a `dist` directory with the compiled assets.
+
+### Running Tests
+
+Run the tests:
+```
+npm test
+# or
+yarn test
+```
+
+Run tests in watch mode:
+```
+npm run test:watch
+# or
+yarn test:watch
+```
+
+## Project Structure
+
+- `src/` - Source code
+  - `components/` - React components
+  - `services/` - API and other services
+  - `styles/` - Theme and styled-components types
+  - `test/` - Test setup and utilities
+  - `App.tsx` - Main application component
+  - `main.tsx` - Application entry point
+
+## Features
+
+- View a paginated list of beads from the catalog
+- Search for beads by name or product code
+- Filter beads by various attributes
+- Responsive design for desktop and mobile
+
+## API Integration
+
+The application connects to the Pattern Maker API. In development, API requests are proxied to the Rails backend (typically running on port 3000) to avoid CORS issues.
+
+## Notes
+
+- Make sure the Rails API is running before starting the client application
+- The proxy configuration in `vite.config.ts` assumes the API is running on `http://localhost:3000`# React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

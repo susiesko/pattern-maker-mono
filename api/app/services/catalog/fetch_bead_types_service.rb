@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Catalog
-  class FetchBeadsService
+  class FetchBeadTypesService
     attr_reader :params
 
     def initialize(params = {})
@@ -9,7 +9,7 @@ module Catalog
     end
 
     def call
-      Catalog::BeadQuery.new.call(params)
+      Catalog::BeadTypeQuery.new.call(params)
     end
   end
 end

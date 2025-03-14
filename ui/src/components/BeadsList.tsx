@@ -258,7 +258,7 @@ const BeadsList = () => {
     const { name, value } = e.target;
     setFilters(prev => ({
       ...prev,
-      [name]: value || undefined
+      [name]: value ?? ''
     }));
     // Reset to first page when filters change
     setPage(1);

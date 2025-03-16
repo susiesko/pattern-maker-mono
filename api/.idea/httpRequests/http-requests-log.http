@@ -1,9 +1,0 @@
-GET http://localhost:3000/api/v1/status
-User-Agent: IntelliJ HTTP Client/RubyMine 2024.3.4
-Accept-Encoding: br, deflate, gzip, x-gzip
-Accept: */*
-
-<> 2025-03-17T135711.200.json
-
-###
-

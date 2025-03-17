@@ -4,12 +4,12 @@ module Api
   module V1
     module Catalog
       class BeadBrandsController < Api::V1::BaseController
-        before_action :set_brand, only: [:show, :update, :destroy]
+        before_action :set_brand, only: [ :show, :update, :destroy ]
 
         # GET /api/v1/catalog/bead_brands
         def index
           @brands = ::Catalog::BeadBrand.all.order(:name)
-          
+
           render json: {
             success: true,
             data: @brands
@@ -22,7 +22,7 @@ module Api
             success: true,
             data: @brand.as_json(
               include: [
-                { bead_types: { only: [:id, :name] } }
+                { bead_types: { only: [ :id, :name ] } }
               ]
             )
           }
@@ -72,7 +72,7 @@ module Api
 
         def set_brand
           @brand = ::Catalog::BeadBrand.find_by(id: params[:id])
-          render_error(:not_found, ['Bead brand not found']) unless @brand
+          render_error(:not_found, [ 'Bead brand not found' ]) unless @brand
         end
 
         def brand_params

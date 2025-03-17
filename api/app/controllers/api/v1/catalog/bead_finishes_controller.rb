@@ -4,12 +4,12 @@ module Api
   module V1
     module Catalog
       class BeadFinishesController < Api::V1::BaseController
-        before_action :set_finish, only: [:show, :update, :destroy]
+        before_action :set_finish, only: [ :show, :update, :destroy ]
 
         # GET /api/v1/catalog/bead_finishes
         def index
           @finishes = ::Catalog::BeadFinish.all.order(:name)
-          
+
           render json: {
             success: true,
             data: @finishes
@@ -68,7 +68,7 @@ module Api
 
         def set_finish
           @finish = ::Catalog::BeadFinish.find_by(id: params[:id])
-          render_error(:not_found, ['Bead finish not found']) unless @finish
+          render_error(:not_found, [ 'Bead finish not found' ]) unless @finish
         end
 
         def finish_params

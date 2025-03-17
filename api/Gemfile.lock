@@ -287,6 +287,9 @@ GEM
       rubocop (>= 1.72)
       rubocop-performance (>= 1.24)
       rubocop-rails (>= 2.30)
+    rubocop-rspec (3.5.0)
+      lint_roller (~> 1.1)
+      rubocop (~> 1.72, >= 1.72.1)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     shoulda-matchers (6.4.0)
@@ -369,7 +372,10 @@ DEPENDENCIES
   rack-cors
   rails (~> 8.0.1)
   rspec-rails
+  rubocop-performance
+  rubocop-rails
   rubocop-rails-omakase
+  rubocop-rspec
   shoulda-matchers
   solid_cable
   solid_cache

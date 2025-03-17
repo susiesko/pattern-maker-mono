@@ -4,18 +4,18 @@ module Api
   module V1
     module Catalog
       class BeadTypesController < Api::V1::BaseController
-        before_action :set_type, only: [:show, :update, :destroy]
+        before_action :set_type, only: [ :show, :update, :destroy ]
 
         # GET /api/v1/catalog/bead_types
         def index
           @types = ::Catalog::BeadType.includes(:brand).all
-          
+
           # Filter by brand if provided
           @types = @types.where(brand_id: params[:brand_id]) if params[:brand_id].present?
-          
+
           render json: {
             success: true,
-            data: @types.as_json(include: { brand: { only: [:id, :name] } })
+            data: @types.as_json(include: { brand: { only: [ :id, :name ] } })
           }
         end
 
@@ -25,8 +25,8 @@ module Api
             success: true,
             data: @type.as_json(
               include: [
-                { brand: { only: [:id, :name] } },
-                { bead_sizes: { only: [:id, :size] } }
+                { brand: { only: [ :id, :name ] } },
+                { bead_sizes: { only: [ :id, :size ] } }
               ]
             )
           }
@@ -39,7 +39,7 @@ module Api
           if @type.save
             render json: {
               success: true,
-              data: @type.as_json(include: { brand: { only: [:id, :name] } }),
+              data: @type.as_json(include: { brand: { only: [ :id, :name ] } }),
               message: 'Bead type created successfully'
             }, status: :created
           else
@@ -52,7 +52,7 @@ module Api
           if @type.update(type_params)
             render json: {
               success: true,
-              data: @type.as_json(include: { brand: { only: [:id, :name] } }),
+              data: @type.as_json(include: { brand: { only: [ :id, :name ] } }),
               message: 'Bead type updated successfully'
             }
           else
@@ -76,7 +76,7 @@ module Api
 
         def set_type
           @type = ::Catalog::BeadType.find_by(id: params[:id])
-          render_error(:not_found, ['Bead type not found']) unless @type
+          render_error(:not_found, [ 'Bead type not found' ]) unless @type
         end
 
         def type_params

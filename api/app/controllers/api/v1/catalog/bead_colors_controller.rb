@@ -4,12 +4,12 @@ module Api
   module V1
     module Catalog
       class BeadColorsController < Api::V1::BaseController
-        before_action :set_color, only: [:show, :update, :destroy]
+        before_action :set_color, only: [ :show, :update, :destroy ]
 
         # GET /api/v1/catalog/bead_colors
         def index
           @colors = ::Catalog::BeadColor.all.order(:name)
-          
+
           render json: {
             success: true,
             data: @colors
@@ -68,7 +68,7 @@ module Api
 
         def set_color
           @color = ::Catalog::BeadColor.find_by(id: params[:id])
-          render_error(:not_found, ['Bead color not found']) unless @color
+          render_error(:not_found, [ 'Bead color not found' ]) unless @color
         end
 
         def color_params

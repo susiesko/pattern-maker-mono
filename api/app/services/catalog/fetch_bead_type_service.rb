@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Catalog
-  class FetchBeadTypeService
+  class FetchBeadTypeService < ApplicationService
     attr_reader :id
 
     def initialize(id)

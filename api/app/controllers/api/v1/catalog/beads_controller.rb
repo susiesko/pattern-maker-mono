@@ -4,8 +4,9 @@ module Api
   module V1
     module Catalog
       class BeadsController < BaseController
+        include ::Catalog
         def index
-          @beads = ::Catalog::FetchBeadsService.new(filter_params).call
+          @beads = FetchBeadsService.call(filter_params)
 
           render json: {
             beads: ActiveModelSerializers::SerializableResource.new(@beads, each_serializer: BeadSerializer)
@@ -13,10 +14,8 @@ module Api
         end
 
         def show
-          bead = ::Catalog::FetchBeadService.new(params[:id]).call
+          bead = FetchBeadService.call(params[:id])
           render json: bead, serializer: BeadSerializer
-        rescue ActiveRecord::RecordNotFound
-          render json: { error: 'Bead not found' }, status: :not_found
         end
 
         private

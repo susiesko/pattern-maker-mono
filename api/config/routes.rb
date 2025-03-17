@@ -5,14 +5,26 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Handle favicon requests to prevent 404 errors in logs
+  get '/favicon.ico', to: proc { [204, {}, ['']] }
+
   # API routes with versioning
   namespace :api do
     namespace :v1 do
-      # Your API endpoints will go here
+      # Status endpoint for health checks
       resources :status, only: [:index]
 
+      # Catalog namespace for all bead-related resources
       namespace :catalog do
-        resources :beads, only: [:index, show]
+        # Main bead resources
+        resources :beads
+
+        # Supporting resources
+        resources :bead_brands
+        resources :bead_types
+        resources :bead_sizes
+        resources :bead_colors
+        resources :bead_finishes
       end
     end
   end

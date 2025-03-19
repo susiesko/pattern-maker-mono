@@ -209,6 +209,7 @@ RSpec.describe "Api::V1::Catalog::BeadBrands", type: :request do
       end
     end
 
+
     context "when the bead brand does not exist" do
       before do
         patch api_v1_catalog_bead_brand_path(id: 999), params: { bead_brand: { name: "Updated Name" } }, headers: valid_headers

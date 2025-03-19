@@ -50,7 +50,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "bead_sizes.rb", force: :cascade do |t|
+  create_table "bead_sizes", force: :cascade do |t|
     t.string "size", null: false
     t.json "metadata"
     t.integer "brand_id", null: false
@@ -86,9 +86,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
   add_foreign_key "bead_color_links", "beads"
   add_foreign_key "bead_finish_links", "bead_finishes", column: "finish_id"
   add_foreign_key "bead_finish_links", "beads"
-  add_foreign_key "bead_sizes.rb", "bead_brands", column: "brand_id"
-  add_foreign_key "bead_sizes.rb", "bead_types", column: "type_id"
+  add_foreign_key "bead_sizes", "bead_brands", column: "brand_id"
+  add_foreign_key "bead_sizes", "bead_types", column: "type_id"
   add_foreign_key "bead_types", "bead_brands", column: "brand_id"
   add_foreign_key "beads", "bead_brands", column: "brand_id"
-  add_foreign_key "beads", "bead_sizes.rb", column: "size_id"
+  add_foreign_key "beads", "bead_sizes", column: "size_id"
 end

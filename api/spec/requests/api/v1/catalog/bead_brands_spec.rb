@@ -51,8 +51,8 @@ RSpec.describe "Api::V1::Catalog::BeadBrands", type: :request do
 
   describe "GET /show" do
     context "when the bead brand exists" do
-      let(:bead_brand) { create(:bead_brand) }
-      let(:bead_types) { create_list(:bead_type, 2, brand: bead_brand) }
+      let!(:bead_brand) { create(:bead_brand) }
+      let!(:bead_types) { create_list(:bead_type, 2, brand: bead_brand) }
 
       before do
         get api_v1_catalog_bead_brand_path(bead_brand), headers: valid_headers
@@ -231,7 +231,8 @@ RSpec.describe "Api::V1::Catalog::BeadBrands", type: :request do
 
   describe "DELETE /destroy" do
     context "when the bead brand exists" do
-      let(:bead_brand) { create(:bead_brand) }
+      # Use let! to ensure the brand is created immediately
+      let!(:bead_brand) { create(:bead_brand) }
 
       it "returns http success" do
         delete api_v1_catalog_bead_brand_path(bead_brand), headers: valid_headers
@@ -239,9 +240,13 @@ RSpec.describe "Api::V1::Catalog::BeadBrands", type: :request do
       end
 
       it "deletes the bead brand" do
-        expect {
-          delete api_v1_catalog_bead_brand_path(bead_brand), headers: valid_headers
-        }.to change(Catalog::BeadBrand, :count).by(-1)
+        # Ensure the brand exists before deletion
+        expect(Catalog::BeadBrand.exists?(bead_brand.id)).to be true
+
+        delete api_v1_catalog_bead_brand_path(bead_brand), headers: valid_headers
+
+        # Verify it's deleted after the request
+        expect(Catalog::BeadBrand.exists?(bead_brand.id)).to be false
       end
 
       it "returns a success message" do
@@ -274,14 +279,20 @@ RSpec.describe "Api::V1::Catalog::BeadBrands", type: :request do
     end
 
     context "when the bead brand has associated records" do
-      let(:bead_brand) { create(:bead_brand) }
-      let(:bead_type) { create(:bead_type, brand: bead_brand) }
+      # Use let! for both to ensure immediate creation
+      let!(:bead_brand) { create(:bead_brand) }
+      let!(:bead_type) { create(:bead_type, brand: bead_brand) }
 
       it "deletes the bead brand and associated records" do
-        expect {
-          delete api_v1_catalog_bead_brand_path(bead_brand), headers: valid_headers
-        }.to change(Catalog::BeadBrand, :count).by(-1)
-          .and change(Catalog::BeadType, :count).by(-1)
+        # Ensure both records exist before deletion
+        expect(Catalog::BeadBrand.exists?(bead_brand.id)).to be true
+        expect(Catalog::BeadType.exists?(bead_type.id)).to be true
+
+        delete api_v1_catalog_bead_brand_path(bead_brand), headers: valid_headers
+
+        # Verify both are deleted after the request
+        expect(Catalog::BeadBrand.exists?(bead_brand.id)).to be false
+        expect(Catalog::BeadType.exists?(bead_type.id)).to be false
       end
     end
   end

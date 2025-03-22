@@ -2,9 +2,130 @@
 
 require 'rails_helper'
 
-RSpec.describe "Api::V1::Catalog::Beads", type: :request do
+# Shared contexts to reduce the number of let statements in each example group
+RSpec.shared_context "with common request setup" do
   let(:valid_headers) { { "ACCEPT" => "application/json" } }
   let(:json_response) { JSON.parse(response.body, symbolize_names: true) }
+end
+
+# Helper method to create test data for filtering
+def create_filter_test_data
+  first_brand = create(:bead_brand)
+  second_brand = create(:bead_brand)
+  first_size = create(:bead_size, brand: first_brand)
+  second_size = create(:bead_size, brand: second_brand)
+  first_bead = create(:bead, brand: first_brand, size: first_size)
+  second_bead = create(:bead, brand: second_brand, size: second_size)
+  color = create(:bead_color)
+  finish = create(:bead_finish)
+
+  create(:bead_color_link, bead: first_bead, color: color)
+  create(:bead_finish_link, bead: second_bead, finish: finish)
+
+  {
+    first_brand: first_brand,
+    second_brand: second_brand,
+    first_size: first_size,
+    second_size: second_size,
+    first_bead: first_bead,
+    second_bead: second_bead,
+    color: color,
+    finish: finish
+  }
+end
+
+# Helper method to create a bead with associated color and finish
+def create_bead_with_associations
+  bead = create(:bead)
+  color = create(:bead_color)
+  finish = create(:bead_finish)
+
+  create(:bead_color_link, bead: bead, color: color)
+  create(:bead_finish_link, bead: bead, finish: finish)
+
+  {
+    bead: bead,
+    color: color,
+    finish: finish
+  }
+end
+
+# Helper method to create data for bead creation tests
+def create_bead_creation_data
+  brand = create(:bead_brand)
+  size = create(:bead_size)
+  colors = create_list(:bead_color, 2)
+  finishes = create_list(:bead_finish, 2)
+
+  {
+    brand: brand,
+    size: size,
+    colors: colors,
+    finishes: finishes,
+    valid_attributes: {
+      bead: {
+        name: "New Bead",
+        brand_product_code: "NB-001",
+        brand_id: brand.id,
+        size_id: size.id,
+        metadata: { material: "glass" },
+        color_ids: colors.map(&:id),
+        finish_ids: finishes.map(&:id)
+      }
+    },
+    invalid_attributes: {
+      bead: {
+        name: nil,
+        brand_product_code: "NB-001",
+        brand_id: brand.id,
+        size_id: size.id
+      }
+    }
+  }
+end
+
+# Helper method to create data for bead update tests
+def create_bead_update_data
+  bead = create(:bead, name: "Original Name")
+  color = create(:bead_color)
+  finish = create(:bead_finish)
+
+  {
+    bead: bead,
+    color: color,
+    finish: finish,
+    valid_attributes: {
+      bead: {
+        name: "Updated Name",
+        color_ids: [ color.id ],
+        finish_ids: [ finish.id ]
+      }
+    },
+    invalid_attributes: {
+      bead: { name: nil }
+    }
+  }
+end
+
+# Helper method to create data for bead deletion tests
+def create_bead_deletion_data
+  bead = create(:bead)
+  color = create(:bead_color)
+  finish = create(:bead_finish)
+  color_link = create(:bead_color_link, bead: bead, color: color)
+  finish_link = create(:bead_finish_link, bead: bead, finish: finish)
+
+  {
+    bead: bead,
+    color: color,
+    finish: finish,
+    color_link: color_link,
+    finish_link: finish_link
+  }
+end
+
+RSpec.describe "Api::V1::Catalog::Beads", type: :request do
+  include_context "with common request setup"
 
   describe "GET /index" do
     context "when there are no beads" do
@@ -26,9 +147,10 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
     end
 
     context "when there are beads" do
-      let(:beads) { create_list(:bead, 3) }
+      let(:index_beads) { create_list(:bead, 3) }
 
       before do
+        index_beads # ensure beads are created
         get api_v1_catalog_beads_path, headers: valid_headers
       end
 
@@ -50,68 +172,54 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
     end
 
     context "with filtering" do
-      let(:brand1) { create(:bead_brand) }
-      let(:brand2) { create(:bead_brand) }
-      let(:size1) { create(:bead_size, brand: brand1) }
-      let(:size2) { create(:bead_size, brand: brand2) }
-      let(:bead1) { create(:bead, brand: brand1, size: size1) }
-      let(:bead2) { create(:bead, brand: brand2, size: size2) }
-      let(:color) { create(:bead_color) }
-      let(:finish) { create(:bead_finish) }
-
-      before do
-        create(:bead_color_link, bead: bead1, color: color)
-        create(:bead_finish_link, bead: bead2, finish: finish)
-      end
+      # Use a single let statement with the helper method instead of multiple let statements
+      let(:filter_data) { create_filter_test_data }
 
       it "filters by brand_id" do
-        get api_v1_catalog_beads_path, params: { brand_id: brand1.id }, headers: valid_headers
+        get api_v1_catalog_beads_path, params: { brand_id: filter_data[:first_brand].id }, headers: valid_headers
         expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(bead1.id)
+        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
       end
 
       it "filters by size_id" do
-        get api_v1_catalog_beads_path, params: { size_id: size2.id }, headers: valid_headers
+        get api_v1_catalog_beads_path, params: { size_id: filter_data[:second_size].id }, headers: valid_headers
         expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(bead2.id)
+        expect(json_response[:data].first[:id]).to eq(filter_data[:second_bead].id)
       end
 
       it "filters by color_id" do
-        get api_v1_catalog_beads_path, params: { color_id: color.id }, headers: valid_headers
+        get api_v1_catalog_beads_path, params: { color_id: filter_data[:color].id }, headers: valid_headers
         expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(bead1.id)
+        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
       end
 
       it "filters by finish_id" do
-        get api_v1_catalog_beads_path, params: { finish_id: finish.id }, headers: valid_headers
+        get api_v1_catalog_beads_path, params: { finish_id: filter_data[:finish].id }, headers: valid_headers
         expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(bead2.id)
+        expect(json_response[:data].first[:id]).to eq(filter_data[:second_bead].id)
       end
 
       it "filters by search term matching name" do
-        get api_v1_catalog_beads_path, params: { search: bead1.name }, headers: valid_headers
+        get api_v1_catalog_beads_path, params: { search: filter_data[:first_bead].name }, headers: valid_headers
         expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(bead1.id)
+        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
       end
 
       it "filters by search term matching brand_product_code" do
-        get api_v1_catalog_beads_path, params: { search: bead2.brand_product_code }, headers: valid_headers
+        get api_v1_catalog_beads_path, params: { search: filter_data[:second_bead].brand_product_code }, headers: valid_headers
         expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(bead2.id)
+        expect(json_response[:data].first[:id]).to eq(filter_data[:second_bead].id)
       end
     end
   end
 
   describe "GET /show" do
     context "when the bead exists" do
-      let(:bead) { create(:bead) }
-      let(:color) { create(:bead_color) }
-      let(:finish) { create(:bead_finish) }
+      # Use a single let statement with the helper method
+      let(:show_data) { create_bead_with_associations }
 
       before do
-        create(:bead_color_link, bead: bead, color: color)
-        create(:bead_finish_link, bead: bead, finish: finish)
-        get api_v1_catalog_bead_path(bead), headers: valid_headers
+        get api_v1_catalog_bead_path(show_data[:bead]), headers: valid_headers
       end
 
       it "returns http success" do
@@ -119,24 +227,24 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
       end
 
       it "returns the requested bead" do
-        expect(json_response[:data][:id]).to eq(bead.id)
-        expect(json_response[:data][:name]).to eq(bead.name)
+        expect(json_response[:data][:id]).to eq(show_data[:bead].id)
+        expect(json_response[:data][:name]).to eq(show_data[:bead].name)
       end
 
       it "includes brand in the response" do
-        expect(json_response[:data][:brand][:id]).to eq(bead.brand.id)
+        expect(json_response[:data][:brand][:id]).to eq(show_data[:bead].brand.id)
       end
 
       it "includes size in the response" do
-        expect(json_response[:data][:size][:id]).to eq(bead.size.id)
+        expect(json_response[:data][:size][:id]).to eq(show_data[:bead].size.id)
       end
 
       it "includes colors in the response" do
-        expect(json_response[:data][:colors].first[:id]).to eq(color.id)
+        expect(json_response[:data][:colors].first[:id]).to eq(show_data[:color].id)
       end
 
       it "includes finishes in the response" do
-        expect(json_response[:data][:finishes].first[:id]).to eq(finish.id)
+        expect(json_response[:data][:finishes].first[:id]).to eq(show_data[:finish].id)
       end
 
       it "returns success status in the response" do
@@ -164,28 +272,12 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
   end
 
   describe "POST /create" do
-    let(:brand) { create(:bead_brand) }
-    let(:size) { create(:bead_size) }
-    let(:colors) { create_list(:bead_color, 2) }
-    let(:finishes) { create_list(:bead_finish, 2) }
+    # Use a single let statement with the helper method
+    let(:create_data) { create_bead_creation_data }
 
     context "with valid parameters" do
-      let(:valid_attributes) do
-        {
-          bead: {
-            name: "New Bead",
-            brand_product_code: "NB-001",
-            brand_id: brand.id,
-            size_id: size.id,
-            metadata: { material: "glass" },
-            color_ids: colors.map(&:id),
-            finish_ids: finishes.map(&:id)
-          }
-        }
-      end
-
       before do
-        post api_v1_catalog_beads_path, params: valid_attributes, headers: valid_headers
+        post api_v1_catalog_beads_path, params: create_data[:valid_attributes], headers: valid_headers
       end
 
       it "returns http created" do
@@ -199,12 +291,12 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
 
       it "associates the bead with the specified colors" do
         expect(Catalog::Bead.first.colors.count).to eq(2)
-        expect(Catalog::Bead.first.colors.map(&:id)).to match_array(colors.map(&:id))
+        expect(Catalog::Bead.first.colors.map(&:id)).to match_array(create_data[:colors].map(&:id))
       end
 
       it "associates the bead with the specified finishes" do
         expect(Catalog::Bead.first.finishes.count).to eq(2)
-        expect(Catalog::Bead.first.finishes.map(&:id)).to match_array(finishes.map(&:id))
+        expect(Catalog::Bead.first.finishes.map(&:id)).to match_array(create_data[:finishes].map(&:id))
       end
 
       it "returns the created bead" do
@@ -222,19 +314,8 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
     end
 
     context "with invalid parameters" do
-      let(:invalid_attributes) do
-        {
-          bead: {
-            name: nil,
-            brand_product_code: "NB-001",
-            brand_id: brand.id,
-            size_id: size.id
-          }
-        }
-      end
-
       before do
-        post api_v1_catalog_beads_path, params: invalid_attributes, headers: valid_headers
+        post api_v1_catalog_beads_path, params: create_data[:invalid_attributes], headers: valid_headers
       end
 
       it "returns http unprocessable entity" do
@@ -256,23 +337,12 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
   end
 
   describe "PATCH /update" do
-    let(:bead) { create(:bead, name: "Original Name") }
-    let(:new_color) { create(:bead_color) }
-    let(:new_finish) { create(:bead_finish) }
+    # Use a single let statement with the helper method
+    let(:update_data) { create_bead_update_data }
 
     context "with valid parameters" do
-      let(:updated_attributes) do
-        {
-          bead: {
-            name: "Updated Name",
-            color_ids: [ new_color.id ],
-            finish_ids: [ new_finish.id ]
-          }
-        }
-      end
-
       before do
-        patch api_v1_catalog_bead_path(bead), params: updated_attributes, headers: valid_headers
+        patch api_v1_catalog_bead_path(update_data[:bead]), params: update_data[:valid_attributes], headers: valid_headers
       end
 
       it "returns http success" do
@@ -280,20 +350,20 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
       end
 
       it "updates the bead" do
-        bead.reload
-        expect(bead.name).to eq("Updated Name")
+        update_data[:bead].reload
+        expect(update_data[:bead].name).to eq("Updated Name")
       end
 
       it "updates the bead's colors" do
-        bead.reload
-        expect(bead.colors.count).to eq(1)
-        expect(bead.colors.first.id).to eq(new_color.id)
+        update_data[:bead].reload
+        expect(update_data[:bead].colors.count).to eq(1)
+        expect(update_data[:bead].colors.first.id).to eq(update_data[:color].id)
       end
 
       it "updates the bead's finishes" do
-        bead.reload
-        expect(bead.finishes.count).to eq(1)
-        expect(bead.finishes.first.id).to eq(new_finish.id)
+        update_data[:bead].reload
+        expect(update_data[:bead].finishes.count).to eq(1)
+        expect(update_data[:bead].finishes.first.id).to eq(update_data[:finish].id)
       end
 
       it "returns the updated bead" do
@@ -310,10 +380,8 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
     end
 
     context "with invalid parameters" do
-      let(:invalid_attributes) { { bead: { name: nil } } }
-
       before do
-        patch api_v1_catalog_bead_path(bead), params: invalid_attributes, headers: valid_headers
+        patch api_v1_catalog_bead_path(update_data[:bead]), params: update_data[:invalid_attributes], headers: valid_headers
       end
 
       it "returns http unprocessable entity" do
@@ -321,8 +389,8 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
       end
 
       it "does not update the bead" do
-        bead.reload
-        expect(bead.name).to eq("Original Name")
+        update_data[:bead].reload
+        expect(update_data[:bead].name).to eq("Original Name")
       end
 
       it "returns an error message" do
@@ -355,42 +423,39 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
 
   describe "DELETE /destroy" do
     context "when the bead exists" do
-      let(:bead) { create(:bead) }
-      let(:color) { create(:bead_color) }
-      let(:finish) { create(:bead_finish) }
-      let(:color_link) { create(:bead_color_link, bead: bead, color: color) }
-      let(:finish_link) { create(:bead_finish_link, bead: bead, finish: finish) }
+      # Use a single let statement with the helper method
+      let(:delete_data) { create_bead_deletion_data }
 
       it "returns http success" do
-        delete api_v1_catalog_bead_path(bead), headers: valid_headers
+        delete api_v1_catalog_bead_path(delete_data[:bead]), headers: valid_headers
         expect(response).to have_http_status(:success)
       end
 
       it "deletes the bead" do
-        expect {
-          delete api_v1_catalog_bead_path(bead), headers: valid_headers
-        }.to change(Catalog::Bead, :count).by(-1)
+        bead_id = delete_data[:bead].id
+        delete api_v1_catalog_bead_path(delete_data[:bead]), headers: valid_headers
+        expect(Catalog::Bead.find_by(id: bead_id)).to be_nil
       end
 
       it "deletes associated color links" do
-        expect {
-          delete api_v1_catalog_bead_path(bead), headers: valid_headers
-        }.to change(Catalog::BeadColorLink, :count).by(-1)
+        color_link_id = delete_data[:color_link].id
+        delete api_v1_catalog_bead_path(delete_data[:bead]), headers: valid_headers
+        expect(Catalog::BeadColorLink.find_by(id: color_link_id)).to be_nil
       end
 
       it "deletes associated finish links" do
-        expect {
-          delete api_v1_catalog_bead_path(bead), headers: valid_headers
-        }.to change(Catalog::BeadFinishLink, :count).by(-1)
+        finish_link_id = delete_data[:finish_link].id
+        delete api_v1_catalog_bead_path(delete_data[:bead]), headers: valid_headers
+        expect(Catalog::BeadFinishLink.find_by(id: finish_link_id)).to be_nil
       end
 
       it "returns a success message" do
-        delete api_v1_catalog_bead_path(bead), headers: valid_headers
+        delete api_v1_catalog_bead_path(delete_data[:bead]), headers: valid_headers
         expect(json_response[:message]).to eq("Bead deleted successfully")
       end
 
       it "returns success status in the response" do
-        delete api_v1_catalog_bead_path(bead), headers: valid_headers
+        delete api_v1_catalog_bead_path(delete_data[:bead]), headers: valid_headers
         expect(json_response[:success]).to be true
       end
     end

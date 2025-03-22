@@ -3,30 +3,85 @@
 module Api
   module V1
     module Catalog
-      class BeadTypesController < BaseController
+      class BeadTypesController < Api::V1::BaseController
+        before_action :set_type, only: [ :show, :update, :destroy ]
+
+        # GET /api/v1/catalog/bead_types
         def index
-          @bead_types = ::Catalog::FetchBeadTypesService.new(filter_params).call
+          @types = ::Catalog::BeadType.includes(:brand).all
 
-          # Manually serialize each bead type to avoid namespace issues
-          serialized_bead_types = @bead_types.map do |bead_type|
-            ::Catalog::BeadTypeSerializer.new(bead_type).as_json
-          end
+          # Filter by brand if provided
+          @types = @types.where(brand_id: params[:brand_id]) if params[:brand_id].present?
 
-          render json: { bead_types: serialized_bead_types }
+          render json: {
+            success: true,
+            data: @types.as_json(include: { brand: { only: [ :id, :name ] } })
+          }
         end
 
+        # GET /api/v1/catalog/bead_types/:id
         def show
-          @bead_type = ::Catalog::FetchBeadTypeService.new(params[:id]).call
-          render json: ::Catalog::BeadTypeSerializer.new(@bead_type).as_json
-        rescue ActiveRecord::RecordNotFound
-          render json: { error: 'Bead type not found' }, status: :not_found
+          render json: {
+            success: true,
+            data: @type.as_json(
+              include: [
+                { brand: { only: [ :id, :name ] } },
+                { bead_sizes: { only: [ :id, :size ] } }
+              ]
+            )
+          }
+        end
+
+        # POST /api/v1/catalog/bead_types
+        def create
+          @type = ::Catalog::BeadType.new(type_params)
+
+          if @type.save
+            render json: {
+              success: true,
+              data: @type.as_json(include: { brand: { only: [ :id, :name ] } }),
+              message: 'Bead type created successfully'
+            }, status: :created
+          else
+            render_error(:unprocessable_entity, @type.errors.full_messages)
+          end
+        end
+
+        # PATCH/PUT /api/v1/catalog/bead_types/:id
+        def update
+          if @type.update(type_params)
+            render json: {
+              success: true,
+              data: @type.as_json(include: { brand: { only: [ :id, :name ] } }),
+              message: 'Bead type updated successfully'
+            }
+          else
+            render_error(:unprocessable_entity, @type.errors.full_messages)
+          end
+        end
+
+        # DELETE /api/v1/catalog/bead_types/:id
+        def destroy
+          if @type.destroy
+            render json: {
+              success: true,
+              message: 'Bead type deleted successfully'
+            }
+          else
+            render_error(:unprocessable_entity, @type.errors.full_messages)
+          end
         end
 
         private
 
-          def filter_params
-            params.permit(:brand_id, :search, :sort_by, :sort_direction)
-          end
+        def set_type
+          @type = ::Catalog::BeadType.find_by(id: params[:id])
+          render_error(:not_found, [ 'Bead type not found' ]) unless @type
+        end
+
+        def type_params
+          params.require(:bead_type).permit(:name, :brand_id)
+        end
       end
     end
   end

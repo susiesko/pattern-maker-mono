@@ -3,7 +3,7 @@
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
 # docker build -t api .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name pattern-maker-api pattern-maker-api
+# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name api api
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
@@ -44,9 +44,6 @@ COPY . .
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
-
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 
 

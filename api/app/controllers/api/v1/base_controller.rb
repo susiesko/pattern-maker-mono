@@ -3,13 +3,15 @@
 module Api
   module V1
     class BaseController < ApplicationController
-      skip_before_action :verify_authenticity_token, if: :json_request?
+      # Common functionality for all API v1 controllers
 
-      protected
-
-        def json_request?
-          request.format.json?
-        end
+      # Return JSON response with error details
+      def render_error(status, errors)
+        render json: {
+          success: false,
+          errors: errors
+        }, status: status
+      end
     end
   end
 end

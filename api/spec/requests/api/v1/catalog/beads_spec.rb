@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable RSpec/MultipleExpectations
+
 require 'rails_helper'
 
 # Shared contexts to reduce the number of let statements in each example group

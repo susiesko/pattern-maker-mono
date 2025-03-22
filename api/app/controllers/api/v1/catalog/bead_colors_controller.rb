@@ -20,7 +20,11 @@ module Api
         def show
           render json: {
             success: true,
-            data: @color
+            data: @color.as_json(
+              include: [
+                { beads: { only: [ :id, :name ] } }
+              ]
+            )
           }
         end
 

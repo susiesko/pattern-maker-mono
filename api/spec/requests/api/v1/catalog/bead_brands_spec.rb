@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable RSpec/MultipleExpectations
+
 require 'rails_helper'
 
 RSpec.describe "Api::V1::Catalog::BeadBrands", type: :request do

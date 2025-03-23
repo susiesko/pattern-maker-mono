@@ -1,57 +1,206 @@
-AllCops:
-  TargetRubyVersion: 3.2.2
-  NewCops: enable
-  Exclude:
-    - 'bin/*'
+require:
+  - rubocop-rails
+  - rubocop-performance
+  - rubocop-rspec
 
-# Line length is often customized (default is 80)
+# Inherit from Rails Omakase configuration
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+# Override with additional configurations
+
+AllCops:
+  TargetRubyVersion: 3.2
+  NewCops: enable
+  UseCache: false
+  Server: false
+  Exclude:
+    - 'db/**/*'
+    - 'config/**/*'
+    - 'script/**/*'
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+    - 'tmp/**/*'
+    - 'log/**/*'
+    - 'spec/fixtures/**/*'
+    - 'lib/tasks/**/*'
+    - 'Gemfile'
+    - 'Rakefile'
+
+# Layout
 Layout/LineLength:
   Max: 120
-  # Exclude certain files where longer lines are acceptable
   Exclude:
-    - 'spec/**/*.rb'
-    - 'db/schema.rb'
+    - 'spec/**/*'
 
-# Indentation settings
-Layout/IndentationWidth:
-  Width: 2
+Layout/EmptyLinesAroundAttributeAccessor:
+  Enabled: true
 
-Layout/IndentationConsistency:
-  EnforcedStyle: indented_internal_methods
+Layout/SpaceAroundMethodCallOperator:
+  Enabled: true
 
-# Hash alignment
-Layout/HashAlignment:
-  EnforcedHashRocketStyle: key
-  EnforcedColonStyle: key
+# Metrics
+Metrics/AbcSize:
+  Max: 20
+  Exclude:
+    - 'spec/**/*'
 
-# Parameter alignment
-Layout/ParameterAlignment:
-  EnforcedStyle: with_first_parameter
+Metrics/BlockLength:
+  Max: 25
+  Exclude:
+    - 'spec/**/*'
+    - 'config/routes.rb'
 
-# String literals configuration
+Metrics/ClassLength:
+  Max: 150
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/MethodLength:
+  Max: 15
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+# Naming
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
+# Style
+Style/Documentation:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: true
+  EnforcedStyle: nested
+
 Style/StringLiterals:
   EnforcedStyle: single_quotes
   ConsistentQuotesInMultiline: true
 
-# Documentation requirements
-Style/Documentation:
-  Enabled: false  # Often disabled in internal projects
+Style/SymbolArray:
+  EnforcedStyle: percent
+  MinSize: 3
 
-# Use safe navigation operator
-Style/SafeNavigation:
+Style/WordArray:
+  EnforcedStyle: percent
+  MinSize: 3
+
+Style/HashEachMethods:
   Enabled: true
 
-# Symbol array syntax preference
-Style/SymbolArray:
-  EnforcedStyle: brackets  # or 'percent' for %i syntax
+Style/HashTransformKeys:
+  Enabled: true
 
-# Class structure preferences
-Style/ClassAndModuleChildren:
-  EnforcedStyle: nested  # or 'compact'
+Style/HashTransformValues:
+  Enabled: true
 
-Metrics/BlockLength:
-  Max: 50
+Style/ExponentialNotation:
+  Enabled: true
+
+Style/RedundantFetchBlock:
+  Enabled: true
+
+Style/RedundantRegexpCharacterClass:
+  Enabled: true
+
+Style/RedundantRegexpEscape:
+  Enabled: true
+
+Style/SlicingWithRange:
+  Enabled: true
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+
+# Rails
+Rails/ActiveRecordCallbacksOrder:
+  Enabled: true
+
+Rails/FindById:
+  Enabled: true
+
+Rails/HasAndBelongsToMany:
+  Enabled: false
+
+Rails/IndexBy:
+  Enabled: true
+
+Rails/IndexWith:
+  Enabled: true
+
+Rails/SkipsModelValidations:
+  Enabled: true
   Exclude:
     - 'spec/**/*'
-    - 'db/*.rb'
-    - 'bin/*'
+
+Rails/UniqueValidationWithoutIndex:
+  Enabled: true
+
+# RSpec
+RSpec/ExampleLength:
+  Max: 15
+
+RSpec/MultipleExpectations:
+  Enabled: true
+  Max: 1
+
+RSpec/MultipleMemoizedHelpers:
+  Max: 20
+
+RSpec/NestedGroups:
+  Max: 4
+
+RSpec/DescribedClass:
+  EnforcedStyle: explicit
+
+RSpec/MessageSpies:
+  EnforcedStyle: receive
+
+RSpec/ContextWording:
+  Prefixes:
+    - when
+    - with
+    - without
+    - if
+    - unless
+    - for
+
+# Performance
+Performance/AncestorsInclude:
+  Enabled: true
+
+Performance/BigDecimalWithNumericArgument:
+  Enabled: true
+
+Performance/RedundantSortBlock:
+  Enabled: true
+
+Performance/RedundantStringChars:
+  Enabled: true
+
+Performance/ReverseFirst:
+  Enabled: true
+
+Performance/SortReverse:
+  Enabled: true
+
+Performance/Squeeze:
+  Enabled: true
+
+Performance/StringInclude:
+  Enabled: true# Omakase Ruby styling for Rails
+inherit_gem: { rubocop-rails-omakase: rubocop.yml }
+
+# Overwrite or add rules to create your own house style
+#
+# # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
+# Layout/SpaceInsideArrayLiteralBrackets:
+#   Enabled: false

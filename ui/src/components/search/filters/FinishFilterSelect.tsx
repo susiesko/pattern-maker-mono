@@ -7,13 +7,19 @@ interface FinishFilterSelectionProps {
   value: string;
 }
 
-const FinishFilterSelect = ({ onChange, value }: FinishFilterSelectionProps) => {
+function FinishFilterSelect({ onChange, value }: FinishFilterSelectionProps) {
   const { data, isLoading } = useBeadFinishesQuery();
 
   return (
     <>
       <label htmlFor="finish">Finish:</label>
-      <StyledSelect name="finish" id="finish" onChange={onChange} value={value} disabled={isLoading}>
+      <StyledSelect
+        name="finish"
+        id="finish"
+        onChange={onChange}
+        value={value}
+        disabled={isLoading}
+      >
         <option value="">All</option>
         {data?.map(finish => (
           <option key={finish.id} value={finish.id.toString()}>
@@ -23,6 +29,6 @@ const FinishFilterSelect = ({ onChange, value }: FinishFilterSelectionProps) => 
       </StyledSelect>
     </>
   );
-};
+}
 
 export default FinishFilterSelect;

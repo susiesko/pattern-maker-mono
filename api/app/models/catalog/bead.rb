@@ -5,6 +5,7 @@ module Catalog
     # Associations
     belongs_to :brand, class_name: 'Catalog::BeadBrand'
     belongs_to :size, class_name: 'Catalog::BeadSize'
+    belongs_to :type, class_name: 'Catalog::BeadType'
     has_many :bead_color_links, dependent: :destroy
     has_many :colors, through: :bead_color_links, source: :color, class_name: 'Catalog::BeadColor'
     has_many :bead_finish_links, dependent: :destroy

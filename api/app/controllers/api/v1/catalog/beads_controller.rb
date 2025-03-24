@@ -8,7 +8,7 @@ module Api
 
         # GET /api/v1/catalog/beads
         def index
-          @beads = ::Catalog::Bead.includes(:brand, :size, :colors, :finishes)
+          @beads = ::Catalog::Bead.includes(:brand, :size, :type, :colors, :finishes)
                                   .order(created_at: :desc)
 
           # Apply filters if provided
@@ -16,7 +16,7 @@ module Api
 
           render json: {
             success: true,
-            data: @beads.as_json(include: [ :brand, :size, :colors, :finishes ])
+            data: @beads.as_json(include: [ :brand, :size, :type, :colors, :finishes ])
           }
         end
 

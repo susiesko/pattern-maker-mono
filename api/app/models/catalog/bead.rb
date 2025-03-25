@@ -7,8 +7,7 @@ module Catalog
 
     # Associations
     belongs_to :brand, class_name: 'Catalog::BeadBrand', foreign_key: 'brand_id'
-    belongs_to :size, class_name: 'Catalog::BeadSize'
-    belongs_to :type, class_name: 'Catalog::BeadType', foreign_key: 'size_id'
+    belongs_to :size, class_name: 'Catalog::BeadSize', foreign_key: 'size_id'
     belongs_to :type, class_name: 'Catalog::BeadType', foreign_key: 'type_id'
 
     has_many :bead_color_links, class_name: 'Catalog::BeadColorLink', foreign_key: 'bead_id', dependent: :destroy

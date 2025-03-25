@@ -28,6 +28,7 @@ module Api
               include: [
                 :brand,
                 :size,
+                :type,
                 { colors: { only: [ :id, :name ] } },
                 { finishes: { only: [ :id, :name ] } }
               ]
@@ -45,7 +46,7 @@ module Api
 
             render json: {
               success: true,
-              data: @bead.as_json(include: [ :brand, :size, :colors, :finishes ]),
+              data: @bead.as_json(include: [ :brand, :size, :type, :colors, :finishes ]),
               message: 'Bead created successfully'
             }, status: :created
           else
@@ -61,7 +62,7 @@ module Api
 
             render json: {
               success: true,
-              data: @bead.as_json(include: [ :brand, :size, :colors, :finishes ]),
+              data: @bead.as_json(include: [ :brand, :size, :type, :colors, :finishes ]),
               message: 'Bead updated successfully'
             }
           else

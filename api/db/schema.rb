@@ -11,6 +11,9 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "bead_brands", force: :cascade do |t|
     t.string "name", null: false
     t.string "website"
@@ -19,8 +22,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
   end
 
   create_table "bead_color_links", force: :cascade do |t|
-    t.integer "bead_id", null: false
-    t.integer "color_id", null: false
+    t.bigint "bead_id", null: false
+    t.bigint "color_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["bead_id", "color_id"], name: "index_bead_color_links_on_bead_id_and_color_id", unique: true
@@ -35,8 +38,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
   end
 
   create_table "bead_finish_links", force: :cascade do |t|
-    t.integer "bead_id", null: false
-    t.integer "finish_id", null: false
+    t.bigint "bead_id", null: false
+    t.bigint "finish_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["bead_id", "finish_id"], name: "index_bead_finish_links_on_bead_id_and_finish_id", unique: true
@@ -53,8 +56,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
   create_table "bead_sizes", force: :cascade do |t|
     t.string "size", null: false
     t.json "metadata"
-    t.integer "brand_id", null: false
-    t.integer "type_id", null: false
+    t.bigint "brand_id", null: false
+    t.bigint "type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["brand_id"], name: "index_bead_sizes_on_brand_id"
@@ -63,7 +66,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
 
   create_table "bead_types", force: :cascade do |t|
     t.string "name", null: false
-    t.integer "brand_id", null: false
+    t.bigint "brand_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["brand_id"], name: "index_bead_types_on_brand_id"
@@ -73,13 +76,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
     t.string "name", null: false
     t.string "brand_product_code", null: false
     t.json "metadata"
-    t.integer "brand_id", null: false
-    t.integer "size_id", null: false
+    t.bigint "brand_id", null: false
+    t.bigint "size_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "image"
+    t.bigint "type_id", null: false
     t.index ["brand_id"], name: "index_beads_on_brand_id"
     t.index ["size_id"], name: "index_beads_on_size_id"
+    t.index ["type_id"], name: "index_beads_on_type_id"
   end
 
   add_foreign_key "bead_color_links", "bead_colors", column: "color_id"
@@ -91,4 +96,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
   add_foreign_key "bead_types", "bead_brands", column: "brand_id"
   add_foreign_key "beads", "bead_brands", column: "brand_id"
   add_foreign_key "beads", "bead_sizes", column: "size_id"
+  add_foreign_key "beads", "bead_types", column: "type_id"
 end

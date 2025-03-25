@@ -2,9 +2,12 @@
 
 module Catalog
   class BeadColor < ApplicationRecord
+    # Set the table name explicitly to match the database
+    self.table_name = 'bead_colors'
+
     # Associations
-    has_many :bead_color_links, foreign_key: :color_id, dependent: :destroy
-    has_many :beads, through: :bead_color_links
+    has_many :bead_color_links, class_name: 'Catalog::BeadColorLink', foreign_key: 'color_id', dependent: :destroy
+    has_many :beads, through: :bead_color_links, class_name: 'Catalog::Bead'
 
     # Validations
     validates :name, presence: true

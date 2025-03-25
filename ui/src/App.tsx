@@ -5,7 +5,7 @@ import theme from './styles/theme';
 import GlobalStyles from './styles/GlobalStyles';
 import Layout from './components/Layout';
 import WelcomePage from './components/WelcomePage';
-import BeadsList from './components/BeadsList';
+import BeadsList from './components/search/BeadsList.tsx';
 import ComingSoon from './components/ComingSoon';
 
 // Create a client for React Query
@@ -13,7 +13,20 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: (failureCount, error: any) => {
+        // Don't retry on 4xx errors (client errors)
+        if (error.statusCode >= 400 && error.statusCode < 500) {
+          return false;
+        }
+        // Retry up to 2 times for other errors
+        return failureCount < 2;
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    },
+    mutations: {
+      // Don't retry mutations by default
+      retry: false,
     },
   },
 });

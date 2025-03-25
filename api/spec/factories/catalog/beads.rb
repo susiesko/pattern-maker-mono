@@ -10,8 +10,9 @@ FactoryBot.define do
     # Create associations inline to ensure they exist for both build and create
     brand { association :bead_brand }
 
-    # For size, we need to ensure it uses the same brand
+    # For size and type, we need to ensure they use the same brand
     size { association :bead_size, brand: brand }
+    type { association :bead_type, brand: brand }
 
     trait :with_colors do
       transient do

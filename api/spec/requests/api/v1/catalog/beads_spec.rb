@@ -14,10 +14,12 @@ end
 def create_filter_test_data
   first_brand = create(:bead_brand)
   second_brand = create(:bead_brand)
-  first_size = create(:bead_size, brand: first_brand)
-  second_size = create(:bead_size, brand: second_brand)
-  first_bead = create(:bead, brand: first_brand, size: first_size)
-  second_bead = create(:bead, brand: second_brand, size: second_size)
+  first_type = create(:bead_type, brand: first_brand)
+  second_type = create(:bead_type, brand: second_brand)
+  first_size = create(:bead_size, brand: first_brand, type: first_type)
+  second_size = create(:bead_size, brand: second_brand, type: second_type)
+  first_bead = create(:bead, brand: first_brand, size: first_size, type: first_type)
+  second_bead = create(:bead, brand: second_brand, size: second_size, type: second_type)
   color = create(:bead_color)
   finish = create(:bead_finish)
 
@@ -27,6 +29,8 @@ def create_filter_test_data
   {
     first_brand: first_brand,
     second_brand: second_brand,
+    first_type: first_type,
+    second_type: second_type,
     first_size: first_size,
     second_size: second_size,
     first_bead: first_bead,
@@ -38,7 +42,10 @@ end
 
 # Helper method to create a bead with associated color and finish
 def create_bead_with_associations
-  bead = create(:bead)
+  brand = create(:bead_brand)
+  type = create(:bead_type, brand: brand)
+  size = create(:bead_size, brand: brand, type: type)
+  bead = create(:bead, brand: brand, size: size, type: type)
   color = create(:bead_color)
   finish = create(:bead_finish)
 
@@ -47,6 +54,9 @@ def create_bead_with_associations
 
   {
     bead: bead,
+    brand: brand,
+    type: type,
+    size: size,
     color: color,
     finish: finish
   }
@@ -55,12 +65,14 @@ end
 # Helper method to create data for bead creation tests
 def create_bead_creation_data
   brand = create(:bead_brand)
-  size = create(:bead_size)
+  type = create(:bead_type, brand: brand)
+  size = create(:bead_size, brand: brand, type: type)
   colors = create_list(:bead_color, 2)
   finishes = create_list(:bead_finish, 2)
 
   {
     brand: brand,
+    type: type,
     size: size,
     colors: colors,
     finishes: finishes,
@@ -69,6 +81,7 @@ def create_bead_creation_data
         name: "New Bead",
         brand_product_code: "NB-001",
         brand_id: brand.id,
+        type_id: type.id,
         size_id: size.id,
         metadata: { material: "glass" },
         color_ids: colors.map(&:id),
@@ -80,6 +93,7 @@ def create_bead_creation_data
         name: nil,
         brand_product_code: "NB-001",
         brand_id: brand.id,
+        type_id: type.id,
         size_id: size.id
       }
     }
@@ -88,17 +102,26 @@ end
 
 # Helper method to create data for bead update tests
 def create_bead_update_data
-  bead = create(:bead, name: "Original Name")
+  brand = create(:bead_brand)
+  type = create(:bead_type, brand: brand)
+  size = create(:bead_size, brand: brand, type: type)
+  bead = create(:bead, name: "Original Name", brand: brand, size: size, type: type)
+  new_type = create(:bead_type, brand: brand)
   color = create(:bead_color)
   finish = create(:bead_finish)
 
   {
     bead: bead,
+    brand: brand,
+    type: type,
+    new_type: new_type,
+    size: size,
     color: color,
     finish: finish,
     valid_attributes: {
       bead: {
         name: "Updated Name",
+        type_id: new_type.id,
         color_ids: [ color.id ],
         finish_ids: [ finish.id ]
       }
@@ -111,7 +134,10 @@ end
 
 # Helper method to create data for bead deletion tests
 def create_bead_deletion_data
-  bead = create(:bead)
+  brand = create(:bead_brand)
+  type = create(:bead_type, brand: brand)
+  size = create(:bead_size, brand: brand, type: type)
+  bead = create(:bead, brand: brand, size: size, type: type)
   color = create(:bead_color)
   finish = create(:bead_finish)
   color_link = create(:bead_color_link, bead: bead, color: color)
@@ -119,6 +145,9 @@ def create_bead_deletion_data
 
   {
     bead: bead,
+    brand: brand,
+    type: type,
+    size: size,
     color: color,
     finish: finish,
     color_link: color_link,
@@ -168,8 +197,8 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
         expect(json_response[:success]).to be true
       end
 
-      it "includes brand, size, colors, and finishes in the response" do
-        expect(json_response[:data].first).to include(:brand, :size, :colors, :finishes)
+      it "includes brand, size, type, colors, and finishes in the response" do
+        expect(json_response[:data].first).to include(:brand, :size, :type, :colors, :finishes)
       end
     end
 
@@ -187,6 +216,12 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
         get api_v1_catalog_beads_path, params: { size_id: filter_data[:second_size].id }, headers: valid_headers
         expect(json_response[:data].size).to eq(1)
         expect(json_response[:data].first[:id]).to eq(filter_data[:second_bead].id)
+      end
+
+      it "filters by type_id" do
+        get api_v1_catalog_beads_path, params: { type_id: filter_data[:first_type].id }, headers: valid_headers
+        expect(json_response[:data].size).to eq(1)
+        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
       end
 
       it "filters by color_id" do
@@ -239,6 +274,10 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
 
       it "includes size in the response" do
         expect(json_response[:data][:size][:id]).to eq(show_data[:bead].size.id)
+      end
+
+      it "includes type in the response" do
+        expect(json_response[:data][:type][:id]).to eq(show_data[:bead].type.id)
       end
 
       it "includes colors in the response" do
@@ -304,6 +343,7 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
       it "returns the created bead" do
         expect(json_response[:data][:name]).to eq("New Bead")
         expect(json_response[:data][:brand_product_code]).to eq("NB-001")
+        expect(json_response[:data][:type][:id]).to eq(Catalog::Bead.first.type.id)
       end
 
       it "returns a success message" do
@@ -354,6 +394,7 @@ RSpec.describe "Api::V1::Catalog::Beads", type: :request do
       it "updates the bead" do
         update_data[:bead].reload
         expect(update_data[:bead].name).to eq("Updated Name")
+        expect(update_data[:bead].type_id).to eq(update_data[:new_type].id)
       end
 
       it "updates the bead's colors" do

@@ -95,7 +95,16 @@ module Api
         end
 
         def size_params
-          params.require(:bead_size).permit(:size, :brand_id, :type_id, metadata: {})
+          # Get the basic parameters
+          permitted_params = params.require(:bead_size).permit(:size, :brand_id, :type_id)
+
+          # Handle metadata separately to avoid JSON equality comparison issues
+          if params[:bead_size][:metadata].present?
+            # Convert to a regular Ruby hash to avoid PostgreSQL JSON equality comparison
+            permitted_params[:metadata] = params[:bead_size][:metadata].permit!.to_h
+          end
+
+          permitted_params
         end
 
         def apply_filters(sizes)

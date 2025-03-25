@@ -80,23 +80,27 @@ export default BeadsList;
 
 // Styled components
 const Container = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: ${props => props.theme.spacing.xl};
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const Title = styled.h1`
   color: ${props => props.theme.colors.text};
   margin-bottom: ${props => props.theme.spacing.xl};
   text-align: center;
+  padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.xl} 0;
 `;
 
 const FiltersContainer = styled.div`
   margin-bottom: ${props => props.theme.spacing.xl};
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: ${props => props.theme.spacing.md};
+  width: 100%;
+  padding: 0 ${props => props.theme.spacing.xl};
 `;
 
 const FilterGroup = styled.div`
@@ -124,6 +128,8 @@ const BeadsGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: ${props => props.theme.spacing.xl};
   margin-bottom: ${props => props.theme.spacing.xl};
+  width: 100%;
+  padding: 0 ${props => props.theme.spacing.xl};
 `;
 
 const BeadCard = styled.div`
@@ -216,6 +222,11 @@ const LoadingMessage = styled.div`
   padding: ${props => props.theme.spacing.xl};
   font-size: ${props => props.theme.fontSizes.large};
   color: ${props => props.theme.colors.primary};
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const ErrorMessage = styled.div`
@@ -223,4 +234,9 @@ const ErrorMessage = styled.div`
   padding: ${props => props.theme.spacing.xl};
   font-size: ${props => props.theme.fontSizes.large};
   color: ${props => props.theme.colors.error};
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;

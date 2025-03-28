@@ -14,13 +14,42 @@
 # Master seed file that loads all individual seed files
 
 # Option to clear existing data (development/testing only)
-if ENV['RESET_DB'] == 'true'
+# frozen_string_literal: true
+
+# This file should ensure the existence of records required to run the application in every environment (production,
+# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
+# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
+
+# Master seed file that loads all individual seed files
+
+# Option to clear existing data (development/testing only)
+if ENV['RESET_DB'] == 'true' && !Rails.env.production?
   puts 'Clearing existing data...'
-  Catalog::BeadBrand.destroy_all
-  Catalog::BeadColor.destroy_all
-  Catalog::BeadSize.destroy_all
-  Catalog::BeadType.destroy_all
-  Catalog::BeadFinish.destroy_all
+
+  # Delete in proper order to respect foreign key constraints
+  ActiveRecord::Base.transaction do
+    # Join tables first
+    Catalog::BeadColorLink.delete_all if defined?(Catalog::BeadColorLink)
+    Catalog::BeadFinishLink.delete_all if defined?(Catalog::BeadFinishLink)
+
+    # Then main tables
+    Catalog::Bead.delete_all
+    Catalog::BeadColor.delete_all
+    Catalog::BeadFinish.delete_all
+    Catalog::BeadSize.delete_all
+    Catalog::BeadType.delete_all
+    Catalog::BeadBrand.delete_all
+
+    # Reset sequences
+    tables = %w[beads bead_brands bead_colors bead_sizes bead_types bead_finishes]
+    tables.each do |table|
+      begin
+        ActiveRecord::Base.connection.execute("ALTER SEQUENCE #{table}_id_seq RESTART WITH 1;")
+      rescue => e
+        puts "Warning: Could not reset sequence for #{table}: #{e.message}"
+      end
+    end
+  end
 end
 
 # Explicitly list seed files in the order they should be executed

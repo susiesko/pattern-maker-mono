@@ -1,4 +1,5 @@
 import { ChangeEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import useBeadsQuery from '../../hooks/queries/useBeadsQuery.ts';
 import { Bead } from '../../types/beads.ts';
@@ -6,6 +7,7 @@ import ColorFilterSelect from './filters/ColorFilterSelect.tsx';
 import FinishFilterSelect from './filters/FinishFilterSelect.tsx';
 
 const BeadsList = () => {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const { data, isLoading, error } = useBeadsQuery(filters);
 
@@ -17,13 +19,25 @@ const BeadsList = () => {
     }));
   };
 
+  const handleAddBead = () => {
+    navigate('/beads/add');
+  };
+
+  const handleEditBead = (id: number) => {
+    navigate(`/beads/edit/${id}`);
+  };
+
   if (isLoading) return <LoadingMessage>Loading beads...</LoadingMessage>;
 
   if (error) return <ErrorMessage>Error loading beads. Please try again later.</ErrorMessage>;
 
   return (
     <Container>
-      <Title>Bead Catalog</Title>
+      <HeaderContainer>
+        <Title>Bead Catalog</Title>
+        <AddButton onClick={handleAddBead}>Add New Bead</AddButton>
+      </HeaderContainer>
+
       <FiltersContainer>
         <FilterGroup>
           <SearchInput
@@ -41,6 +55,7 @@ const BeadsList = () => {
           <FinishFilterSelect onChange={handleFilterChange} value={filters.finish || ''} />
         </FilterGroup>
       </FiltersContainer>
+
       <BeadsGrid>
         {data?.map((bead: Bead) => (
           <BeadCard key={bead.id}>
@@ -68,6 +83,9 @@ const BeadsList = () => {
                   <FinishTag key={finish.id}>{finish.name}</FinishTag>
                 ))}
               </TagsContainer>
+              <CardActions>
+                <EditButton onClick={() => handleEditBead(bead.id)}>Edit</EditButton>
+              </CardActions>
             </BeadInfo>
           </BeadCard>
         ))}
@@ -86,11 +104,32 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
+const HeaderContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.xl} 0;
+  margin-bottom: ${props => props.theme.spacing.xl};
+`;
+
 const Title = styled.h1`
   color: ${props => props.theme.colors.text};
-  margin-bottom: ${props => props.theme.spacing.xl};
-  text-align: center;
-  padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.xl} 0;
+  margin: 0;
+`;
+
+const AddButton = styled.button`
+  background-color: ${props => props.theme.colors.primary};
+  color: white;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.small};
+  padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.lg};
+  font-size: ${props => props.theme.fontSizes.medium};
+  cursor: pointer;
+  transition: background-color ${props => props.theme.transitions.default};
+
+  &:hover {
+    background-color: ${props => props.theme.colors.primaryDark};
+  }
 `;
 
 const FiltersContainer = styled.div`
@@ -215,6 +254,27 @@ const FinishTag = styled.span`
   font-size: ${props => props.theme.fontSizes.small};
   background-color: ${props => props.theme.colors.finishTag.bg};
   color: ${props => props.theme.colors.finishTag.text};
+`;
+
+const CardActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: ${props => props.theme.spacing.md};
+`;
+
+const EditButton = styled.button`
+  background-color: transparent;
+  color: ${props => props.theme.colors.primary};
+  border: 1px solid ${props => props.theme.colors.primary};
+  border-radius: ${props => props.theme.borderRadius.small};
+  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.md};
+  font-size: ${props => props.theme.fontSizes.small};
+  cursor: pointer;
+  transition: all ${props => props.theme.transitions.default};
+
+  &:hover {
+    background-color: ${props => props.theme.colors.primaryLight};
+  }
 `;
 
 const LoadingMessage = styled.div`

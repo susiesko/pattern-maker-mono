@@ -14,6 +14,16 @@ Rails.application.routes.draw do
       # Status endpoint for health checks
       resources :status, only: [:index]
 
+      # Authentication routes
+      post '/auth/login', to: 'authentication#login'
+      get '/auth/me', to: 'authentication#me'
+
+      # User management
+      resources :users
+
+      # Password management
+      put '/password', to: 'passwords#update'
+
       # Catalog namespace for all bead-related resources
       namespace :catalog do
         # Main bead resources

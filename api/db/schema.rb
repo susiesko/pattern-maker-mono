@@ -87,6 +87,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_09_170034) do
     t.index ["type_id"], name: "index_beads_on_type_id"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "username", null: false
+    t.string "email", null: false
+    t.string "password_digest", null: false
+    t.string "first_name"
+    t.string "last_name"
+    t.boolean "admin", default: false
+    t.datetime "last_login_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["username"], name: "index_users_on_username", unique: true
+  end
+
   add_foreign_key "bead_color_links", "bead_colors", column: "color_id"
   add_foreign_key "bead_color_links", "beads"
   add_foreign_key "bead_finish_links", "bead_finishes", column: "finish_id"

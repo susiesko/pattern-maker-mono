@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 
       # Authentication routes
       post '/auth/login', to: 'authentication#login'
+      post '/auth/register', to: 'users#create'
       get '/auth/me', to: 'authentication#me'
 
       # User management

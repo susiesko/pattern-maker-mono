@@ -25,7 +25,12 @@ module Api
       private
 
       def auth_params
-        params.permit(:email, :password)
+        # Handle both nested and non-nested parameters
+        if params[:authentication].present?
+          params.require(:authentication).permit(:email, :password)
+        else
+          params.permit(:email, :password)
+        end
       end
 
       def user_response(user)

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# This script runs the Miyuki preview spider and provides an interactive console
+# This script runs the Miyuki Wholesale preview spider and provides an interactive console
 # to explore the results.
 #
 # Usage:
-#   rails runner script/preview_miyuki_spider.rb [options]
+#   rails runner script/preview_miyuki_wholesale_spider.rb [options]
 #
 # Options:
 #   MAX_PAGES=5      Limit the crawl to 5 pages
@@ -14,8 +14,8 @@
 
 require 'irb'
 
-puts "Loading Miyuki preview spider..."
-require Rails.root.join('lib', 'spiders', 'miyuki_preview_spider')
+puts "Loading Miyuki Wholesale preview spider..."
+require Rails.root.join('lib', 'spiders', 'miyuki_wholesale_preview_spider')
 
 # Set up options from environment variables
 options = {}
@@ -26,7 +26,7 @@ options[:delay] = ENV['DELAY'].to_f if ENV['DELAY'].present?
 puts "Starting crawl with options: #{options.inspect}"
 
 # Run the spider and get results
-results = MiyukiPreviewSpider.crawl_and_return_results(options)
+results = MiyukiWholesalePreviewSpider.crawl_and_return_results(options)
 
 puts "\nCrawl completed!"
 puts "Found #{results[:beads].length} beads in #{results[:categories].length} categories"
@@ -34,7 +34,7 @@ puts "Found #{results[:beads].length} beads in #{results[:categories].length} ca
 # Export to JSON file if requested
 if ENV['EXPORT_JSON'].present?
   require 'json'
-  filename = ENV['EXPORT_JSON'] == 'true' ? 'miyuki_beads.json' : ENV['EXPORT_JSON']
+  filename = ENV['EXPORT_JSON'] == 'true' ? 'miyuki_wholesale_beads.json' : ENV['EXPORT_JSON']
   File.write(filename, JSON.pretty_generate(results))
   puts "Results exported to #{filename}"
 end

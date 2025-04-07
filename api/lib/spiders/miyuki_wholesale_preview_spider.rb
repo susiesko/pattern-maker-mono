@@ -2,7 +2,7 @@
 
 require 'vessel'
 
-class MiyukiPreviewSpider < Vessel::Cargo
+class MiyukiWholesalePreviewSpider < Vessel::Cargo
   # Configure the spider
   domain 'miyukiwholesale.com'
   start_urls 'https://www.miyukiwholesale.com/miyuki/'
@@ -199,7 +199,7 @@ class MiyukiPreviewSpider < Vessel::Cargo
 
     run(options) do |data|
       # Store the results when the spider is done
-      results = data.results if data.is_a?(MiyukiPreviewSpider)
+      results = data.results if data.is_a?(MiyukiWholesalePreviewSpider)
     end
 
     # Print summary

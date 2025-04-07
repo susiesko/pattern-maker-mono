@@ -4,15 +4,19 @@ This directory contains web spiders built with the [Vessel](https://github.com/r
 
 ## Available Spiders
 
-- `miyuki_spider.rb` - Crawls the English Miyuki website to extract bead information
+- `miyuki_wholesale_spider.rb` - Crawls the Miyuki Wholesale website to extract bead information
+- `miyuki_wholesale_preview_spider.rb` - Preview version that doesn't save to the database
 
 ## Running Spiders
 
 You can run the spiders using the provided Rake tasks:
 
 ```bash
-# Run the Miyuki spider
-rails spiders:miyuki
+# Run the Miyuki Wholesale spider
+rails spiders:miyuki_wholesale
+
+# Run the Miyuki Wholesale preview spider
+rails spiders:miyuki_wholesale_preview
 
 # Run all spiders
 rails spiders:all
@@ -52,7 +56,7 @@ To debug a spider:
 2. Run the spider with the `DEBUG=true` environment variable:
 
 ```bash
-DEBUG=true rails spiders:miyuki
+DEBUG=true rails spiders:miyuki_wholesale
 ```
 
 ## Notes

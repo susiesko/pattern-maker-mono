@@ -8,7 +8,7 @@ RSpec.describe Admin::SpidersController, type: :controller do
 
   before do
     # Stub the available_spiders method directly instead of trying to stub Dir[]
-    allow_any_instance_of(Admin::SpidersController).to receive(:available_spiders).and_return(['miyuki'])
+    allow_any_instance_of(Admin::SpidersController).to receive(:available_spiders).and_return([ 'miyuki_wholesale' ]) # rubocop:disable RSpec/AnyInstance
   end
 
   describe 'GET #index' do
@@ -24,7 +24,7 @@ RSpec.describe Admin::SpidersController, type: :controller do
 
       it 'returns a list of available spiders' do
         json_response = JSON.parse(response.body)
-        expect(json_response['available_spiders']).to include('miyuki')
+        expect(json_response['available_spiders']).to include('miyuki_wholesale')
       end
     end
 
@@ -49,12 +49,12 @@ RSpec.describe Admin::SpidersController, type: :controller do
       context 'with a valid spider name' do
         it 'enqueues a job to run the spider' do
           expect {
-            post :run, params: { name: 'miyuki', max_pages: 10 }
-          }.to have_enqueued_job(Catalog::RunSpiderJob).with('miyuki', { 'max_pages' => '10' })
+            post :run, params: { name: 'miyuki_wholesale', max_pages: 10 }
+          }.to have_enqueued_job(Catalog::RunSpiderJob).with('miyuki_wholesale', { 'max_pages' => '10' })
 
           expect(response).to have_http_status(:success)
           json_response = JSON.parse(response.body)
-          expect(json_response['message']).to include('miyuki')
+          expect(json_response['message']).to include('miyuki_wholesale')
         end
       end
 
@@ -72,7 +72,7 @@ RSpec.describe Admin::SpidersController, type: :controller do
     context 'when user is not an admin' do
       before do
         allow(controller).to receive(:current_user).and_return(regular_user)
-        post :run, params: { name: 'miyuki' }
+        post :run, params: { name: 'miyuki_wholesale' }
       end
 
       it 'returns unauthorized status' do

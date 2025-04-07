@@ -3,12 +3,12 @@
 require 'vessel'
 
 namespace :spiders do
-  desc 'Run the Miyuki spider to crawl and populate the bead database'
-  task miyuki: :environment do
-    puts 'Starting Miyuki spider...'
+  desc 'Run the Miyuki Wholesale spider to crawl and populate the bead database'
+  task miyuki_wholesale: :environment do
+    puts 'Starting Miyuki Wholesale spider...'
 
     # Load the spider
-    require Rails.root.join('lib', 'spiders', 'miyuki_spider')
+    require Rails.root.join('lib', 'spiders', 'miyuki_wholesale_spider')
 
     # Options can be passed as environment variables
     options = {}
@@ -19,17 +19,17 @@ namespace :spiders do
     puts "Running with options: #{options.inspect}"
 
     # Run the spider
-    MiyukiSpider.run(options)
+    MiyukiWholesaleSpider.run(options)
 
-    puts 'Miyuki spider completed!'
+    puts 'Miyuki Wholesale spider completed!'
   end
 
-  desc 'Run the Miyuki preview spider to see results without saving to database'
-  task miyuki_preview: :environment do
-    puts 'Starting Miyuki preview spider...'
+  desc 'Run the Miyuki Wholesale preview spider to see results without saving to database'
+  task miyuki_wholesale_preview: :environment do
+    puts 'Starting Miyuki Wholesale preview spider...'
 
     # Load the preview spider
-    require Rails.root.join('lib', 'spiders', 'miyuki_preview_spider')
+    require Rails.root.join('lib', 'spiders', 'miyuki_wholesale_preview_spider')
 
     # Options can be passed as environment variables
     options = {}
@@ -40,12 +40,12 @@ namespace :spiders do
     puts "Running with options: #{options.inspect}"
 
     # Run the spider and get results
-    results = MiyukiPreviewSpider.crawl_and_return_results(options)
+    results = MiyukiWholesalePreviewSpider.crawl_and_return_results(options)
 
     # Export to JSON file if requested
     if ENV['EXPORT_JSON'].present?
       require 'json'
-      filename = ENV['EXPORT_JSON'] == 'true' ? 'miyuki_beads.json' : ENV['EXPORT_JSON']
+      filename = ENV['EXPORT_JSON'] == 'true' ? 'miyuki_wholesale_beads.json' : ENV['EXPORT_JSON']
       File.write(filename, JSON.pretty_generate(results))
       puts "Results exported to #{filename}"
     end
@@ -56,7 +56,7 @@ namespace :spiders do
     puts 'Running all spiders...'
 
     # Add more spiders here as they are created
-    Rake::Task['spiders:miyuki'].invoke
+    Rake::Task['spiders:miyuki_wholesale'].invoke
 
     puts 'All spiders completed!'
   end

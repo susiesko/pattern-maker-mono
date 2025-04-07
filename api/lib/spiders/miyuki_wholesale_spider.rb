@@ -2,7 +2,7 @@
 
 require 'vessel'
 
-class MiyukiSpider < Vessel::Cargo
+class MiyukiWholesaleSpider < Vessel::Cargo
   # Configure the spider
   domain 'miyukiwholesale.com'
   start_urls 'https://www.miyukiwholesale.com/miyuki/'

@@ -4,7 +4,8 @@ class AuthenticationService
   ALGORITHM = 'HS256'
 
   def self.encode(payload, exp = 24.hours.from_now)
-    payload[:exp] = exp.to_i
+    # Only set expiration if not already present in payload
+    payload[:exp] ||= exp.to_i
     JWT.encode(payload, secret_key, ALGORITHM)
   end
 

@@ -8,6 +8,46 @@ RSpec.describe 'Api::V1::Users', type: :request do
     JSON.parse(response.body)
   end
 
+  describe 'GET /api/v1/users' do
+    let(:admin) { create(:user, :admin) }
+    let(:admin_token) { AuthenticationService.encode(user_id: admin.id) }
+    let(:admin_headers) { { 'Authorization' => admin_token } }
+
+    let(:regular_user) { create(:user) }
+    let(:user_token) { AuthenticationService.encode(user_id: regular_user.id) }
+    let(:user_headers) { { 'Authorization' => user_token } }
+
+    context 'when user is admin' do
+      before do
+        # Create some users to list
+        create_list(:user, 3)
+        get '/api/v1/users', headers: admin_headers
+      end
+
+      it 'returns all users' do
+        expect(json_response.size).to eq(User.count)
+      end
+
+      it 'returns status code 200' do
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context 'when user is not admin' do
+      before do
+        get '/api/v1/users', headers: user_headers
+      end
+
+      it 'returns status code 401' do
+        expect(response).to have_http_status(401)
+      end
+
+      it 'returns an unauthorized message' do
+        expect(json_response['error']).to match(/Admin access required/)
+      end
+    end
+  end
+
   describe 'POST /api/v1/users' do
     let(:valid_attributes) do
       {
@@ -61,6 +101,59 @@ RSpec.describe 'Api::V1::Users', type: :request do
         expect(json_response).to have_key('errors')
         expect(json_response['errors']).to be_an(Array)
         expect(json_response['errors']).not_to be_empty
+      end
+    end
+
+    context 'when using frontend parameter names' do
+      let(:frontend_params) do
+        {
+          name: 'frontenduser',
+          email: 'frontend@example.com',
+          password: 'password123',
+          confirmPassword: 'password123',
+          first_name: 'Frontend',
+          last_name: 'User'
+        }
+      end
+
+      before do
+        post '/api/v1/users', params: frontend_params
+      end
+
+      it 'creates a new user with mapped parameters' do
+        user = User.find_by(email: 'frontend@example.com')
+        expect(user).not_to be_nil
+        expect(user.username).to eq('frontenduser')
+      end
+
+      it 'returns status code 201' do
+        expect(response).to have_http_status(201)
+      end
+    end
+
+    context 'with various parameter combinations' do
+      it 'normalizes username from name parameter' do
+        post '/api/v1/users', params: {
+          name: 'fromname',
+          email: 'fromname@example.com',
+          password: 'password123',
+          password_confirmation: 'password123'
+        }
+
+        expect(response).to have_http_status(201)
+        expect(User.find_by(email: 'fromname@example.com').username).to eq('fromname')
+      end
+
+      it 'normalizes password_confirmation from confirmPassword' do
+        post '/api/v1/users', params: {
+          username: 'confirmuser',
+          email: 'confirm@example.com',
+          password: 'password123',
+          confirmPassword: 'password123'
+        }
+
+        expect(response).to have_http_status(201)
+        expect(User.find_by(email: 'confirm@example.com')).not_to be_nil
       end
     end
   end
@@ -144,6 +237,30 @@ RSpec.describe 'Api::V1::Users', type: :request do
 
       it 'returns an unauthorized message' do
         expect(json_response['error']).to match(/not authorized/)
+      end
+    end
+
+    context 'when an admin updates another user' do
+      let(:admin) { create(:user, :admin) }
+      let(:admin_token) { AuthenticationService.encode(user_id: admin.id) }
+      let(:admin_headers) { { 'Authorization' => admin_token } }
+
+      before do
+        put "/api/v1/users/#{user.id}", params: valid_attributes, headers: admin_headers
+      end
+
+      it 'updates the user' do
+        user.reload
+        expect(user.first_name).to eq('Updated')
+        expect(user.last_name).to eq('Name')
+      end
+
+      it 'returns status code 200' do
+        expect(response).to have_http_status(200)
+      end
+
+      it 'returns success message' do
+        expect(json_response['message']).to eq('User updated successfully')
       end
     end
   end

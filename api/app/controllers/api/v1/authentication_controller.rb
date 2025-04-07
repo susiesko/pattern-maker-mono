@@ -5,7 +5,9 @@ module Api
     class AuthenticationController < ApplicationController
       # POST /api/v1/auth/login
       def login
-        user = User.find_by(email: auth_params[:email])
+        # Downcase email to match the downcased emails in the database
+        email = auth_params[:email]&.downcase
+        user = User.find_by(email: email)
 
         if user&.authenticate(auth_params[:password])
           user.update(last_login_at: Time.current)

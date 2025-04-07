@@ -39,4 +39,12 @@ Rails.application.routes.draw do
       end
     end
   end
+
+  # Admin routes
+  namespace :admin do
+    # Spider management
+    resources :spiders, only: [:index], param: :name do
+      post :run, on: :member
+    end
+  end
 end

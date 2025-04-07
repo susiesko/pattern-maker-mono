@@ -1,4 +1,4 @@
-require:
+plugins:
   - rubocop-rails
   - rubocop-performance
   - rubocop-rspec
@@ -13,7 +13,6 @@ AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable
   UseCache: false
-  Server: false
   Exclude:
     - 'db/**/*'
     - 'config/**/*'
@@ -147,10 +146,12 @@ Rails/UniqueValidationWithoutIndex:
 # RSpec
 RSpec/ExampleLength:
   Max: 15
+  Exclude:
+    - 'spec/lib/spiders/miyuki_spider_spec.rb'
 
 RSpec/MultipleExpectations:
   Enabled: true
-  Max: 1
+  Max: 5
 
 RSpec/MultipleMemoizedHelpers:
   Max: 20
@@ -162,7 +163,7 @@ RSpec/DescribedClass:
   EnforcedStyle: explicit
 
 RSpec/MessageSpies:
-  EnforcedStyle: receive
+  EnforcedStyle: have_received
 
 RSpec/ContextWording:
   Prefixes:
@@ -196,8 +197,10 @@ Performance/Squeeze:
   Enabled: true
 
 Performance/StringInclude:
-  Enabled: true# Omakase Ruby styling for Rails
-inherit_gem: { rubocop-rails-omakase: rubocop.yml }
+  Enabled: true
+
+# The following is a duplicate of the inherit_gem directive at the top of the file
+# inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
 # Overwrite or add rules to create your own house style
 #

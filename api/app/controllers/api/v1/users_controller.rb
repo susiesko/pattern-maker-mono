@@ -3,9 +3,9 @@
 module Api
   module V1
     class UsersController < ApplicationController
-      before_action :authenticate_user!, except: [:create]
-      before_action :set_user, only: [:show, :update, :destroy]
-      before_action :authorize_user!, only: [:update, :destroy]
+      before_action :authenticate_user!, except: [ :create ]
+      before_action :set_user, only: [ :show, :update, :destroy ]
+      before_action :authorize_user!, only: [ :update, :destroy ]
 
       # GET /api/v1/users
       def index
@@ -33,10 +33,10 @@ module Api
 
         if @user.save
           token = AuthenticationService.encode(user_id: @user.id)
-          render json: { 
-            message: 'User created successfully', 
-            token: token, 
-            user: user_response(@user) 
+          render json: {
+            message: 'User created successfully',
+            token: token,
+            user: user_response(@user)
           }, status: :created
         else
           render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity

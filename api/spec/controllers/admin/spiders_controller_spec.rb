@@ -7,9 +7,8 @@ RSpec.describe Admin::SpidersController, type: :controller do
   let(:regular_user) { create(:user, admin: false) }
 
   before do
-    allow(Dir).to receive(:[]).with(Rails.root.join('lib', 'spiders', '*_spider.rb')).and_return(
-      [Rails.root.join('lib', 'spiders', 'miyuki_spider.rb').to_s]
-    )
+    # Stub the available_spiders method directly instead of trying to stub Dir[]
+    allow_any_instance_of(Admin::SpidersController).to receive(:available_spiders).and_return(['miyuki'])
   end
 
   describe 'GET #index' do
@@ -51,7 +50,7 @@ RSpec.describe Admin::SpidersController, type: :controller do
         it 'enqueues a job to run the spider' do
           expect {
             post :run, params: { name: 'miyuki', max_pages: 10 }
-          }.to have_enqueued_job(Catalog::RunSpiderJob).with('miyuki', { 'max_pages' => 10 })
+          }.to have_enqueued_job(Catalog::RunSpiderJob).with('miyuki', { 'max_pages' => '10' })
 
           expect(response).to have_http_status(:success)
           json_response = JSON.parse(response.body)

@@ -7,6 +7,7 @@ RSpec.describe Catalog::RunSpiderJob, type: :job do
     let(:spider_name) { 'miyuki' }
     let(:options) { { max_pages: 10 } }
     let(:service) { instance_double(Catalog::SpiderRunnerService) }
+    let(:job) { Catalog::RunSpiderJob.new }
 
     before do
       allow(Catalog::SpiderRunnerService).to receive(:new).and_return(service)
@@ -18,7 +19,7 @@ RSpec.describe Catalog::RunSpiderJob, type: :job do
       end
 
       it 'calls the spider runner service' do
-        subject.perform(spider_name, options)
+        job.perform(spider_name, options)
 
         expect(Catalog::SpiderRunnerService).to have_received(:new).with(spider_name, options)
         expect(service).to have_received(:call)
@@ -33,7 +34,7 @@ RSpec.describe Catalog::RunSpiderJob, type: :job do
       end
 
       it 'raises the error' do
-        expect { subject.perform(spider_name, options) }.to raise_error(StandardError, 'Test error')
+        expect { job.perform(spider_name, options) }.to raise_error(StandardError, 'Test error')
       end
     end
   end

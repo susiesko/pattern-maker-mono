@@ -41,10 +41,10 @@ class MiyukiSpider < Vessel::Cargo
     end
 
     # If no categories were found, try to parse the page as a category page directly
-    if css('a[href*="/miyuki/"]').empty?
-      Rails.logger.info "No categories found, trying to parse as a category page directly"
-      parse_category(data: { category: "Miyuki Beads" })
-    end
+    return unless css('a[href*="/miyuki/"]').empty?
+
+    Rails.logger.info 'No categories found, trying to parse as a category page directly'
+    parse_category(data: { category: 'Miyuki Beads' })
   end
 
   # Parse each bead category page
@@ -155,16 +155,16 @@ class MiyukiSpider < Vessel::Cargo
     end
 
     # If no beads were found with the expected selectors, try some alternative selectors
-    if bead_items.empty?
-      Rails.logger.info "No beads found with primary selectors, trying alternatives"
+    return unless bead_items.empty?
 
-      # Try alternative selectors
-      css('a[href*="miyuki"] img').map { |img| img.ancestors('a').first }.each do |item|
-        product_url = absolute_url(item.attribute(:href))
-        product_text = item.text.strip
+    Rails.logger.info 'No beads found with primary selectors, trying alternatives'
 
-        Rails.logger.info "Found item with alternative selector: #{product_text} (#{product_url})"
-      end
+    # Try alternative selectors
+    css('a[href*="miyuki"] img').map { |img| img.ancestors('a').first }.each do |item|
+      product_url = absolute_url(item.attribute(:href))
+      product_text = item.text.strip
+
+      Rails.logger.info "Found item with alternative selector: #{product_text} (#{product_url})"
     end
 
     # Follow pagination if available

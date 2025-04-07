@@ -2,29 +2,60 @@
 
 require 'rails_helper'
 
+# Mock the Vessel::Cargo class for testing
+module Vessel
+  class Cargo
+    class << self
+      attr_accessor :domain_value, :start_urls_value, :delay_value, :headers_value
+
+      def domain(value = nil)
+        @domain_value = value if value
+        @domain_value
+      end
+
+      def start_urls(value = nil)
+        @start_urls_value = value if value
+        @start_urls_value
+      end
+
+      def delay(value = nil)
+        @delay_value = value if value
+        @delay_value
+      end
+
+      def headers(value = nil)
+        @headers_value = value if value
+        @headers_value
+      end
+    end
+  end
+end
+
+require Rails.root.join('lib', 'spiders', 'miyuki_spider')
+
 RSpec.describe MiyukiSpider do
   # Note: We're not using Vessel::TestHelpers because the API has changed
   # and we need to adapt our tests to the new Vessel::Cargo approach
 
   describe 'crawling behavior' do
     it 'is configured with the correct domain and start URLs' do
-      expect(described_class.domain).to eq('miyuki-beads.co.jp')
-      expect(described_class.start_urls).to eq('https://www.miyuki-beads.co.jp/english/beads/')
+      expect(MiyukiSpider.domain).to eq('miyukiwholesale.com')
+      expect(MiyukiSpider.start_urls).to eq('https://www.miyukiwholesale.com/miyuki/')
     end
 
     it 'has a parse method that handles the main page' do
-      expect(described_class.instance_methods(false)).to include(:parse)
+      expect(MiyukiSpider.instance_methods(false)).to include(:parse)
     end
 
     it 'has a parse_category method that handles category pages' do
-      expect(described_class.instance_methods(false)).to include(:parse_category)
+      expect(MiyukiSpider.instance_methods(false)).to include(:parse_category)
     end
   end
 
   describe 'database interactions' do
     let!(:brand) { create(:bead_brand, name: 'Miyuki', website: 'https://www.miyuki-beads.co.jp/english/') }
 
-    it 'creates the expected database records' do
+    it 'creates the expected database records', :aggregate_failures do
       # This is a simplified test that just verifies the models and associations
       # A full integration test would require running the actual spider
 

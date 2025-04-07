@@ -23,7 +23,7 @@ RSpec.describe User, type: :model do
     it { is_expected.to validate_length_of(:password).is_at_least(6) }
     it { is_expected.to have_secure_password }
 
-    context 'email format validation' do
+    context 'for email format validation' do
       it 'is valid with a proper email format' do
         user = User.new(
           username: 'emailtest',
@@ -46,7 +46,7 @@ RSpec.describe User, type: :model do
       end
     end
 
-    context 'password validation' do
+    context 'when validating password' do
       it 'requires password_confirmation to match password' do
         user = User.new(
           username: 'passtest',

@@ -61,10 +61,10 @@ class MiyukiPreviewSpider < Vessel::Cargo
     end
 
     # If no categories were found, try to parse the page as a category page directly
-    if @results[:categories].empty?
-      puts "No categories found, trying to parse as a category page directly"
-      parse_category(data: { category: "Miyuki Beads" })
-    end
+    return unless @results[:categories].empty?
+
+    puts 'No categories found, trying to parse as a category page directly'
+    parse_category(data: { category: 'Miyuki Beads' })
   end
 
   # Parse each bead category page
@@ -151,35 +151,35 @@ class MiyukiPreviewSpider < Vessel::Cargo
       puts "  Finish: #{finish_name}" if finish_name.present?
       puts "  Image: #{image_url}"
       puts "  Source: #{product_url}"
-      puts "---"
+      puts '---'
 
       # Optionally follow the product URL to get more detailed information
       # yield request(url: product_url, method: :parse_product, data: bead_data)
     end
 
     # If no beads were found with the expected selectors, try some alternative selectors
-    if bead_items.empty?
-      puts "No beads found with primary selectors, trying alternatives"
+    return unless bead_items.empty?
 
-      # Try alternative selectors
-      css('a[href*="miyuki"] img').map { |img| img.ancestors('a').first }.each do |item|
-        product_url = absolute_url(item.attribute(:href))
-        product_text = item.text.strip
+    puts 'No beads found with primary selectors, trying alternatives'
 
-        puts "Found item with alternative selector:"
-        puts "  URL: #{product_url}"
-        puts "  Text: #{product_text}"
-        puts "---"
-      end
+    # Try alternative selectors
+    css('a[href*="miyuki"] img').map { |img| img.ancestors('a').first }.each do |item|
+      product_url = absolute_url(item.attribute(:href))
+      product_text = item.text.strip
+
+      puts 'Found item with alternative selector:'
+      puts "  URL: #{product_url}"
+      puts "  Text: #{product_text}"
+      puts '---'
     end
 
     # Follow pagination if available
     next_page = at_css('a[href*="NEXT"]') || at_css('a:contains("NEXT")') || css('a').find { |a| a.text.include?('NEXT') }
-    if next_page
-      next_page_url = absolute_url(next_page.attribute(:href))
-      puts "Following next page: #{next_page_url}"
-      yield request(url: next_page_url, method: :parse_category, data: data)
-    end
+    return unless next_page
+
+    next_page_url = absolute_url(next_page.attribute(:href))
+    puts "Following next page: #{next_page_url}"
+    yield request(url: next_page_url, method: :parse_category, data: data)
   end
 
   # Parse individual product pages for more detailed information
@@ -197,11 +197,9 @@ class MiyukiPreviewSpider < Vessel::Cargo
   def self.crawl_and_return_results(options = {})
     results = nil
 
-    self.run(options) do |data|
+    run(options) do |data|
       # Store the results when the spider is done
-      if data.is_a?(MiyukiPreviewSpider)
-        results = data.results
-      end
+      results = data.results if data.is_a?(MiyukiPreviewSpider)
     end
 
     # Print summary
@@ -217,11 +215,11 @@ class MiyukiPreviewSpider < Vessel::Cargo
     end
 
     puts "\nBeads found: #{results[:beads].length}"
-    puts "Sample of first 5 beads:" if results[:beads].any?
+    puts 'Sample of first 5 beads:' if results[:beads].any?
     results[:beads].first(5).each do |bead|
       puts "  - #{bead[:product_code]}: #{bead[:name]} (#{bead[:color]})"
     end
 
-    return results
+    results
   end
 end

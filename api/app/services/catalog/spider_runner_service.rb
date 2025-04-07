@@ -18,7 +18,7 @@ module Catalog
 
       # Return success
       { success: true, message: "#{spider_name} spider completed successfully" }
-    rescue => e
+    rescue StandardError => e
       # Log the error
       Rails.logger.error("Spider error: #{e.message}")
       Rails.logger.error(e.backtrace.join("\n"))

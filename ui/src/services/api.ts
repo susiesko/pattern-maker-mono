@@ -49,7 +49,11 @@ api.interceptors.request.use(
       });
     }
 
-    // You could add authentication tokens here if needed
+    // Add authentication token if available
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {

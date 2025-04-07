@@ -1,5 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAuth } from '../context/AuthContext';
 
 const NavContainer = styled.nav`
   width: 250px;
@@ -59,6 +60,27 @@ const NavLink = styled(Link)<{ active: boolean }>`
   }
 `;
 
+const NavButton = styled.button`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.lg};
+  color: ${props => props.theme.colors.text};
+  background: none;
+  border: none;
+  font-size: ${props => props.theme.fontSizes.medium};
+  cursor: pointer;
+  transition: all ${props => props.theme.transitions.default};
+  border-left: 4px solid transparent;
+
+  &:hover {
+    background-color: ${props => props.theme.colors.secondary};
+    color: ${props => props.theme.colors.primary};
+    border-left-color: ${props => props.theme.colors.primaryDark};
+  }
+`;
+
 const IconWrapper = styled.span`
   margin-right: ${props => props.theme.spacing.md};
   font-size: 1.2rem;
@@ -72,14 +94,55 @@ const Footer = styled.div`
   border-top: 1px solid ${props => props.theme.colors.border};
 `;
 
+const UserSection = styled.div`
+  padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.md};
+  border-top: 1px solid ${props => props.theme.colors.border};
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: ${props => props.theme.spacing.sm};
+  font-size: ${props => props.theme.fontSizes.medium};
+`;
+
+const UserAvatar = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: ${props => props.theme.colors.primary};
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: ${props => props.theme.spacing.sm};
+  font-weight: bold;
+`;
+
 // Simple icon components using emoji (in a real app, you'd use SVG icons or an icon library)
 const HomeIcon = () => <span role="img" aria-label="Home">🏠</span>;
 const CatalogIcon = () => <span role="img" aria-label="Catalog">💎</span>;
 const DesignerIcon = () => <span role="img" aria-label="Designer">🎨</span>;
 const ProjectsIcon = () => <span role="img" aria-label="Projects">📁</span>;
+const LoginIcon = () => <span role="img" aria-label="Login">🔑</span>;
+const RegisterIcon = () => <span role="img" aria-label="Register">📝</span>;
+const LogoutIcon = () => <span role="img" aria-label="Logout">🚪</span>;
 
 const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // Get the first letter of the user's name for the avatar
+  const getInitial = () => {
+    return user?.name ? user.name.charAt(0).toUpperCase() : '?';
+  };
 
   return (
     <NavContainer>
@@ -113,6 +176,34 @@ const Navigation = () => {
           </NavLink>
         </NavItem>
       </NavList>
+
+      {isAuthenticated ? (
+        <UserSection>
+          <UserInfo>
+            <UserAvatar>{getInitial()}</UserAvatar>
+            <div>{user?.name}</div>
+          </UserInfo>
+          <NavButton onClick={handleLogout}>
+            <IconWrapper><LogoutIcon /></IconWrapper>
+            Logout
+          </NavButton>
+        </UserSection>
+      ) : (
+        <UserSection>
+          <NavItem>
+            <NavLink to="/login" active={location.pathname === '/login'}>
+              <IconWrapper><LoginIcon /></IconWrapper>
+              Login
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink to="/register" active={location.pathname === '/register'}>
+              <IconWrapper><RegisterIcon /></IconWrapper>
+              Register
+            </NavLink>
+          </NavItem>
+        </UserSection>
+      )}
 
       <Footer>
         Pattern Maker v1.0.0

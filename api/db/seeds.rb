@@ -3,22 +3,6 @@
 # This file should ensure the existence of records required to run the application in every environment (production,
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
-# db/seeds.rb
-
-# Master seed file that loads all individual seed files
-
-# Option to clear existing data (development/testing only)
-# frozen_string_literal: true
-
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 
 # Master seed file that loads all individual seed files
 
@@ -40,8 +24,11 @@ if ENV['RESET_DB'] == 'true' && !Rails.env.production?
     Catalog::BeadType.delete_all
     Catalog::BeadBrand.delete_all
 
+    # User accounts
+    User.delete_all if defined?(User)
+
     # Reset sequences
-    tables = %w[beads bead_brands bead_colors bead_sizes bead_types bead_finishes]
+    tables = %w[beads bead_brands bead_colors bead_sizes bead_types bead_finishes users]
     tables.each do |table|
       begin
         ActiveRecord::Base.connection.execute("ALTER SEQUENCE #{table}_id_seq RESTART WITH 1;")
@@ -49,6 +36,23 @@ if ENV['RESET_DB'] == 'true' && !Rails.env.production?
         puts "Warning: Could not reset sequence for #{table}: #{e.message}"
       end
     end
+  end
+end
+
+# Create default admin user (only in development)
+if Rails.env.development? && defined?(User)
+  admin_email = 'admin@example.com'
+  unless User.exists?(email: admin_email)
+    puts 'Creating default admin user...'
+    User.create!(
+      username: 'admin',
+      email: admin_email,
+      password: 'password123',
+      password_confirmation: 'password123',
+      first_name: 'Admin',
+      last_name: 'User',
+      admin: true
+    )
   end
 end
 

@@ -13,6 +13,14 @@ The Fire Mountain Gems spider is built using the [Vessel](https://github.com/rub
 - PostgreSQL database
 - Vessel gem (already included in the Gemfile)
 
+## Setup
+
+Before running the spider, create the output directory:
+
+```bash
+mkdir -p tmp/crawler_results/fire_mountain_gems
+```
+
 ## Running the Spider
 
 ### Using Rake Tasks
@@ -78,6 +86,17 @@ The Fire Mountain Gems spider works as follows:
 5. Saves results to JSON files in `tmp/crawler_results/fire_mountain_gems/`
 6. Processes results through `Catalog::BeadCreatorService`
 
+## Technical Details
+
+The spider inherits from `Vessel::Cargo` and uses CSS selectors to parse HTML:
+
+- `.product-tile` - Product containers
+- `.link` - Product links
+- `h3.name` - Product names
+- `img.tile-image` - Product images
+- `.pricebooks .pricebook:first-child .price` - Pricing information
+- `a.page-link-next` - Pagination links
+
 ## Database Structure
 
 The spider populates the following tables:
@@ -125,19 +144,24 @@ To customize the spider's behavior:
 
 ### Common Issues
 
-1. **Spider not finding products**:
+1. **Output directory missing**:
+   ```bash
+   mkdir -p tmp/crawler_results/fire_mountain_gems
+   ```
+
+2. **Spider not finding products**:
    - Check if Fire Mountain Gems website structure has changed
    - Update CSS selectors (`.product-tile`, `.link`, `h3.name`)
 
-2. **Rate limiting or blocking**:
+3. **Rate limiting or blocking**:
    - Increase the `DELAY` environment variable
    - Reduce `CONCURRENCY` setting
 
-3. **Database errors**:
+4. **Database errors**:
    - Ensure all required tables exist
    - Check that `Catalog::BeadCreatorService` is working properly
 
-4. **Missing colors/finishes**:
+5. **Missing colors/finishes**:
    - Verify color and finish data exists in database
    - Check extraction logic in `extract_colors_from_name` and `extract_finishes_from_name`
 

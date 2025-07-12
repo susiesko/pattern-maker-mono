@@ -6,7 +6,8 @@ module Catalog
     self.table_name = 'bead_finishes'
 
     # Associations
-    has_many :bead_finish_links, class_name: 'Catalog::BeadFinishLink', foreign_key: 'finish_id', dependent: :destroy
+    has_many :bead_finish_links, class_name: 'Catalog::BeadFinishLink', dependent: :destroy,
+                                 inverse_of: :finish
     has_many :beads, through: :bead_finish_links, class_name: 'Catalog::Bead'
 
     # Validations

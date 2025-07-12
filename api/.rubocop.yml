@@ -1,18 +1,12 @@
-plugins:
+require:
   - rubocop-rails
   - rubocop-performance
   - rubocop-rspec
 
-# Inherit from Rails Omakase configuration
-inherit_gem:
-  rubocop-rails-omakase: rubocop.yml
-
-# Override with additional configurations
-
 AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable
-  UseCache: false
+  SuggestExtensions: false
   Exclude:
     - 'db/**/*'
     - 'config/**/*'
@@ -39,6 +33,15 @@ Layout/EmptyLinesAroundAttributeAccessor:
 Layout/SpaceAroundMethodCallOperator:
   Enabled: true
 
+Layout/EmptyLinesAroundBlockBody:
+  Enabled: false
+
+Layout/EmptyLinesAroundClassBody:
+  Enabled: false
+
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: false
+
 # Metrics
 Metrics/AbcSize:
   Max: 20
@@ -50,6 +53,7 @@ Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
     - 'config/routes.rb'
+    - 'config/environments/*.rb'
 
 Metrics/ClassLength:
   Max: 150
@@ -76,12 +80,14 @@ Style/Documentation:
   Enabled: false
 
 Style/ClassAndModuleChildren:
-  Enabled: true
   EnforcedStyle: nested
 
 Style/StringLiterals:
   EnforcedStyle: single_quotes
   ConsistentQuotesInMultiline: true
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: single_quotes
 
 Style/SymbolArray:
   EnforcedStyle: percent
@@ -100,24 +106,24 @@ Style/HashTransformKeys:
 Style/HashTransformValues:
   Enabled: true
 
-Style/ExponentialNotation:
-  Enabled: true
-
-Style/RedundantFetchBlock:
-  Enabled: true
-
-Style/RedundantRegexpCharacterClass:
-  Enabled: true
-
-Style/RedundantRegexpEscape:
-  Enabled: true
-
-Style/SlicingWithRange:
-  Enabled: true
-
 Style/FrozenStringLiteralComment:
   Enabled: true
   EnforcedStyle: always
+
+Style/GuardClause:
+  Enabled: true
+
+Style/IfUnlessModifier:
+  Enabled: true
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
 
 # Rails
 Rails/ActiveRecordCallbacksOrder:
@@ -143,14 +149,32 @@ Rails/SkipsModelValidations:
 Rails/UniqueValidationWithoutIndex:
   Enabled: true
 
+Rails/FilePath:
+  Enabled: false
+
+Rails/OutputSafety:
+  Enabled: true
+
+Rails/PluralizationGrammar:
+  Enabled: true
+
+Rails/Presence:
+  Enabled: true
+
+Rails/Present:
+  Enabled: true
+
+Rails/RedundantForeignKey:
+  Enabled: true
+
+Rails/TimeZone:
+  Enabled: true
+
 # RSpec
 RSpec/ExampleLength:
   Max: 15
-  Exclude:
-    - 'spec/lib/spiders/miyuki_spider_spec.rb'
 
 RSpec/MultipleExpectations:
-  Enabled: true
   Max: 5
 
 RSpec/MultipleMemoizedHelpers:
@@ -173,6 +197,12 @@ RSpec/ContextWording:
     - if
     - unless
     - for
+
+RSpec/InstanceVariable:
+  Enabled: false
+
+RSpec/LetSetup:
+  Enabled: false
 
 # Performance
 Performance/AncestorsInclude:
@@ -199,11 +229,17 @@ Performance/Squeeze:
 Performance/StringInclude:
   Enabled: true
 
-# The following is a duplicate of the inherit_gem directive at the top of the file
-# inherit_gem: { rubocop-rails-omakase: rubocop.yml }
+Performance/FlatMap:
+  Enabled: true
 
-# Overwrite or add rules to create your own house style
-#
-# # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
-# Layout/SpaceInsideArrayLiteralBrackets:
-#   Enabled: false
+Performance/MapCompact:
+  Enabled: true
+
+Performance/SelectMap:
+  Enabled: true
+
+Performance/Size:
+  Enabled: true
+
+Performance/Sum:
+  Enabled: true

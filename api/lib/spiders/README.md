@@ -6,6 +6,8 @@ This directory contains web spiders built with the [Vessel](https://github.com/r
 
 - `miyuki_wholesale_spider.rb` - Crawls the Miyuki Wholesale website to extract bead information
 - `miyuki_wholesale_preview_spider.rb` - Preview version that doesn't save to the database
+- `fire_mountain_gems_spider.rb` - Crawls the Fire Mountain Gems website for Miyuki Delica 11/0 beads
+- `fire_mountain_gems_preview_spider.rb` - Preview version that doesn't save to the database
 
 ## Running Spiders
 
@@ -17,6 +19,12 @@ rails spiders:miyuki_wholesale
 
 # Run the Miyuki Wholesale preview spider
 rails spiders:miyuki_wholesale_preview
+
+# Run the Fire Mountain Gems spider
+rails spiders:fire_mountain_gems
+
+# Run the Fire Mountain Gems preview spider
+rails spiders:fire_mountain_gems_preview
 
 # Run all spiders
 rails spiders:all

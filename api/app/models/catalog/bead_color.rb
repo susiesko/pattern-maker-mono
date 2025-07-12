@@ -6,7 +6,8 @@ module Catalog
     self.table_name = 'bead_colors'
 
     # Associations
-    has_many :bead_color_links, class_name: 'Catalog::BeadColorLink', foreign_key: 'color_id', dependent: :destroy
+    has_many :bead_color_links, class_name: 'Catalog::BeadColorLink', dependent: :destroy,
+                                inverse_of: :color
     has_many :beads, through: :bead_color_links, class_name: 'Catalog::Bead'
 
     # Validations

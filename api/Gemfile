@@ -52,6 +52,9 @@ group :development, :test do
   gem "rubocop-performance", require: false
   gem "rubocop-rspec", require: false
 
+  gem 'ruby-lsp'
+  gem 'rubocop' # for formatting/linting
+
   # Testing framework
   gem "rspec-rails"
   gem "factory_bot_rails"

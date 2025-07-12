@@ -33,10 +33,10 @@ module Spiders
       # Parse the product listings on the current page
       def parse_product_listings
         # Extract all product items from the page
-        
+
         begin
           product_items = css('.product-tile')
-        rescue => e
+        rescue StandardError => e
           log_message_quiet "Error parsing product listings: #{e.message}"
           return
         end
@@ -51,44 +51,43 @@ module Spiders
 
         # Follow pagination if available
         next_page = at_css('a.page-link-next')
-        if next_page
-          next_page_url = absolute_url(next_page.attribute(:href))
-          log_message_quiet "Following next page: #{next_page_url}"
-          yield request(url: next_page_url, method: :parse_product_listings)
-        end
+        return unless next_page
+
+        next_page_url = absolute_url(next_page.attribute(:href))
+        log_message_quiet "Following next page: #{next_page_url}"
+        yield request(url: next_page_url, method: :parse_product_listings)
       end
 
       def parse_product(item)
         # Extract product details
         product_link = item.at_css('.link')
-        raise "no product link found" unless product_link
+        raise 'no product link found' unless product_link
 
         product_url = absolute_url(product_link.attribute(:href))
         product_name = item.at_css('h3.name').text.strip.gsub(/\n\s+Product Title/, '')
 
         # Extract product code from the name or URL
         product_code_match = product_name.match(/DB-?(\d+)/) ||
-          product_name.match(/DBS-?(\d+)/) ||
-          product_name.match(/DBM-?(\d+)/) ||
-          product_name.match(/DBL-?(\d+)/)
+                             product_name.match(/DBS-?(\d+)/) ||
+                             product_name.match(/DBM-?(\d+)/) ||
+                             product_name.match(/DBL-?(\d+)/)
 
-        if product_code_match
-          prefix = product_code_match[0].match(/DB-|DBS-|DBM-|DBL-/).to_s
-          product_code = "#{prefix}#{product_code_match[1]}"
-        else
-          # Skip if we can't identify a Miyuki Delica product code
-          raise "Skipping non-delicas: #{product_name}"
+        raise "Skipping non-delicas: #{product_name}" unless product_code_match
 
-        end
+        prefix = product_code_match[0].match(/DB-|DBS-|DBM-|DBL-/).to_s
+        product_code = "#{prefix}#{product_code_match[1]}"
+
+        # Skip if we can't identify a Miyuki Delica product code
+
         # Determine product size based on product code prefix
         # TODO: log when there is an unknown size
         product_size = case product_code
-                      when /^DBS-/ then '15/0'
-                      when /^DB-/ then '11/0'
-                      when /^DBM-/ then '10/0'
-                      when /^DBL-/ then '8/0'
-                      else 'Unknown'
-                      end
+                       when /^DBS-/ then '15/0'
+                       when /^DB-/ then '11/0'
+                       when /^DBM-/ then '10/0'
+                       when /^DBL-/ then '8/0'
+                       else 'Unknown'
+                       end
 
         # Get the image URL
         image_element = item.at_css('img.tile-image')
@@ -104,44 +103,42 @@ module Spiders
         # Try to extract color information from the name
         color_names = extract_colors_from_name(product_name)
 
-        return {
+        {
           name: product_name,
           brand_product_code: product_code,
-          brand: "Miyuki",
-          type: "Delica",
+          brand: 'Miyuki',
+          type: 'Delica',
           size: product_size,
           image: image_url,
           colors: color_names.split(','),
           finishes: finish_names.split(','),
           metadata: {
             source_url: product_url,
-            price: price
-          }
+            price: price,
+          },
         }
-      rescue => e
-        x = {
+      rescue StandardError => e
+        {
           error: "Error parsing product: #{e.message}",
-          name: product_name || "",
-          brand_product_code: product_code || "",
-          brand: "Miyuki",
-          type: "Delica",
-          size: product_size || "",
-          image: image_url || "",
+          name: product_name || '',
+          brand_product_code: product_code || '',
+          brand: 'Miyuki',
+          type: 'Delica',
+          size: product_size || '',
+          image: image_url || '',
           colors: color_names&.split(',') || [],
           finishes: finish_names&.split(',') || [],
           metadata: {
-            source_url: product_url || "",
-            price: price || ""
-          }
+            source_url: product_url || '',
+            price: price || '',
+          },
         }
-        puts x.inspect
-        return x
       end
 
       # Parse individual product pages for more detailed information
       def parse_product_detail(data: {})
         log_message_quiet "Parsing product detail page: #{current_url}"
-        
+
         # Extract detailed product information
         description = at_css('.product-description')&.text&.strip
         specs = {}
@@ -162,31 +159,31 @@ module Spiders
 
         # Update the bead data with additional information
         bead_index = @results[:beads].find_index { |b| b[:product_code] == data[:product_code] }
-        
+
         if bead_index
           @results[:beads][bead_index] = @results[:beads][bead_index].merge(
             description: description,
             specifications: specs,
-            additional_images: additional_images.presence
+            additional_images: additional_images.presence,
           )
-          
+
           log_message_quiet "Updated bead details: #{data[:product_code]} - #{data[:name]}"
         end
 
         @results
       end
-      
+
       # Method to run the spider and return results
       def self.crawl_and_return_results(options = {})
         results = []
-    
+
         run(options) do |data|
           results << data
         end
-        
+
         puts "\nBeads found: #{results.length}"
 
-        return results
+        results
       end
 
       private
@@ -200,7 +197,7 @@ module Spiders
       end
 
       def get_clean_name(name)
-        name.gsub(/DB-?\d+/, '').gsub(/Miyuki Delica/, '').strip
+        name.gsub(/DB-?\d+/, '').gsub('Miyuki Delica', '').strip
       end
 
       def get_clean_color_name(name)
@@ -234,22 +231,18 @@ module Spiders
       # Helper method to extract color from product name
       def extract_colors_from_name(name)
         colors = []
-        
+
         # Remove product code and common prefixes
         clean_name = get_clean_color_name(name)
 
         # Split by common separators and take the last part as the color
         # Fetch all colors from the database
-        
+
         all_colors.each do |color|
-          if clean_name.downcase.include?(color.downcase)
-            colors << color.gsub(/\s+/, ' ').strip.capitalize
-          end
+          colors << color.gsub(/\s+/, ' ').strip.capitalize if clean_name.downcase.include?(color.downcase)
         end
 
-        if colors.empty?
-          colors << clean_name
-        end
+        colors << clean_name if colors.empty?
 
         colors.join(',')
       end
@@ -257,14 +250,12 @@ module Spiders
       # Helper method to extract finish from product name
       def extract_finishes_from_name(name)
         finishes = []
-        
+
         all_finishes.each do |finish|
-          if name.downcase.include?(finish.downcase)
-            finishes << finish.gsub(/\s+/, ' ').strip
-          end
+          finishes << finish.gsub(/\s+/, ' ').strip if name.downcase.include?(finish.downcase)
         end
 
-        return finishes.join(',')
+        finishes.join(',')
       end
 
       def log_message_quiet(message)

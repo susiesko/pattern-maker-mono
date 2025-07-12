@@ -6,8 +6,8 @@ module Catalog
     self.table_name = 'bead_color_links'
 
     # Associations
-    belongs_to :bead, class_name: 'Catalog::Bead', foreign_key: 'bead_id'
-    belongs_to :color, class_name: 'Catalog::BeadColor', foreign_key: 'color_id'
+    belongs_to :bead, class_name: 'Catalog::Bead'
+    belongs_to :color, class_name: 'Catalog::BeadColor'
 
     # Validations
     validates :bead_id, uniqueness: { scope: :color_id }

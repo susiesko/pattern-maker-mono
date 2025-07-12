@@ -1,15 +1,15 @@
 module Catalog
   class BeadCreatorService
-    def self.create_from_spider_data(data)
+    def self.create_from_spider_data(data) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       # Create or find required associations
-      raise if data == nil
+      raise if data.nil?
 
       brand = BeadBrand.find_by(name: data[:brand])
       bead_type = BeadType.find_by(name: data[:type])
       size = BeadSize.find_by(size: data[:size])
       brand_name = brand.name
       brand_product_code = data[:brand_product_code]
-      
+
       # Create the bead
       bead = Bead.find_or_create_by(brand_product_code: brand_product_code) do |b|
         b.name = data[:name]
@@ -33,23 +33,23 @@ module Catalog
           bead.finishes << finish
         end
       end
-      
+
       bead
-    rescue => e
-      puts "Error creating bead #{brand_name || ""} #{brand_product_code || ""}: #{e.message}"
+    rescue StandardError => e
+      puts "Error creating bead #{brand_name || ''} #{brand_product_code || ''}: #{e.message}"
     end
 
     def self.get_color_family_name(color_name)
       case color_name.downcase
-        when 'cobalt'
-          'Blue'
-        when 'ivory'
-          'White'
-        when 'gunmetal'
-          'Black'
-        else
-          color_name
+      when 'cobalt'
+        'Blue'
+      when 'ivory'
+        'White'
+      when 'gunmetal'
+        'Black'
+      else
+        color_name
       end
     end
   end
-end 
+end

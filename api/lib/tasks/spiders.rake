@@ -7,9 +7,6 @@ namespace :spiders do
   task fire_mountain_gems: :environment do
     puts 'Starting Fire Mountain Gems spider...'
 
-    # Load the spider (Rails autoloading handles this)
-    # require Rails.root.join('lib', 'spiders', 'fire_mountain_gems_spider')
-
     # Options can be passed as environment variables
     options = {}
     options[:max_pages] = ENV['MAX_PAGES'].to_i if ENV['MAX_PAGES'].present?

@@ -18,6 +18,6 @@ module Catalog
 
     # Validations
     validates :name, presence: true
-    validates :brand_product_code, presence: true
+    validates :brand_product_code, presence: true, uniqueness: true
   end
 end

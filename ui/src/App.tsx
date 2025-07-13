@@ -5,7 +5,7 @@ import theme from './styles/theme';
 import GlobalStyles from './styles/GlobalStyles';
 import Layout from './components/Layout';
 import WelcomePage from './components/WelcomePage';
-import BeadsList from './components/search/BeadsList.tsx';
+import BeadsListPage from './pages/BeadsListPage';
 import AddBeadPage from './pages/AddBeadPage';
 import EditBeadPage from './pages/EditBeadPage';
 import ComingSoon from './components/ComingSoon';
@@ -28,7 +28,7 @@ const queryClient = new QueryClient({
         return failureCount < 2;
       },
       staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
     },
     mutations: {
       // Don't retry mutations by default
@@ -53,11 +53,12 @@ function App() {
               <Route path="/" element={<Layout />}>
                 {/* Public routes within layout */}
                 <Route index element={<WelcomePage />} />
-                <Route path="beads" element={<BeadsList />} />
+                <Route path="beads" element={<BeadsListPage />} />
 
                 {/* Protected routes */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="beads/add" element={<AddBeadPage />} />
+                  <Route path="beads/:id" element={<ComingSoon title="Bead Details" />} />
                   <Route path="beads/edit/:id" element={<EditBeadPage />} />
                   <Route path="designer" element={<ComingSoon title="Pattern Designer" />} />
                   <Route path="projects" element={<ComingSoon title="My Projects" />} />

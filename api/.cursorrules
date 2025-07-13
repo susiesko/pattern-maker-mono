@@ -7,7 +7,7 @@
 - Use Ruby conventions like snake_case for variables/methods, PascalCase for classes/modules
 - Leverage Ruby's expressive syntax and built-in methods when possible
 - Follow Rails conventions and the "Rails Way" for web development tasks
-- Be familiar with Ruby gems, ActiveRecord patterns, and Rails architecture
+- Be familiar with Ruby gems, ActiveRecord patterns, and Rails architecture.  Check the gemfile before assuming we are using specific third party gems.
 
 # Coding pattern preferences
 - Always prefer simple solutions

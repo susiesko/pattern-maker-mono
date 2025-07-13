@@ -9,14 +9,31 @@ module Api
         # GET /api/v1/catalog/beads
         def index
           @beads = ::Catalog::Bead.includes(:brand, :size, :type, :colors, :finishes)
-                                  .order(created_at: :desc)
 
           # Apply filters if provided
           @beads = apply_filters(@beads)
 
+          # Apply sorting
+          sort_config = get_sort_config
+          @beads = @beads.order(sort_config[:field] => sort_config[:direction])
+
+          # Apply pagination
+          pagination_result = PaginationService.new(
+            @beads,
+            cursor: params[:cursor],
+            limit: params[:limit],
+            cursor_field: sort_config[:field],
+            direction: sort_config[:direction]
+          ).paginate
+
           render json: {
             success: true,
-            data: @beads.as_json(include: [ :brand, :size, :type, :colors, :finishes ])
+            data: pagination_result[:records].as_json(include: [ :brand, :size, :type, :colors, :finishes ]),
+            pagination: {
+              has_more: pagination_result[:has_more],
+              next_cursor: pagination_result[:next_cursor],
+              limit: pagination_result[:limit]
+            }
           }
         end
 
@@ -182,6 +199,27 @@ module Api
           end
 
           filtered_beads
+        end
+
+        def get_sort_config
+          sort_by = params[:sort_by] || 'id'
+          direction = params[:direction] || 'desc'
+          
+          # Validate direction
+          direction = 'desc' unless %w[asc desc].include?(direction)
+          
+          # Map sort options to database fields
+          case sort_by
+          when 'product_code', 'brand_product_code'
+            { field: :brand_product_code, direction: direction.to_sym }
+          when 'name'
+            { field: :name, direction: direction.to_sym }
+          when 'created_at', 'date'
+            { field: :created_at, direction: direction.to_sym }
+          else
+            # Default to id
+            { field: :id, direction: direction.to_sym }
+          end
         end
       end
     end

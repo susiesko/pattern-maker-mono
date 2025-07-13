@@ -85,7 +85,8 @@ module Api
         private
 
         def set_bead
-          @bead = ::Catalog::Bead.find_by(id: params[:id])
+          @bead = ::Catalog::Bead.includes(:brand, :size, :type, :colors, :finishes)
+                                 .find_by(id: params[:id])
           render_error(:not_found, [ 'Bead not found' ]) unless @bead
         end
 

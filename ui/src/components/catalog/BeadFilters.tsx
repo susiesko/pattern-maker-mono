@@ -40,8 +40,9 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
     <FiltersContainer>
       <FiltersGrid>
         <FilterGroup>
-          <FilterLabel>Brand</FilterLabel>
+          <FilterLabel htmlFor="brand-filter">Brand</FilterLabel>
           <FilterSelect
+            id="brand-filter"
             value={filters.brandId}
             onChange={(e) => handleFilterChange('brandId', e.target.value)}
           >
@@ -55,8 +56,9 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
         </FilterGroup>
 
         <FilterGroup>
-          <FilterLabel>Type</FilterLabel>
+          <FilterLabel htmlFor="type-filter">Type</FilterLabel>
           <FilterSelect
+            id="type-filter"
             value={filters.typeId}
             onChange={(e) => handleFilterChange('typeId', e.target.value)}
           >
@@ -70,8 +72,9 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
         </FilterGroup>
 
         <FilterGroup>
-          <FilterLabel>Size</FilterLabel>
+          <FilterLabel htmlFor="size-filter">Size</FilterLabel>
           <FilterSelect
+            id="size-filter"
             value={filters.sizeId}
             onChange={(e) => handleFilterChange('sizeId', e.target.value)}
           >
@@ -85,8 +88,9 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
         </FilterGroup>
 
         <FilterGroup>
-          <FilterLabel>Color</FilterLabel>
+          <FilterLabel htmlFor="color-filter">Color</FilterLabel>
           <FilterSelect
+            id="color-filter"
             value={filters.colorId}
             onChange={(e) => handleFilterChange('colorId', e.target.value)}
           >
@@ -100,8 +104,9 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
         </FilterGroup>
 
         <FilterGroup>
-          <FilterLabel>Finish</FilterLabel>
+          <FilterLabel htmlFor="finish-filter">Finish</FilterLabel>
           <FilterSelect
+            id="finish-filter"
             value={filters.finishId}
             onChange={(e) => handleFilterChange('finishId', e.target.value)}
           >
@@ -116,7 +121,7 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
       </FiltersGrid>
 
       {hasActiveFilters && (
-        <ClearFiltersButton onClick={handleClearFilters}>
+        <ClearFiltersButton type="button" onClick={handleClearFilters}>
           Clear All Filters
         </ClearFiltersButton>
       )}

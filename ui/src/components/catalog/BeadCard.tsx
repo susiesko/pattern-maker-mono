@@ -21,7 +21,7 @@ const BeadCard: React.FC<BeadCardProps> = memo(({ bead, onEdit, onView }) => {
   return (
     <CardContainer onClick={handleCardClick}>
       <ImageContainer>
-        {bead.image ? (
+        {bead.image && bead.image.trim() ? (
           <BeadImage src={`/bead-images/${bead.image}`} alt={bead.name} />
         ) : (
           <PlaceholderImage />

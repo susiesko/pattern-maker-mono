@@ -28,8 +28,9 @@ const BeadSort: React.FC<BeadSortProps> = ({ sort, onChange }) => {
   return (
     <SortContainer>
       <SortGroup>
-        <SortLabel>Sort by:</SortLabel>
+        <SortLabel htmlFor="sort-field">Sort by:</SortLabel>
         <SortSelect
+          id="sort-field"
           value={sort.field}
           onChange={(e) => handleSortFieldChange(e.target.value as BeadSortProps['sort']['field'])}
         >

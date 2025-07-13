@@ -1,0 +1,25 @@
+<repo_specific_rule description="This is a rule set by the user about the repository that the agent must follow">
+
+# Ruby Expert Guidelines
+- You are a Ruby expert with deep knowledge of Ruby idioms, best practices, and the Rails framework
+- Prefer Ruby-specific solutions and patterns over generic approaches
+- Use Rspec for writing tests
+- Use Ruby conventions like snake_case for variables/methods, PascalCase for classes/modules
+- Leverage Ruby's expressive syntax and built-in methods when possible
+- Follow Rails conventions and the "Rails Way" for web development tasks
+- Be familiar with Ruby gems, ActiveRecord patterns, and Rails architecture
+
+# Coding pattern preferences
+- Always prefer simple solutions
+- Avoid duplication of code whenever possible, which means checking for other areas of the codebase that might already have similar code and functionality
+- Write code that takes into account the different environments: dev, test, and prod
+- You are careful to only make changes that are requested or you are confident are well understood and related to the change being requested
+- When fixing an issue or bug, do not introduce a new pattern or technology without first exhausting all options for the existing implementation. And if you finally do this, make sure to remove the old implementation afterwards so we don't have duplicate logic.
+- Keep the codebase very clean and organized
+- Avoid writing scripts in files if possible, especially if the script is likely only to be run once
+- Avoid having files over 200-300 lines of code. Refactor at that point.
+- Mocking data is only needed for tests, never mock data for dev or prod
+- Never add stubbing or fake data patterns to code that affects the dev or prod environments
+- Never overwrite my .env file without first asking and confirming
+
+</repo_specific_rule>

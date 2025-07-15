@@ -7,6 +7,40 @@ const PaginationContainer = styled.div`
   align-items: center;
   gap: 8px;
   margin: 24px 0;
+  flex-wrap: wrap;
+`;
+
+const PaginationControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const PageSizeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+`;
+
+const PageSizeLabel = styled.span`
+  font-size: 14px;
+  color: #6b7280;
+`;
+
+const PageSizeSelect = styled.select`
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
 `;
 
 const PaginationButton = styled.button<{ active?: boolean }>`
@@ -40,20 +74,24 @@ interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
   hasMore: boolean;
   loading?: boolean;
   itemsPerPage?: number;
   totalItems?: number;
+  pageSizeOptions?: number[];
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
   currentPage,
   totalPages,
   onPageChange,
+  onPageSizeChange,
   hasMore,
   loading = false,
-  itemsPerPage = 20,
-  totalItems
+  itemsPerPage = 12,
+  totalItems,
+  pageSizeOptions = [12, 24, 48, 96]
 }) => {
   const getPageNumbers = () => {
     const pages = [];
@@ -107,23 +145,49 @@ export const Pagination: React.FC<PaginationProps> = ({
     );
   };
 
+  const handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newPageSize = parseInt(event.target.value);
+    if (onPageSizeChange) {
+      onPageSizeChange(newPageSize);
+    }
+  };
+
   return (
     <PaginationContainer>
-      <PaginationButton
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1 || loading}
-      >
-        Previous
-      </PaginationButton>
+      <PaginationControls>
+        <PaginationButton
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1 || loading}
+        >
+          Previous
+        </PaginationButton>
 
-      {getPageNumbers().map(renderPageButton)}
+        {getPageNumbers().map(renderPageButton)}
 
-      <PaginationButton
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={!hasMore || loading}
-      >
-        Next
-      </PaginationButton>
+        <PaginationButton
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={!hasMore || loading}
+        >
+          Next
+        </PaginationButton>
+      </PaginationControls>
+
+      {onPageSizeChange && (
+        <PageSizeContainer>
+          <PageSizeLabel>Show:</PageSizeLabel>
+          <PageSizeSelect
+            value={itemsPerPage}
+            onChange={handlePageSizeChange}
+            disabled={loading}
+          >
+            {pageSizeOptions.map(size => (
+              <option key={size} value={size}>
+                {size} per page
+              </option>
+            ))}
+          </PageSizeSelect>
+        </PageSizeContainer>
+      )}
 
       {totalItems && (
         <PaginationInfo>

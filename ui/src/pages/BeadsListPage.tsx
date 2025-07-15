@@ -40,7 +40,7 @@ const BeadsListPage: React.FC = () => {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(24);
+  const [pageSize, setPageSize] = useState(24);
 
   // Convert our filters to the format expected by usePaginatedBeadsQuery
   const paginatedFilters = useMemo((): PaginatedBeadFilters => ({
@@ -72,6 +72,11 @@ const BeadsListPage: React.FC = () => {
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
+  }, []);
+
+  const handlePageSizeChange = useCallback((newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
   }, []);
 
   const handleAddBead = useCallback(() => {
@@ -199,6 +204,7 @@ const BeadsListPage: React.FC = () => {
                   currentPage={currentPage}
                   totalPages={data.pagination.total_pages}
                   onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
                   hasMore={data.pagination.has_more}
                   loading={isLoading}
                   itemsPerPage={pageSize}

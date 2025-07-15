@@ -4,7 +4,7 @@ module Api
   module V1
     module Catalog
       class BeadsController < Api::V1::BaseController
-        before_action :set_bead, only: [ :show, :update, :destroy ]
+        before_action :set_bead, only: %i[show update destroy]
 
         # GET /api/v1/catalog/beads
         def index
@@ -18,22 +18,19 @@ module Api
           @beads = @beads.order(sort_config[:field] => sort_config[:direction])
 
           # Apply pagination
+          page = params[:page] || 1
+          per_page = params[:per_page] || params[:limit] || 20
+
           pagination_result = PaginationService.new(
             @beads,
-            cursor: params[:cursor],
-            limit: params[:limit],
-            cursor_field: sort_config[:field],
-            direction: sort_config[:direction]
+            page: page,
+            per_page: per_page,
           ).paginate
 
           render json: {
             success: true,
-            data: pagination_result[:records].as_json(include: [ :brand, :size, :type, :colors, :finishes ]),
-            pagination: {
-              has_more: pagination_result[:has_more],
-              next_cursor: pagination_result[:next_cursor],
-              limit: pagination_result[:limit]
-            }
+            data: pagination_result[:records].as_json(include: %i[brand size type colors finishes]),
+            pagination: pagination_result[:pagination],
           }
         end
 
@@ -46,10 +43,10 @@ module Api
                 :brand,
                 :size,
                 :type,
-                { colors: { only: [ :id, :name ] } },
-                { finishes: { only: [ :id, :name ] } }
-              ]
-            )
+                { colors: { only: [:id, :name] } },
+                { finishes: { only: [:id, :name] } },
+              ],
+            ),
           }
         end
 
@@ -63,8 +60,8 @@ module Api
 
             render json: {
               success: true,
-              data: @bead.as_json(include: [ :brand, :size, :type, :colors, :finishes ]),
-              message: 'Bead created successfully'
+              data: @bead.as_json(include: %i[brand size type colors finishes]),
+              message: 'Bead created successfully',
             }, status: :created
           else
             render_error(:unprocessable_entity, @bead.errors.full_messages)
@@ -79,8 +76,8 @@ module Api
 
             render json: {
               success: true,
-              data: @bead.as_json(include: [ :brand, :size, :type, :colors, :finishes ]),
-              message: 'Bead updated successfully'
+              data: @bead.as_json(include: %i[brand size type colors finishes]),
+              message: 'Bead updated successfully',
             }
           else
             render_error(:unprocessable_entity, @bead.errors.full_messages)
@@ -92,7 +89,7 @@ module Api
           if @bead.destroy
             render json: {
               success: true,
-              message: 'Bead deleted successfully'
+              message: 'Bead deleted successfully',
             }
           else
             render_error(:unprocessable_entity, @bead.errors.full_messages)
@@ -104,7 +101,7 @@ module Api
         def set_bead
           @bead = ::Catalog::Bead.includes(:brand, :size, :type, :colors, :finishes)
                                  .find_by(id: params[:id])
-          render_error(:not_found, [ 'Bead not found' ]) unless @bead
+          render_error(:not_found, ['Bead not found']) unless @bead
         end
 
         def bead_params
@@ -115,7 +112,7 @@ module Api
             :brand_id,
             :size_id,
             :type_id,
-            :image
+            :image,
           )
 
           # Handle metadata separately to avoid JSON equality comparison issues
@@ -131,18 +128,16 @@ module Api
           bead_params = params[:bead]
 
           # Handle both camelCase and snake_case parameter names
-          color_ids = bead_params[:color_ids].present? ? bead_params[:color_ids] : bead_params[:colorIds]
-          finish_ids = bead_params[:finish_ids].present? ? bead_params[:finish_ids] : bead_params[:finishIds]
+          color_ids = bead_params[:color_ids].presence || bead_params[:colorIds]
+          finish_ids = bead_params[:finish_ids].presence || bead_params[:finishIds]
 
           # Update colors if provided
-          if color_ids.present?
-            @bead.color_ids = color_ids
-          end
+          @bead.color_ids = color_ids if color_ids.present?
 
           # Update finishes if provided
-          if finish_ids.present?
-            @bead.finish_ids = finish_ids
-          end
+          return unless finish_ids.present?
+
+          @bead.finish_ids = finish_ids
         end
 
         def apply_filters(beads)
@@ -151,26 +146,20 @@ module Api
           # Helper method to get parameter value from either snake_case or camelCase
           def get_param(snake_case_key, camel_case_key = nil)
             camel_case_key ||= snake_case_key.camelize(:lower)
-            params[snake_case_key].present? ? params[snake_case_key] : params[camel_case_key]
+            params[snake_case_key].presence || params[camel_case_key]
           end
 
           # Filter by brand
           brand_param = params[:brand_id] || params[:brandId] || params[:brand]
-          if brand_param.present?
-            filtered_beads = filtered_beads.where(brand_id: brand_param)
-          end
+          filtered_beads = filtered_beads.where(brand_id: brand_param) if brand_param.present?
 
           # Filter by size
           size_param = params[:size_id] || params[:sizeId] || params[:size]
-          if size_param.present?
-            filtered_beads = filtered_beads.where(size_id: size_param)
-          end
+          filtered_beads = filtered_beads.where(size_id: size_param) if size_param.present?
 
           # Filter by type
           type_param = params[:type_id] || params[:typeId] || params[:type]
-          if type_param.present?
-            filtered_beads = filtered_beads.where(type_id: type_param)
-          end
+          filtered_beads = filtered_beads.where(type_id: type_param) if type_param.present?
 
           # Filter by color
           color_param = params[:color_id] || params[:colorId] || params[:color]
@@ -204,10 +193,10 @@ module Api
         def get_sort_config
           sort_by = params[:sort_by] || 'id'
           direction = params[:direction] || 'desc'
-          
+
           # Validate direction
           direction = 'desc' unless %w[asc desc].include?(direction)
-          
+
           # Map sort options to database fields
           case sort_by
           when 'product_code', 'brand_product_code'

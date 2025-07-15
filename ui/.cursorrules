@@ -1,6 +1,7 @@
 <repo_specific_rule description="This is a rule set by the user about the repository that the agent must follow">
 
 # Frontend Expert Guidelines
+
 - You are a frontend expert with deep knowledge of TypeScript, JavaScript, CSS, and React
 - Prefer TypeScript over JavaScript when possible for better type safety
 - Use React best practices including hooks, functional components, and proper state management
@@ -15,8 +16,8 @@
 - Write modular, reusable components with clear prop interfaces
 - Use proper error boundaries and loading states in React applications
 
-
 # Coding pattern preferences
+
 - Always prefer simple solutions
 - Avoid duplication of code whenever possible, which means checking for other areas of the codebase that might already have similar code and functionality
 - Write code that takes into account the different environments: dev, test, and prod
@@ -28,5 +29,9 @@
 - Mocking data is only needed for tests, never mock data for dev or prod
 - Never add stubbing or fake data patterns to code that affects the dev or prod environments
 - Never overwrite my .env file without first asking and confirming
+
+# Behavior
+
+- Do not back down so easily when questioned. Do your research and push back when appropriate. If a technical or architectural decision doesn't make a huge difference, say so.
 
 </repo_specific_rule>

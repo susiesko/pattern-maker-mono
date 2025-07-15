@@ -2,9 +2,10 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Bead } from '../types/beads';
-import { useBeadsQuery } from '../hooks/queries/useBeadsQuery';
+import { usePaginatedBeadsQuery, BeadFilters as PaginatedBeadFilters } from '../hooks/queries/usePaginatedBeadsQuery';
 import { BeadCard, BeadFilters, BeadSearch, BeadSort } from '../components/catalog';
 import { LoadingSpinner, ErrorMessage, EmptyState } from '../components/ui';
+import Pagination from '../components/Pagination';
 
 interface BeadFilters {
   search: string;
@@ -18,12 +19,6 @@ interface BeadFilters {
 interface BeadSort {
   field: 'name' | 'brand' | 'created_at' | 'updated_at';
   direction: 'asc' | 'desc';
-}
-
-interface BeadsPagination {
-  page: number;
-  limit: number;
-  total: number;
 }
 
 const BeadsListPage: React.FC = () => {
@@ -44,36 +39,39 @@ const BeadsListPage: React.FC = () => {
     direction: 'asc',
   });
 
-  const [pagination, setPagination] = useState<BeadsPagination>({
-    page: 1,
-    limit: 24,
-    total: 0,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(24);
 
-  // Memoized query parameters
-  const queryParams = useMemo(() => ({
-    ...filters,
-    sortBy: sort.field,
-    sortOrder: sort.direction,
-    page: pagination.page.toString(),
-    limit: pagination.limit.toString(),
-  }), [filters, sort, pagination]);
+  // Convert our filters to the format expected by usePaginatedBeadsQuery
+  const paginatedFilters = useMemo((): PaginatedBeadFilters => ({
+    page: currentPage,
+    per_page: pageSize,
+    sort_by: sort.field === 'brand' ? 'name' : (sort.field === 'name' ? 'name' : sort.field === 'created_at' ? 'created_at' : 'id'),
+    direction: sort.direction,
+    search: filters.search || undefined,
+    brand_id: filters.brandId ? parseInt(filters.brandId) : undefined,
+    type_id: filters.typeId ? parseInt(filters.typeId) : undefined,
+    size_id: filters.sizeId ? parseInt(filters.sizeId) : undefined,
+    color_id: filters.colorId ? parseInt(filters.colorId) : undefined,
+    finish_id: filters.finishId ? parseInt(filters.finishId) : undefined,
+  }), [filters, sort, pageSize, currentPage]);
 
   // Data fetching
-  const { data, isLoading, error, refetch } = useBeadsQuery(queryParams);
+  const { data, isLoading, error, refetch } = usePaginatedBeadsQuery(paginatedFilters);
 
   // Event handlers
   const handleFilterChange = useCallback((newFilters: Partial<BeadFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page when filtering
+    setCurrentPage(1); // Reset to first page when filtering
   }, []);
 
   const handleSortChange = useCallback((newSort: BeadSort) => {
     setSort(newSort);
+    setCurrentPage(1); // Reset to first page when sorting
   }, []);
 
   const handlePageChange = useCallback((page: number) => {
-    setPagination(prev => ({ ...prev, page }));
+    setCurrentPage(page);
   }, []);
 
   const handleAddBead = useCallback(() => {
@@ -94,7 +92,7 @@ const BeadsListPage: React.FC = () => {
     [filters]
   );
 
-  const beadsData = useMemo(() => data || [], [data]);
+  const beadsData = useMemo(() => data?.data || [], [data]);
   const isEmpty = !isLoading && beadsData.length === 0;
   const isFiltered = isEmpty && hasFilters;
 
@@ -195,10 +193,17 @@ const BeadsListPage: React.FC = () => {
               ))}
             </BeadsGrid>
 
-            {/* Pagination would go here */}
-            {beadsData.length > 0 && (
+            {data?.pagination && (
               <PaginationContainer>
-                {/* TODO: Add pagination component */}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={data.pagination.total_pages}
+                  onPageChange={handlePageChange}
+                  hasMore={data.pagination.has_more}
+                  loading={isLoading}
+                  itemsPerPage={pageSize}
+                  totalItems={data.pagination.total_count}
+                />
               </PaginationContainer>
             )}
           </>

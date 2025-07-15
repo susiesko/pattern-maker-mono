@@ -4,3 +4,4 @@ export { default as useBeadSizesQuery } from './useBeadSizesQuery';
 export { default as useBeadTypesQuery } from './useBeadTypesQuery';
 export { default as useBeadColorsQuery } from './useBeadColorsQuery';
 export { default as useBeadFinishesQuery } from './useBeadFinishesQuery';
+export { default as usePaginatedBeadsQuery } from './usePaginatedBeadsQuery';

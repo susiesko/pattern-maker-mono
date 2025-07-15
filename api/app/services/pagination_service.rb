@@ -1,38 +1,35 @@
 class PaginationService
   DEFAULT_LIMIT = 20
   MAX_LIMIT = 100
-  
-  def initialize(relation, cursor: nil, limit: DEFAULT_LIMIT, cursor_field: :id, direction: :desc)
+
+  def initialize(relation, page: 1, per_page: DEFAULT_LIMIT)
     @relation = relation
-    @cursor = cursor
-    @cursor_field = cursor_field
-    @direction = direction
-    @limit = [limit.to_i, MAX_LIMIT].min
-    @limit = DEFAULT_LIMIT if @limit <= 0
+    @page = [page.to_i, 1].max # Ensure page is at least 1
+    @per_page = [[per_page.to_i, 1].max, MAX_LIMIT].min # Ensure per_page is between 1 and MAX_LIMIT
+    @per_page = DEFAULT_LIMIT if @per_page <= 0
   end
-  
+
   def paginate
-    records = build_query.limit(@limit + 1) # +1 to check if more exist
-    
-    has_more = records.size > @limit
-    records = records.first(@limit) if has_more
-    
+    # Get total count for pagination info
+    total_count = @relation.count
+    total_pages = (total_count.to_f / @per_page).ceil
+
+    # Calculate offset
+    offset = (@page - 1) * @per_page
+
+    # Get the records for this page
+    records = @relation.offset(offset).limit(@per_page)
+
     {
       records: records,
-      has_more: has_more,
-      next_cursor: has_more ? records.last&.send(@cursor_field) : nil,
-      limit: @limit
+      pagination: {
+        current_page: @page,
+        per_page: @per_page,
+        total_count: total_count,
+        total_pages: total_pages,
+        has_more: @page < total_pages,
+        has_previous: @page > 1,
+      },
     }
   end
-  
-  private
-  
-  def build_query
-    if @cursor.present?
-      operator = @direction == :desc ? '<' : '>'
-      @relation.where("#{@cursor_field} #{operator} ?", @cursor)
-    else
-      @relation
-    end
-  end
-end 
+end

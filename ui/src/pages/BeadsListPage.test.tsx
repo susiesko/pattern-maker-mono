@@ -2,11 +2,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import BeadsListPage from './BeadsListPage';
-import { useBeadsQuery } from '../hooks/queries/useBeadsQuery';
+import { usePaginatedBeadsQuery } from '../hooks/queries/usePaginatedBeadsQuery';
 import { createTestWrapper } from '../test/testUtils';
 
 // Mock the hooks and components
-vi.mock('../hooks/queries/useBeadsQuery');
+vi.mock('../hooks/queries/usePaginatedBeadsQuery');
 vi.mock('../components/catalog', () => ({
   BeadCard: ({ bead, onEdit, onView }: any) => (
     <div data-testid={`bead-card-${bead.id}`}>
@@ -50,18 +50,36 @@ vi.mock('../components/ui', () => ({
       {onRetry && <button onClick={onRetry}>Retry</button>}
     </div>
   ),
-  EmptyState: ({ title, message, onAction, actionLabel }: any) => (
+  EmptyState: ({ title, message, actionLabel, onAction }: any) => (
     <div data-testid="empty-state">
-      <h3>{title}</h3>
+      <h2>{title}</h2>
       <p>{message}</p>
-      {onAction && actionLabel && (
-        <button onClick={onAction}>{actionLabel}</button>
-      )}
+      {actionLabel && <button onClick={onAction}>{actionLabel}</button>}
     </div>
   ),
 }));
 
-// Mock react-router-dom
+vi.mock('../components/Pagination', () => ({
+  default: ({ currentPage, totalPages, onPageChange, hasMore }: any) => (
+    <div data-testid="pagination">
+      <button 
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        Previous
+      </button>
+      <span>Page {currentPage} of {totalPages}</span>
+      <button 
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={!hasMore}
+      >
+        Next
+      </button>
+    </div>
+  ),
+}));
+
+// Mock navigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -71,50 +89,82 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-const mockUseBeadsQuery = vi.mocked(useBeadsQuery);
+const mockUsePaginatedBeadsQuery = vi.mocked(usePaginatedBeadsQuery);
+
+// Sample test data
+const sampleBeads = [
+  {
+    id: 1,
+    name: 'Test Bead 1',
+    brand_product_code: 'TB001',
+    image: 'bead1.jpg',
+    metadata: {},
+    created_at: '2023-01-01T00:00:00Z',
+    updated_at: '2023-01-01T00:00:00Z',
+    brand: { id: 1, name: 'Test Brand', website: 'https://test.com' },
+    size: { id: 1, size: '11/0' },
+    type: { id: 1, name: 'Seed' },
+    colors: [{ id: 1, name: 'Red' }],
+    finishes: [{ id: 1, name: 'Matte' }],
+  },
+  {
+    id: 2,
+    name: 'Test Bead 2',
+    brand_product_code: 'TB002',
+    image: 'bead2.jpg',
+    metadata: {},
+    created_at: '2023-01-02T00:00:00Z',
+    updated_at: '2023-01-02T00:00:00Z',
+    brand: { id: 1, name: 'Test Brand', website: 'https://test.com' },
+    size: { id: 1, size: '11/0' },
+    type: { id: 1, name: 'Seed' },
+    colors: [{ id: 2, name: 'Blue' }],
+    finishes: [{ id: 2, name: 'Glossy' }],
+  },
+];
+
+const defaultQueryResult = {
+  data: {
+    data: sampleBeads,
+    pagination: {
+      current_page: 1,
+      per_page: 24,
+      total_count: 100,
+      total_pages: 5,
+      has_more: true,
+      has_previous: false,
+    },
+  },
+  isLoading: false,
+  error: null,
+  refetch: vi.fn(),
+  // Add required React Query properties
+  isError: false,
+  isPending: false,
+  isLoadingError: false,
+  isRefetchError: false,
+  isStale: false,
+  isSuccess: true,
+  status: 'success' as const,
+  fetchStatus: 'idle' as const,
+  dataUpdatedAt: Date.now(),
+  errorUpdatedAt: 0,
+  failureCount: 0,
+  failureReason: null,
+  errorUpdateCount: 0,
+  isFetched: true,
+  isFetchedAfterMount: true,
+  isFetching: false,
+  isInitialLoading: false,
+  isPlaceholderData: false,
+  isRefetching: false,
+  promise: Promise.resolve(),
+} as any;
 
 describe('BeadsListPage', () => {
-  const mockBeads = [
-    {
-      id: 1,
-      name: 'Test Bead 1',
-      brand_product_code: 'TB-001',
-      image: 'test-bead-1.jpg',
-      metadata: {},
-      created_at: '2023-01-01T00:00:00Z',
-      updated_at: '2023-01-01T00:00:00Z',
-      brand: { id: 1, name: 'Test Brand', website: 'https://test.com' },
-      size: { id: 1, size: '11/0' },
-      type: { id: 1, name: 'Seed' },
-      colors: [{ id: 1, name: 'Red' }],
-      finishes: [{ id: 1, name: 'Matte' }],
-    },
-    {
-      id: 2,
-      name: 'Test Bead 2',
-      brand_product_code: 'TB-002',
-      image: 'test-bead-2.jpg',
-      metadata: {},
-      created_at: '2023-01-02T00:00:00Z',
-      updated_at: '2023-01-02T00:00:00Z',
-      brand: { id: 2, name: 'Another Brand', website: 'https://another.com' },
-      size: { id: 2, size: '8/0' },
-      type: { id: 2, name: 'Delica' },
-      colors: [{ id: 2, name: 'Blue' }],
-      finishes: [{ id: 2, name: 'Transparent' }],
-    },
-  ];
-
-  const defaultQueryResult = {
-    data: mockBeads,
-    isLoading: false,
-    error: null,
-    refetch: vi.fn(),
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseBeadsQuery.mockReturnValue(defaultQueryResult);
+    mockUsePaginatedBeadsQuery.mockReturnValue(defaultQueryResult);
   });
 
   const renderWithRouter = (initialEntries = ['/beads']) => {
@@ -128,7 +178,7 @@ describe('BeadsListPage', () => {
 
   describe('Loading State', () => {
     it('displays loading spinner when data is loading', () => {
-      mockUseBeadsQuery.mockReturnValue({
+      mockUsePaginatedBeadsQuery.mockReturnValue({
         ...defaultQueryResult,
         isLoading: true,
         data: undefined,
@@ -144,7 +194,7 @@ describe('BeadsListPage', () => {
   describe('Error State', () => {
     it('displays error message when there is an error', () => {
       const mockRefetch = vi.fn();
-      mockUseBeadsQuery.mockReturnValue({
+      mockUsePaginatedBeadsQuery.mockReturnValue({
         ...defaultQueryResult,
         error: new Error('Failed to fetch'),
         data: undefined,
@@ -164,9 +214,19 @@ describe('BeadsListPage', () => {
 
   describe('Empty State', () => {
     it('displays empty state when no beads are available', () => {
-      mockUseBeadsQuery.mockReturnValue({
+      mockUsePaginatedBeadsQuery.mockReturnValue({
         ...defaultQueryResult,
-        data: [],
+        data: {
+          data: [],
+          pagination: {
+            current_page: 1,
+            per_page: 24,
+            total_count: 0,
+            total_pages: 0,
+            has_more: false,
+            has_previous: false,
+          },
+        },
       });
 
       renderWithRouter();
@@ -177,9 +237,19 @@ describe('BeadsListPage', () => {
     });
 
     it('displays filtered empty state when no beads match filters', async () => {
-      mockUseBeadsQuery.mockReturnValue({
+      mockUsePaginatedBeadsQuery.mockReturnValue({
         ...defaultQueryResult,
-        data: [],
+        data: {
+          data: [],
+          pagination: {
+            current_page: 1,
+            per_page: 24,
+            total_count: 0,
+            total_pages: 0,
+            has_more: false,
+            has_previous: false,
+          },
+        },
       });
 
       renderWithRouter();
@@ -206,9 +276,19 @@ describe('BeadsListPage', () => {
     });
 
     it('displays singular form when only one bead', () => {
-      mockUseBeadsQuery.mockReturnValue({
+      mockUsePaginatedBeadsQuery.mockReturnValue({
         ...defaultQueryResult,
-        data: [mockBeads[0]],
+        data: {
+          data: [sampleBeads[0]],
+          pagination: {
+            current_page: 1,
+            per_page: 24,
+            total_count: 1,
+            total_pages: 1,
+            has_more: false,
+            has_previous: false,
+          },
+        },
       });
 
       renderWithRouter();
@@ -254,7 +334,7 @@ describe('BeadsListPage', () => {
       fireEvent.change(searchInput, { target: { value: 'test search' } });
 
       await waitFor(() => {
-        expect(mockUseBeadsQuery).toHaveBeenCalledWith(
+        expect(mockUsePaginatedBeadsQuery).toHaveBeenCalledWith(
           expect.objectContaining({
             search: 'test search',
           })
@@ -268,13 +348,13 @@ describe('BeadsListPage', () => {
       const filterButton = screen.getByText('Filter by Brand');
       fireEvent.click(filterButton);
 
-      await waitFor(() => {
-        expect(mockUseBeadsQuery).toHaveBeenCalledWith(
-          expect.objectContaining({
-            brandId: '1',
-          })
-        );
-      });
+              await waitFor(() => {
+          expect(mockUsePaginatedBeadsQuery).toHaveBeenCalledWith(
+            expect.objectContaining({
+              brand_id: 1,
+            })
+          );
+        });
     });
 
     it('clears filters when clear filters is clicked', async () => {
@@ -288,18 +368,18 @@ describe('BeadsListPage', () => {
       const clearButton = screen.getByText('Clear Filters');
       fireEvent.click(clearButton);
 
-      await waitFor(() => {
-        expect(mockUseBeadsQuery).toHaveBeenCalledWith(
-          expect.objectContaining({
-            brandId: '',
-            typeId: '',
-            sizeId: '',
-            colorId: '',
-            finishId: '',
-            search: '',
-          })
-        );
-      });
+              await waitFor(() => {
+          expect(mockUsePaginatedBeadsQuery).toHaveBeenCalledWith(
+            expect.objectContaining({
+              search: undefined,
+              brand_id: undefined,
+              type_id: undefined,
+              size_id: undefined,
+              color_id: undefined,
+              finish_id: undefined,
+            })
+          );
+        });
     });
 
     it('displays filtered count indicator when filters are active', async () => {
@@ -321,18 +401,24 @@ describe('BeadsListPage', () => {
       const sortButton = screen.getByText('Sort by Name');
       fireEvent.click(sortButton);
 
-      await waitFor(() => {
-        expect(mockUseBeadsQuery).toHaveBeenCalledWith(
-          expect.objectContaining({
-            sortBy: 'name',
-            sortOrder: 'asc',
-          })
-        );
-      });
+              await waitFor(() => {
+          expect(mockUsePaginatedBeadsQuery).toHaveBeenCalledWith(
+            expect.objectContaining({
+              sort_by: 'name',
+              direction: 'asc',
+            })
+          );
+        });
     });
   });
 
   describe('Pagination', () => {
+    it('displays pagination component when data is available', () => {
+      renderWithRouter();
+
+      expect(screen.getByTestId('pagination')).toBeInTheDocument();
+    });
+
     it('resets to first page when filters change', async () => {
       renderWithRouter();
 
@@ -340,9 +426,9 @@ describe('BeadsListPage', () => {
       fireEvent.click(filterButton);
 
       await waitFor(() => {
-        expect(mockUseBeadsQuery).toHaveBeenCalledWith(
+        expect(mockUsePaginatedBeadsQuery).toHaveBeenCalledWith(
           expect.objectContaining({
-            page: '1',
+            per_page: 24,
           })
         );
       });

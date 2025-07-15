@@ -15,7 +15,7 @@ const BeadSearch: React.FC<BeadSearchProps> = ({
   debounceMs = 300
 }) => {
   const [inputValue, setInputValue] = useState(value);
-  const debounceRef = useRef<number>();
+  const debounceRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     setInputValue(value);
@@ -35,7 +35,7 @@ const BeadSearch: React.FC<BeadSearchProps> = ({
         clearTimeout(debounceRef.current);
       }
     };
-  }, [inputValue, onChange, debounceMs]);
+  }, [inputValue, debounceMs]); // Removed onChange from dependencies
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);

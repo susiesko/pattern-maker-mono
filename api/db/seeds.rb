@@ -56,17 +56,21 @@ if Rails.env.development? && defined?(User)
   end
 end
 
-# Explicitly list seed files in the order they should be executed
-seed_files = %w[bead_brands.rb bead_types.rb bead_sizes.rb bead_colors.rb bead_finishes.rb]
+# COMMENTED OUT: Original seed data preserved for future reference
+# The following seed files are commented out to avoid conflicts with the new detailed bead attributes.
+# If you need to restore the original seed data, uncomment these lines:
+#
+# # Explicitly list seed files in the order they should be executed
+# seed_files = %w[bead_brands.rb bead_types.rb bead_sizes.rb bead_colors.rb bead_finishes.rb]
+#
+# seed_files.each do |seed_file|
+#   filename = File.join(Rails.root, 'db', 'seeds', seed_file)
+#   if File.exist?(filename)
+#     puts "Loading seed file: #{File.basename(filename)}"
+#     load filename
+#   else
+#     puts "Warning: Seed file #{seed_file} not found."
+#   end
+# end
 
-seed_files.each do |seed_file|
-  filename = File.join(Rails.root, 'db', 'seeds', seed_file)
-  if File.exist?(filename)
-    puts "Loading seed file: #{File.basename(filename)}"
-    load filename
-  else
-    puts "Warning: Seed file #{seed_file} not found."
-  end
-end
-
-puts 'Seeding completed!'
+puts 'Seeding completed! (Original seed data commented out - see above for restoration instructions)'

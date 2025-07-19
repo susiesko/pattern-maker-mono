@@ -113,6 +113,15 @@ module Api
             :size_id,
             :type_id,
             :image,
+            # New detailed attributes
+            :shape,
+            :size,
+            :color_group,
+            :glass_group,
+            :finish,
+            :dyed,
+            :galvanized,
+            :plating,
           )
 
           # Handle metadata separately to avoid JSON equality comparison issues
@@ -186,6 +195,31 @@ module Api
               search_pattern, search_pattern
             )
           end
+
+          # Filter by new detailed attributes
+          shape_param = params[:shape]
+          filtered_beads = filtered_beads.by_shape(shape_param) if shape_param.present?
+
+          size_param = params[:size]
+          filtered_beads = filtered_beads.by_size(size_param) if size_param.present?
+
+          color_group_param = params[:color_group]
+          filtered_beads = filtered_beads.by_color_group(color_group_param) if color_group_param.present?
+
+          glass_group_param = params[:glass_group]
+          filtered_beads = filtered_beads.by_glass_group(glass_group_param) if glass_group_param.present?
+
+          finish_param = params[:finish]
+          filtered_beads = filtered_beads.by_finish(finish_param) if finish_param.present?
+
+          dyed_param = params[:dyed]
+          filtered_beads = filtered_beads.by_dyed(dyed_param) if dyed_param.present?
+
+          galvanized_param = params[:galvanized]
+          filtered_beads = filtered_beads.by_galvanized(galvanized_param) if galvanized_param.present?
+
+          plating_param = params[:plating]
+          filtered_beads = filtered_beads.by_plating(plating_param) if plating_param.present?
 
           filtered_beads
         end

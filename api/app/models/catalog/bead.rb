@@ -21,5 +21,25 @@ module Catalog
     # Validations
     validates :name, presence: true
     validates :brand_product_code, presence: true, uniqueness: true
+
+    # New detailed attribute validations (commented out for now)
+    # validates :shape, presence: true, inclusion: { in: %w[Delica Rocailles Round Cube Cylinder Triangle Square] }
+    # validates :size, presence: true, inclusion: { in: %w[11/0 8/0 6/0 15/0 12/0 10/0 8/0 6/0 5/0 4/0 3/0 2/0 1/0 1 2 3 4 5 6] }
+    # validates :color_group, presence: true, inclusion: { in: %w[red pink orange yellow green blue purple brown black white gray silver gold] }
+    # validates :glass_group, presence: true, inclusion: { in: %w[Opaque Transparent Translucent Iridescent Metallic] }
+    # validates :finish, presence: true, inclusion: { in: %w[Matte Glossy Pearl Metallic Iridescent] }
+    # validates :dyed, presence: true, inclusion: { in: %w[Dyed Non-dyed] }
+    # validates :galvanized, presence: true, inclusion: { in: %w[Galvanized Non-galvanized] }
+    # validates :plating, presence: true, inclusion: { in: %w[Plating Non-plating] }
+
+    # Scopes for filtering
+    scope :by_shape, ->(shape) { where(shape: shape) }
+    scope :by_size, ->(size) { where(size: size) }
+    scope :by_color_group, ->(color_group) { where(color_group: color_group) }
+    scope :by_glass_group, ->(glass_group) { where(glass_group: glass_group) }
+    scope :by_finish, ->(finish) { where(finish: finish) }
+    scope :by_dyed, ->(dyed) { where(dyed: dyed) }
+    scope :by_galvanized, ->(galvanized) { where(galvanized: galvanized) }
+    scope :by_plating, ->(plating) { where(plating: plating) }
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_12_044452) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_19_202124) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -82,6 +82,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_12_044452) do
     t.datetime "updated_at", null: false
     t.string "image"
     t.bigint "type_id", null: false
+    t.string "shape"
+    t.string "size"
+    t.string "color_group"
+    t.string "glass_group"
+    t.string "finish"
+    t.string "dyed"
+    t.string "galvanized"
+    t.string "plating"
     t.index ["brand_id"], name: "index_beads_on_brand_id"
     t.index ["brand_product_code"], name: "index_beads_on_brand_product_code", unique: true
     t.index ["size_id"], name: "index_beads_on_size_id"

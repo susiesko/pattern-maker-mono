@@ -1,0 +1,17 @@
+# Cursor AI Rules (Python-Specific)
+
+- Always follow PEP8 for style and naming.
+- Use snake_case for variables, functions, and methods; PascalCase for classes.
+- Use type hints for all new functions and methods.
+- Prefer Black for formatting and isort for imports.
+- Use pytest for all new tests unless the project is already using unittest.
+- Add or update tests for any code changes.
+- Use exceptions for error handling, not return codes.
+- Never catch broad Exception unless you re-raise or log it.
+- Don’t add new Python dependencies without user approval.
+- Refactor files > 300 lines into smaller modules.
+- Place business logic in modules, not in scripts.
+- Add docstrings to all public functions and classes.
+- Never hardcode secrets or config—use environment variables or config files.
+- Never overwrite .env or secrets files.
+- If a user requests a “gross” Python anti-pattern, warn them but do it if they insist

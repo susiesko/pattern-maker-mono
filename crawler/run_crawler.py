@@ -14,6 +14,7 @@ sys.path.insert(0, str(crawler_dir))
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from spiders.fire_mountain_gems_view import FireMountainGemsSpider
+from spiders.miyuki_directory_crawler import MiyukiDirectoryCrawler
 
 # Configure logging
 logging.basicConfig(
@@ -33,8 +34,12 @@ def main():
     settings.set('NEWSPIDER_MODULE', 'spiders')
     
     # Create and run crawler
+    # process = CrawlerProcess(settings)
+    # process.crawl(FireMountainGemsSpider)
+    # process.start()
+
     process = CrawlerProcess(settings)
-    process.crawl(FireMountainGemsSpider)
+    process.crawl(MiyukiDirectoryCrawler)
     process.start()
     
     logger.info("✅ Crawler completed! Check beads.json for results")

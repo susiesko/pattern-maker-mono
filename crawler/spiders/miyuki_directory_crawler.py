@@ -25,7 +25,7 @@ class MiyukiDirectoryCrawler(Spider):
         super().__init__(*args, **kwargs)
         self.beads_found = []
         self.total_count = 0
-        self.output_file = Path('beads.json')
+        self.output_file = Path('data/beads.json')
     
     def parse(self, response):
         """Parse the main Miyuki Delica page"""

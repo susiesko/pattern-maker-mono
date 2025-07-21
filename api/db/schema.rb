@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_19_205402) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_21_164850) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -48,6 +48,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_19_205402) do
     t.index ["plating"], name: "index_beads_on_plating"
   end
 
+  create_table "inventories", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "bead_id", null: false
+    t.decimal "quantity", precision: 10, scale: 3, default: "0.0", null: false
+    t.string "quantity_unit", default: "unit", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bead_id"], name: "index_inventories_on_bead_id"
+    t.index ["user_id", "bead_id"], name: "index_inventories_on_user_id_and_bead_id", unique: true
+    t.index ["user_id"], name: "index_inventories_on_user_id"
+  end
+
+  create_table "user_inventory_settings", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.json "field_definitions", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_inventory_settings_on_user_id", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "username", null: false
     t.string "email", null: false
@@ -63,4 +83,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_19_205402) do
   end
 
   add_foreign_key "beads", "bead_brands", column: "brand_id"
+  add_foreign_key "inventories", "beads"
+  add_foreign_key "inventories", "users"
+  add_foreign_key "user_inventory_settings", "users"
 end

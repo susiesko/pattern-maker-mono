@@ -7,6 +7,7 @@ module Catalog
 
     # Associations (only brand remains, others replaced by columns)
     belongs_to :brand, class_name: 'Catalog::BeadBrand', inverse_of: :beads
+    has_many :inventories, dependent: :destroy
 
     # Removed associations (tables deleted):
     # belongs_to :size, class_name: 'Catalog::BeadSize', inverse_of: :beads

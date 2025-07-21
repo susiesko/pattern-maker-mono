@@ -63,13 +63,13 @@ RSpec.describe UserInventorySetting, type: :model do
 
     before do
       create(:user_inventory_setting, user: first_user)
-      create(:user_inventory_setting, user: user2)
+      create(:user_inventory_setting, user: second_user)
     end
 
     describe '.by_user' do
       it 'returns settings for specific user' do
-        expect(UserInventorySetting.by_user(user1).count).to eq(1)
-        expect(UserInventorySetting.by_user(user2).count).to eq(1)
+        expect(UserInventorySetting.by_user(first_user).count).to eq(1)
+        expect(UserInventorySetting.by_user(second_user).count).to eq(1)
       end
     end
   end

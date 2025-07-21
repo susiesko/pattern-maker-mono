@@ -12,23 +12,15 @@ if ENV['RESET_DB'] == 'true' && !Rails.env.production?
 
   # Delete in proper order to respect foreign key constraints
   ActiveRecord::Base.transaction do
-    # Join tables first
-    Catalog::BeadColorLink.delete_all if defined?(Catalog::BeadColorLink)
-    Catalog::BeadFinishLink.delete_all if defined?(Catalog::BeadFinishLink)
-
     # Then main tables
     Catalog::Bead.delete_all
-    Catalog::BeadColor.delete_all
-    Catalog::BeadFinish.delete_all
-    Catalog::BeadSize.delete_all
-    Catalog::BeadType.delete_all
     Catalog::BeadBrand.delete_all
 
     # User accounts
     User.delete_all if defined?(User)
 
     # Reset sequences
-    tables = %w[beads bead_brands bead_colors bead_sizes bead_types bead_finishes users]
+    tables = %w[beads bead_brands users]
     tables.each do |table|
       begin
         ActiveRecord::Base.connection.execute("ALTER SEQUENCE #{table}_id_seq RESTART WITH 1;")

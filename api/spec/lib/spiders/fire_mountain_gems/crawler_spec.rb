@@ -68,7 +68,13 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
       # Test DBS- pattern
       html_dbs = sample_product_html.gsub('DB-123', 'DBS-456')
       doc_dbs = Nokogiri::HTML(html_dbs)
-      result_dbs = crawler.parse_product(doc_dbs.at_css('.product-tile'))
+      product_item_dbs = doc_dbs.at_css('.product-tile')
+
+      # Re-stub the helper methods for this item too
+      allow(product_item_dbs.at_css('.link')).to receive(:attribute).with(:href).and_return('/product/dbs-456-silver-lined-crystal')
+      allow(product_item_dbs.at_css('img.tile-image')).to receive(:attribute).with(:src).and_return('/images/dbs456.jpg')
+
+      result_dbs = crawler.parse_product(product_item_dbs)
       expect(result_dbs[:brand_product_code]).to eq('DBS-456')
       expect(result_dbs[:size]).to eq('15/0')
     end
@@ -84,7 +90,13 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
       test_cases.each do |code, expected_size|
         html = sample_product_html.gsub('DB-123', code)
         doc = Nokogiri::HTML(html)
-        result = crawler.parse_product(doc.at_css('.product-tile'))
+        product_item_test = doc.at_css('.product-tile')
+
+        # Stub the helper methods for each test item
+        allow(product_item_test.at_css('.link')).to receive(:attribute).with(:href).and_return("/product/#{code.downcase}-silver-lined-crystal")
+        allow(product_item_test.at_css('img.tile-image')).to receive(:attribute).with(:src).and_return("/images/#{code.downcase}.jpg")
+
+        result = crawler.parse_product(product_item_test)
         expect(result[:size]).to eq(expected_size)
       end
     end
@@ -92,8 +104,13 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
     it 'raises error for non-delica products' do
       non_delica_html = sample_product_html.gsub('DB-123', 'ABC-123')
       doc = Nokogiri::HTML(non_delica_html)
+      product_item_non_delica = doc.at_css('.product-tile')
 
-      result = crawler.parse_product(doc.at_css('.product-tile'))
+      # Stub the helper methods for non-delica item
+      allow(product_item_non_delica.at_css('.link')).to receive(:attribute).with(:href).and_return('/product/abc-123-silver-lined-crystal')
+      allow(product_item_non_delica.at_css('img.tile-image')).to receive(:attribute).with(:src).and_return('/images/abc123.jpg')
+
+      result = crawler.parse_product(product_item_non_delica)
       expect(result[:error]).to include('Skipping non-delicas')
     end
 

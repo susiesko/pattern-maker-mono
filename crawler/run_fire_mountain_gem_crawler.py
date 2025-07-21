@@ -34,15 +34,11 @@ def main():
     settings.set('NEWSPIDER_MODULE', 'spiders')
     
     # Create and run crawler
-    # process = CrawlerProcess(settings)
-    # process.crawl(FireMountainGemsSpider)
-    # process.start()
-
     process = CrawlerProcess(settings)
-    process.crawl(MiyukiDirectoryCrawler)
+    process.crawl(FireMountainGemsSpider)
     process.start()
     
-    logger.info("✅ Crawler completed! Check beads.json for results")
+    logger.info("✅ Crawler completed! Check miyuki_directory_beads.json for results")
 
 if __name__ == '__main__':
     main() 

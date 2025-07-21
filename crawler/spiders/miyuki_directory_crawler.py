@@ -28,7 +28,7 @@ class MiyukiDirectoryCrawler(Spider):
         
         self.total_count = 0
         self.duplicate_count = 0
-        self.output_file = Path('data/beads.json')
+        self.output_file = Path('data/miyuki_directory_beads.json')
         self.size_counts = {}
         self.existing_product_codes: Set[str] = set()
         self.pages_crawled = 0
@@ -38,6 +38,8 @@ class MiyukiDirectoryCrawler(Spider):
             self.max_pages = int(self.max_pages)
         else:
             self.max_pages = None
+
+        self.max_pages = 1
 
         # Open file for streaming JSON output
         self._json_file = None

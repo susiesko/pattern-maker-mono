@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Catalog
   class BeadCreatorService
     def self.create_from_spider_data(data) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
@@ -36,7 +38,7 @@ module Catalog
 
       bead
     rescue StandardError => e
-      puts "Error creating bead #{brand_name || ''} #{brand_product_code || ''}: #{e.message}"
+      Rails.logger.debug { "Error creating bead #{brand_name || ''} #{brand_product_code || ''}: #{e.message}" }
     end
 
     def self.get_color_family_name(color_name)

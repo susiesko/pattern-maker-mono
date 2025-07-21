@@ -4,14 +4,14 @@ require 'rails_helper'
 
 RSpec.describe User, type: :model do
   # Create a valid subject for testing
-  subject {
+  subject do
     User.new(
       username: 'testuser',
       email: 'test@example.com',
       password: 'password123',
-      password_confirmation: 'password123'
+      password_confirmation: 'password123',
     )
-  }
+  end
 
   # Validations
   describe 'validations' do
@@ -29,7 +29,7 @@ RSpec.describe User, type: :model do
           username: 'emailtest',
           email: 'valid@example.com',
           password: 'password123',
-          password_confirmation: 'password123'
+          password_confirmation: 'password123',
         )
         expect(user).to be_valid
       end
@@ -39,7 +39,7 @@ RSpec.describe User, type: :model do
           username: 'emailtest',
           email: 'invalid-email',
           password: 'password123',
-          password_confirmation: 'password123'
+          password_confirmation: 'password123',
         )
         expect(user).not_to be_valid
         expect(user.errors[:email]).to include('is invalid')
@@ -52,7 +52,7 @@ RSpec.describe User, type: :model do
           username: 'passtest',
           email: 'pass@example.com',
           password: 'password123',
-          password_confirmation: 'different123'
+          password_confirmation: 'different123',
         )
         expect(user).not_to be_valid
         expect(user.errors[:password_confirmation]).to include("doesn't match Password")
@@ -81,7 +81,7 @@ RSpec.describe User, type: :model do
           username: 'testuser2',
           email: 'TEST@EXAMPLE.COM',
           password: 'password123',
-          password_confirmation: 'password123'
+          password_confirmation: 'password123',
         )
         expect(user.email).to eq('test@example.com')
       end
@@ -91,7 +91,7 @@ RSpec.describe User, type: :model do
           username: 'testuser3',
           email: 'lowercase@example.com',
           password: 'password123',
-          password_confirmation: 'password123'
+          password_confirmation: 'password123',
         )
         expect(user.email).to eq('lowercase@example.com')
       end
@@ -123,7 +123,7 @@ RSpec.describe User, type: :model do
         username: 'regularuser',
         email: 'regular@example.com',
         password: 'password123',
-        password_confirmation: 'password123'
+        password_confirmation: 'password123',
       )
       expect(user.admin).to be_falsey
     end
@@ -134,7 +134,7 @@ RSpec.describe User, type: :model do
         email: 'admin@example.com',
         password: 'password123',
         password_confirmation: 'password123',
-        admin: true
+        admin: true,
       )
       expect(admin.admin).to be_truthy
     end

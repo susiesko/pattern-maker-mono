@@ -1,7 +1,11 @@
+# frozen_string_literal: true
+
+# TODO: remove this file when we remove the ruby crawler
+
 require 'rails_helper'
 
 RSpec.describe Spiders::FireMountainGems::Crawler do
-  let(:crawler) { described_class.new }
+  let(:crawler) { Spiders::FireMountainGems::Crawler.new }
 
   let(:sample_product_html) do
     <<~HTML
@@ -21,7 +25,7 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
 
   describe '#initialize' do
     it 'creates a new crawler instance' do
-      expect(crawler).to be_a(described_class)
+      expect(crawler).to be_a(Spiders::FireMountainGems::Crawler)
     end
 
     it 'initializes results as empty array' do
@@ -35,23 +39,14 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
 
     before do
       # Mock the helper methods directly on the crawler instance
-      allow(crawler).to receive(:all_colors).and_return(%w[Crystal Silver Blue])
-      allow(crawler).to receive(:all_finishes).and_return(['Silver Lined', 'Matte', 'Opaque'])
+      allow(crawler).to receive_messages(all_colors: %w[Crystal Silver Blue], all_finishes: ['Silver Lined', 'Matte', 'Opaque'])
 
       # Mock absolute_url method
       allow(crawler).to receive(:absolute_url) { |url| "https://www.firemountaingems.com#{url}" }
 
-      # Mock the attribute method to return strings instead of Nokogiri::XML::Attr objects
-      allow_any_instance_of(Nokogiri::XML::Element).to receive(:attribute) do |element, attr_name|
-        case attr_name
-        when :href, 'href'
-          element.get_attribute('href')
-        when :src, 'src'
-          element.get_attribute('src')
-        else
-          element.get_attribute(attr_name.to_s)
-        end
-      end
+      # Mock the specific elements that will be used
+      allow(product_item.at_css('.link')).to receive(:attribute).with(:href).and_return('/product/db-123-silver-lined-crystal')
+      allow(product_item.at_css('img.tile-image')).to receive(:attribute).with(:src).and_return('/images/db123.jpg')
     end
 
     it 'extracts product information correctly' do
@@ -113,8 +108,7 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
 
   describe '#extract_colors_from_name' do
     before do
-      allow(crawler).to receive(:all_colors).and_return(%w[Crystal Silver Blue])
-      allow(crawler).to receive(:all_finishes).and_return(['Silver Lined', 'Matte'])
+      allow(crawler).to receive_messages(all_colors: %w[Crystal Silver Blue], all_finishes: ['Silver Lined', 'Matte'])
     end
 
     it 'extracts known colors from product name' do
@@ -151,13 +145,13 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
   describe '.crawl_and_return_results' do
     it 'returns an array of results' do
       # Mock the run method to avoid actual HTTP requests
-      allow(described_class).to receive(:run) do |options, &block|
+      allow(Spiders::FireMountainGems::Crawler).to receive(:run) do |_options, &block|
         # Simulate yielding some test data
         block.call({ name: 'Test Bead', brand_product_code: 'DB-001' })
         block.call({ name: 'Test Bead 2', brand_product_code: 'DB-002' })
       end
 
-      results = described_class.crawl_and_return_results
+      results = Spiders::FireMountainGems::Crawler.crawl_and_return_results
 
       expect(results).to be_an(Array)
       expect(results.length).to eq(2)
@@ -176,27 +170,33 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
 
     describe '#all_colors' do
       it 'caches color names from database' do
-        color_relation = double('color_relation')
+        color_relation = double('color_relation') # rubocop:disable RSpec/VerifiedDoubles
         allow(Catalog::Bead).to receive(:distinct).and_return(color_relation)
         allow(color_relation).to receive(:pluck).with(:color_group).and_return(['Crystal', 'Silver'])
         allow(color_relation).to receive(:compact).and_return(['Crystal', 'Silver'])
 
         # Call twice to test caching
-        crawler.send(:all_colors)
-        crawler.send(:all_colors)
+        first_result = crawler.send(:all_colors)
+        second_result = crawler.send(:all_colors)
+
+        expect(first_result).to eq(['Crystal', 'Silver'])
+        expect(second_result).to eq(['Crystal', 'Silver'])
       end
     end
 
     describe '#all_finishes' do
       it 'caches finish names from database' do
-        finish_relation = double('finish_relation')
+        finish_relation = double('finish_relation') # rubocop:disable RSpec/VerifiedDoubles
         allow(Catalog::Bead).to receive(:distinct).and_return(finish_relation)
         allow(finish_relation).to receive(:pluck).with(:finish).and_return(['Silver Lined', 'Matte'])
         allow(finish_relation).to receive(:compact).and_return(['Silver Lined', 'Matte'])
 
         # Call twice to test caching
-        crawler.send(:all_finishes)
-        crawler.send(:all_finishes)
+        first_result = crawler.send(:all_finishes)
+        second_result = crawler.send(:all_finishes)
+
+        expect(first_result).to eq(['Silver Lined', 'Matte'])
+        expect(second_result).to eq(['Silver Lined', 'Matte'])
       end
     end
   end

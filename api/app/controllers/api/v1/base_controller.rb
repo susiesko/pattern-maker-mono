@@ -9,7 +9,7 @@ module Api
       def render_error(status, errors)
         render json: {
           success: false,
-          errors: errors
+          errors: errors,
         }, status: status
       end
     end

@@ -525,3 +525,5 @@ RSpec.describe 'Api::V1::Catalog::Beads', type: :request do
     end
   end
 end
+
+# rubocop:enable RSpec/MultipleExpectations

@@ -4,7 +4,7 @@ require 'vessel'
 
 module Spiders
   module FireMountainGems
-    class Crawler < Vessel::Cargo
+    class Crawler < Vessel::Cargo # rubocop:disable Metrics/ClassLength
       # Configure the spider
       domain 'firemountaingems.com'
       start_urls 'https://www.firemountaingems.com/beads/beads-by-brand/miyuki/'
@@ -31,7 +31,7 @@ module Spiders
       end
 
       # Parse the product listings on the current page
-      def parse_product_listings
+      def parse_product_listings # rubocop:disable Metrics/MethodLength
         # Extract all product items from the page
 
         begin
@@ -58,7 +58,7 @@ module Spiders
         yield request(url: next_page_url, method: :parse_product_listings)
       end
 
-      def parse_product(item)
+      def parse_product(item) # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
         # Extract product details
         product_link = item.at_css('.link')
         raise 'no product link found' unless product_link
@@ -95,7 +95,7 @@ module Spiders
 
         # Extract price if available
         price_element = item.at_css('.pricebooks .pricebook:first-child .price')
-        price = price_element ? price_element.text.strip : nil
+        price = price_element&.text&.strip
 
         # Try to extract finish information from the name
         finish_names = extract_finishes_from_name(product_name)
@@ -136,7 +136,7 @@ module Spiders
       end
 
       # Parse individual product pages for more detailed information
-      def parse_product_detail(data: {})
+      def parse_product_detail(data: {}) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
         log_message_quiet "Parsing product detail page: #{current_url}"
 
         # Extract detailed product information
@@ -181,7 +181,7 @@ module Spiders
           results << data
         end
 
-        puts "\nBeads found: #{results.length}"
+        Rails.logger.debug { "\nBeads found: #{results.length}" }
 
         results
       end
@@ -263,7 +263,7 @@ module Spiders
       end
 
       def log_message(message)
-        puts "Crawler: #{message}"
+        Rails.logger.debug { "Crawler: #{message}" }
       end
     end
   end

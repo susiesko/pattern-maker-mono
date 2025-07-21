@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe 'Api::V1::Passwords', type: :request do
   # Helper method to parse JSON response
   def json_response
-    JSON.parse(response.body)
+    response.parsed_body
   end
 
   describe 'PUT /api/v1/password' do
@@ -18,7 +18,7 @@ RSpec.describe 'Api::V1::Passwords', type: :request do
         {
           current_password: 'current_password',
           password: 'new_password123',
-          password_confirmation: 'new_password123'
+          password_confirmation: 'new_password123',
         }
       end
 
@@ -45,7 +45,7 @@ RSpec.describe 'Api::V1::Passwords', type: :request do
         {
           current_password: 'wrong_password',
           password: 'new_password123',
-          password_confirmation: 'new_password123'
+          password_confirmation: 'new_password123',
         }
       end
 
@@ -73,7 +73,7 @@ RSpec.describe 'Api::V1::Passwords', type: :request do
         {
           current_password: 'current_password',
           password: 'short',
-          password_confirmation: 'short'
+          password_confirmation: 'short',
         }
       end
 
@@ -101,7 +101,7 @@ RSpec.describe 'Api::V1::Passwords', type: :request do
         {
           current_password: 'current_password',
           password: 'new_password123',
-          password_confirmation: 'different_password'
+          password_confirmation: 'different_password',
         }
       end
 

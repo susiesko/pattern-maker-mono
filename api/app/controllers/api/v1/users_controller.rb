@@ -3,9 +3,9 @@
 module Api
   module V1
     class UsersController < ApplicationController
-      before_action :authenticate_user!, except: [ :create ]
-      before_action :set_user, only: [ :show, :update, :destroy ]
-      before_action :authorize_user!, only: [ :update, :destroy ]
+      before_action :authenticate_user!, except: [:create]
+      before_action :set_user, only: %i[show update destroy]
+      before_action :authorize_user!, only: [:update, :destroy]
 
       # GET /api/v1/users
       def index
@@ -20,7 +20,7 @@ module Api
       end
 
       # POST /api/v1/users
-      def create
+      def create # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
         # Log the parameters for debugging
         Rails.logger.info "Registration params: #{params.inspect}"
         Rails.logger.info "Registration params class: #{params.class}"
@@ -36,7 +36,7 @@ module Api
           render json: {
             message: 'User created successfully',
             token: token,
-            user: user_response(@user)
+            user: user_response(@user),
           }, status: :created
         else
           render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
@@ -64,7 +64,7 @@ module Api
         @user = User.find(params[:id])
       end
 
-      def user_params
+      def user_params # rubocop:disable Metrics/AbcSize,Metrics/MethodLength,Metrics/PerceivedComplexity
         # Log all parameters for debugging
         Rails.logger.info "User params method called with params: #{params.inspect}"
 
@@ -108,15 +108,15 @@ module Api
       end
 
       def authorize_user!
-        unless current_user.id == @user.id || current_user.admin?
-          raise ExceptionHandler::UnauthorizedRequest, 'You are not authorized to perform this action'
-        end
+        return if current_user.id == @user.id || current_user.admin?
+
+        raise ExceptionHandler::UnauthorizedRequest, 'You are not authorized to perform this action'
       end
 
       def authorize_admin!
-        unless current_user.admin?
-          raise ExceptionHandler::UnauthorizedRequest, 'Admin access required'
-        end
+        return if current_user.admin?
+
+        raise ExceptionHandler::UnauthorizedRequest, 'Admin access required'
       end
 
       def user_response(user)
@@ -127,7 +127,7 @@ module Api
           first_name: user.first_name,
           last_name: user.last_name,
           admin: user.admin,
-          created_at: user.created_at
+          created_at: user.created_at,
         }
       end
     end

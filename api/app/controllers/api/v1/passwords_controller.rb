@@ -14,7 +14,8 @@ module Api
           return render json: { error: 'Current password is incorrect' }, status: :unauthorized
         end
 
-        if user.update(password: password_params[:password], password_confirmation: password_params[:password_confirmation])
+        if user.update(password: password_params[:password],
+                       password_confirmation: password_params[:password_confirmation])
           render json: { message: 'Password updated successfully' }, status: :ok
         else
           render json: { errors: user.errors.full_messages }, status: :unprocessable_entity

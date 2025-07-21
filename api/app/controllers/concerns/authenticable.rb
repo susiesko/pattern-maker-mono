@@ -30,6 +30,6 @@ module Authenticable
   end
 
   def auth_token
-    @auth_token ||= request.headers['Authorization']&.split(' ')&.last
+    @auth_token ||= request.headers['Authorization']&.split&.last
   end
 end

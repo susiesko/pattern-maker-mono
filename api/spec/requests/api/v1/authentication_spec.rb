@@ -20,7 +20,7 @@ RSpec.describe 'Api::V1::Authentication', type: :request do
         expect(json_response['user']).to include(
           'id' => user.id,
           'username' => user.username,
-          'email' => user.email
+          'email' => user.email,
         )
       end
 
@@ -48,7 +48,7 @@ RSpec.describe 'Api::V1::Authentication', type: :request do
         expect(json_response['user']).to include(
           'id' => user.id,
           'username' => user.username,
-          'email' => user.email
+          'email' => user.email,
         )
       end
 
@@ -71,7 +71,7 @@ RSpec.describe 'Api::V1::Authentication', type: :request do
         expect(json_response['user']).to include(
           'id' => user.id,
           'username' => user.username,
-          'email' => user.email
+          'email' => user.email,
         )
       end
 
@@ -165,7 +165,7 @@ RSpec.describe 'Api::V1::Authentication', type: :request do
         expect(json_response['user']).to include(
           'id' => user.id,
           'username' => user.username,
-          'email' => user.email
+          'email' => user.email,
         )
       end
 
@@ -226,6 +226,6 @@ RSpec.describe 'Api::V1::Authentication', type: :request do
 
   # Helper method to parse JSON response
   def json_response
-    JSON.parse(response.body)
+    response.parsed_body
   end
 end

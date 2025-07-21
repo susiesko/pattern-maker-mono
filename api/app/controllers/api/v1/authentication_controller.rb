@@ -29,7 +29,7 @@ module Api
       def auth_params
         # Handle both nested and non-nested parameters
         if params[:authentication].present?
-          params.require(:authentication).permit(:email, :password)
+          params.expect(authentication: [:email, :password])
         else
           params.permit(:email, :password)
         end
@@ -43,7 +43,7 @@ module Api
           first_name: user.first_name,
           last_name: user.last_name,
           admin: user.admin,
-          created_at: user.created_at
+          created_at: user.created_at,
         }
       end
     end

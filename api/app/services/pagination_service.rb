@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PaginationService
   DEFAULT_LIMIT = 20
   MAX_LIMIT = 100
@@ -5,8 +7,7 @@ class PaginationService
   def initialize(relation, page: 1, per_page: DEFAULT_LIMIT)
     @relation = relation
     @page = [page.to_i, 1].max # Ensure page is at least 1
-    @per_page = [[per_page.to_i, 1].max, MAX_LIMIT].min # Ensure per_page is between 1 and MAX_LIMIT
-    @per_page = DEFAULT_LIMIT if @per_page <= 0
+    @per_page = per_page.to_i.clamp(1, MAX_LIMIT) # Ensure per_page is between 1 and MAX_LIMIT
   end
 
   def paginate

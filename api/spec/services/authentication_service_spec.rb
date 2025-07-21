@@ -52,16 +52,16 @@ RSpec.describe AuthenticationService do
     end
 
     it 'raises InvalidToken error when token is invalid' do
-      expect {
+      expect do
         AuthenticationService.decode('invalid.token')
-      }.to raise_error(ExceptionHandler::InvalidToken)
+      end.to raise_error(ExceptionHandler::InvalidToken)
     end
 
     it 'raises InvalidToken error when token is expired' do
       expired_token = AuthenticationService.encode({ user_id: user.id }, 1.minute.ago)
-      expect {
+      expect do
         AuthenticationService.decode(expired_token)
-      }.to raise_error(ExceptionHandler::InvalidToken)
+      end.to raise_error(ExceptionHandler::InvalidToken)
     end
   end
 

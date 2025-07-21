@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe PaginationService do
@@ -6,7 +8,7 @@ RSpec.describe PaginationService do
       it 'returns first 20 records and has_more true' do
         create_list(:bead, 25)
         relation = Catalog::Bead.order(id: :desc)
-        service = described_class.new(relation)
+        service = PaginationService.new(relation)
         result = service.paginate
 
         expect(result[:records].size).to eq(20)
@@ -17,18 +19,18 @@ RSpec.describe PaginationService do
     end
 
     context 'with custom page size' do
-      it 'returns records for the specified page' do
+      it 'returns records for the specified page' do # rubocop:disable RSpec/MultipleExpectations
         create_list(:bead, 15)
         relation = Catalog::Bead.order(id: :desc)
 
         # First page
-        first_page = described_class.new(relation, per_page: 5).paginate
+        first_page = PaginationService.new(relation, per_page: 5).paginate
         expect(first_page[:records].size).to eq(5)
         expect(first_page[:pagination][:has_more]).to be(true)
         expect(first_page[:pagination][:current_page]).to eq(1)
 
         # Second page
-        second_page = described_class.new(relation, page: 2, per_page: 5).paginate
+        second_page = PaginationService.new(relation, page: 2, per_page: 5).paginate
         expect(second_page[:records].size).to eq(5)
         expect(second_page[:pagination][:current_page]).to eq(2)
         expect(second_page[:pagination][:has_previous]).to be(true)
@@ -39,7 +41,7 @@ RSpec.describe PaginationService do
       it 'respects the per_page parameter' do
         create_list(:bead, 15)
         relation = Catalog::Bead.order(id: :desc)
-        service = described_class.new(relation, per_page: 10)
+        service = PaginationService.new(relation, per_page: 10)
         result = service.paginate
 
         expect(result[:records].size).to eq(10)
@@ -48,10 +50,10 @@ RSpec.describe PaginationService do
     end
 
     context 'with pagination info' do
-      it 'returns correct pagination metadata' do
+      it 'returns correct pagination metadata' do # rubocop:disable RSpec/MultipleExpectations
         create_list(:bead, 25)
         relation = Catalog::Bead.order(id: :desc)
-        service = described_class.new(relation, page: 2, per_page: 10)
+        service = PaginationService.new(relation, page: 2, per_page: 10)
         result = service.paginate
 
         expect(result[:pagination][:current_page]).to eq(2)

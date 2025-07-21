@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe 'Api::V1::Users', type: :request do
   # Helper method to parse JSON response
   def json_response
-    JSON.parse(response.body)
+    response.parsed_body
   end
 
   describe 'GET /api/v1/users' do
@@ -56,7 +56,7 @@ RSpec.describe 'Api::V1::Users', type: :request do
         password: 'password123',
         password_confirmation: 'password123',
         first_name: 'New',
-        last_name: 'User'
+        last_name: 'User',
       }
     end
 
@@ -79,7 +79,7 @@ RSpec.describe 'Api::V1::Users', type: :request do
           'username' => 'newuser',
           'email' => 'newuser@example.com',
           'first_name' => 'New',
-          'last_name' => 'User'
+          'last_name' => 'User',
         )
       end
 
@@ -112,7 +112,7 @@ RSpec.describe 'Api::V1::Users', type: :request do
           password: 'password123',
           confirmPassword: 'password123',
           first_name: 'Frontend',
-          last_name: 'User'
+          last_name: 'User',
         }
       end
 
@@ -137,7 +137,7 @@ RSpec.describe 'Api::V1::Users', type: :request do
           name: 'fromname',
           email: 'fromname@example.com',
           password: 'password123',
-          password_confirmation: 'password123'
+          password_confirmation: 'password123',
         }
 
         expect(response).to have_http_status(201)
@@ -149,7 +149,7 @@ RSpec.describe 'Api::V1::Users', type: :request do
           username: 'confirmuser',
           email: 'confirm@example.com',
           password: 'password123',
-          confirmPassword: 'password123'
+          confirmPassword: 'password123',
         }
 
         expect(response).to have_http_status(201)
@@ -172,7 +172,7 @@ RSpec.describe 'Api::V1::Users', type: :request do
         expect(json_response).to include(
           'id' => user.id,
           'username' => user.username,
-          'email' => user.email
+          'email' => user.email,
         )
       end
 

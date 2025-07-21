@@ -11,7 +11,7 @@ class AuthenticationService
 
   def self.decode(token)
     decoded = JWT.decode(token, secret_key, true, { algorithm: ALGORITHM })[0]
-    HashWithIndifferentAccess.new(decoded)
+    ActiveSupport::HashWithIndifferentAccess.new(decoded)
   rescue JWT::DecodeError, JWT::ExpiredSignature => e
     raise ExceptionHandler::InvalidToken, e.message
   end

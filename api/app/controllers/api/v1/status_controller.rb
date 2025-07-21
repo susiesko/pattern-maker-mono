@@ -8,7 +8,7 @@ module Api
           success: true,
           api_version: 'v1',
           status: 'online',
-          timestamp: Time.current
+          timestamp: Time.current,
         }
       end
     end

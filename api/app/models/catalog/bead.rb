@@ -22,8 +22,13 @@ module Catalog
 
     # New detailed attribute validations (commented out for now)
     # validates :shape, presence: true, inclusion: { in: %w[Delica Rocailles Round Cube Cylinder Triangle Square] }
-    # validates :size, presence: true, inclusion: { in: %w[11/0 8/0 6/0 15/0 12/0 10/0 8/0 6/0 5/0 4/0 3/0 2/0 1/0 1 2 3 4 5 6] }
-    # validates :color_group, presence: true, inclusion: { in: %w[red pink orange yellow green blue purple brown black white gray silver gold] }
+    # validates :size, presence: true, inclusion: {
+    #   in: %w[11/0 8/0 6/0 15/0 12/0 10/0 8/0 6/0 5/0 4/0 3/0 2/0 1/0 1 2 3 4 5 6]
+    # }
+
+    # validates :color_group, presence: true, inclusion: {
+    #   in: %w[red pink orange yellow green blue purple brown black white gray silver gold]
+    # }
     # validates :glass_group, presence: true, inclusion: { in: %w[Opaque Transparent Translucent Iridescent Metallic] }
     # validates :finish, presence: true, inclusion: { in: %w[Matte Glossy Pearl Metallic Iridescent] }
     # validates :dyed, presence: true, inclusion: { in: %w[Dyed Non-dyed] }

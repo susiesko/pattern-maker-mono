@@ -524,6 +524,64 @@ RSpec.describe 'Api::V1::Catalog::Beads', type: :request do
       end
     end
   end
+
+  describe 'GET /api/v1/catalog/beads/:id' do
+    let(:test_bead) { create(:bead) }
+
+    context 'when user is authenticated' do
+      let(:user) { create(:user) }
+      let(:token) { AuthenticationService.encode(user_id: user.id) }
+      let(:headers) { { 'Content-Type' => 'application/json', 'Authorization' => "Bearer #{token}" } }
+
+      context 'when user has inventory for the bead' do
+        let!(:inventory) { create(:inventory, user: user, bead: test_bead, quantity: 25.5, quantity_unit: 'grams') }
+
+        it 'includes user inventory information' do
+          get "/api/v1/catalog/beads/#{test_bead.id}", headers: headers
+
+          expect(response).to have_http_status(:ok)
+          json_response = response.parsed_body
+
+          expect(json_response['success']).to be true
+          bead_data = json_response['data']
+          expect(bead_data['user_inventory']).to be_present
+          expect(bead_data['user_inventory']['id']).to eq(inventory.id)
+          expect(bead_data['user_inventory']['quantity']).to eq('25.5')
+          expect(bead_data['user_inventory']['quantity_unit']).to eq('grams')
+        end
+      end
+
+      context 'when user has no inventory for the bead' do
+        it 'includes null user inventory' do
+          get "/api/v1/catalog/beads/#{test_bead.id}", headers: headers
+
+          expect(response).to have_http_status(:ok)
+          json_response = response.parsed_body
+
+          expect(json_response['success']).to be true
+          bead_data = json_response['data']
+          expect(bead_data['user_inventory']).to be_nil
+        end
+      end
+    end
+
+    context 'when user is not authenticated' do
+      it 'does not include user inventory information' do
+        get "/api/v1/catalog/beads/#{test_bead.id}"
+
+        expect(response).to have_http_status(:ok)
+        json_response = response.parsed_body
+
+        expect(json_response['success']).to be true
+        bead_data = json_response['data']
+        expect(bead_data).not_to have_key('user_inventory')
+      end
+    end
+  end
+
+  describe 'GET /api/v1/catalog/beads' do
+    # existing tests for index action go here...
+  end
 end
 
 # rubocop:enable RSpec/MultipleExpectations

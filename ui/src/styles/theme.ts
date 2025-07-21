@@ -8,6 +8,9 @@ const theme = {
     lightText: '#666',
     border: '#ddd',
     error: '#e53935',
+    success: '#28a745',
+    successDark: '#218838',
+    warning: '#ffc107',
     white: '#ffffff',
     colorTag: {
       bg: '#e3f2fd',

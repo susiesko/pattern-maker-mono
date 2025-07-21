@@ -6,6 +6,7 @@ import GlobalStyles from './styles/GlobalStyles';
 import Layout from './components/Layout';
 import WelcomePage from './components/WelcomePage';
 import BeadsListPage from './pages/BeadsListPage';
+import BeadDetailPage from './pages/BeadDetailPage';
 import AddBeadPage from './pages/AddBeadPage';
 import EditBeadPage from './pages/EditBeadPage';
 import ComingSoon from './components/ComingSoon';
@@ -54,11 +55,11 @@ function App() {
                 {/* Public routes within layout */}
                 <Route index element={<WelcomePage />} />
                 <Route path="beads" element={<BeadsListPage />} />
+                <Route path="beads/:id" element={<BeadDetailPage />} />
 
                 {/* Protected routes */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="beads/add" element={<AddBeadPage />} />
-                  <Route path="beads/:id" element={<ComingSoon title="Bead Details" />} />
                   <Route path="beads/edit/:id" element={<EditBeadPage />} />
                   <Route path="designer" element={<ComingSoon title="Pattern Designer" />} />
                   <Route path="projects" element={<ComingSoon title="My Projects" />} />

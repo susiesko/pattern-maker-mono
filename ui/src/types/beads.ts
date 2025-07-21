@@ -27,21 +27,22 @@ export interface BeadType {
 export interface Bead {
   id: number;
   name: string;
-  brand_product_code: string;
-  image?: string;
-  metadata?: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
+  brand_product_code?: string;
   brand: BeadBrand;
-  // Direct string attributes from the new schema
   shape?: string;
   size?: string;
   color_group?: string;
-  glass_group?: string;
   finish?: string;
+  glass_group?: string;
   dyed?: string;
   galvanized?: string;
   plating?: string;
+  image?: string;
+  user_inventory?: {
+    id: number;
+    quantity: number;
+    quantity_unit: string;
+  } | null;
 }
 
 // Filter option types for dropdowns
@@ -49,4 +50,17 @@ export interface FilterOption {
   value: string;
   label: string;
   count?: number;
+}
+
+// API Response types
+export interface PaginatedBeadsResponse {
+  data: Bead[];
+  pagination: {
+    current_page: number;
+    per_page: number;
+    total_count: number;
+    total_pages: number;
+    has_more: boolean;
+    has_previous: boolean;
+  };
 }

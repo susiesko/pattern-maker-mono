@@ -36,13 +36,24 @@ module Api
 
         # GET /api/v1/catalog/beads/:id
         def show
+          bead = ::Catalog::Bead.includes(:brand).find(params[:id])
+
+          # Include user's inventory info if authenticated
+          bead_data = bead.as_json(include: :brand)
+
+          # Only check for inventory if user is authenticated
+          begin
+            if current_user
+              inventory_item = current_user.inventories.find_by(bead_id: bead.id)
+              bead_data['user_inventory'] = inventory_item&.as_json(only: %i[id quantity quantity_unit])
+            end
+          rescue ExceptionHandler::InvalidToken, ExceptionHandler::MissingToken
+            # User not authenticated, continue without inventory info
+          end
+
           render json: {
             success: true,
-            data: @bead.as_json(
-              include: [
-                :brand,
-              ],
-            ),
+            data: bead_data,
           }
         end
 

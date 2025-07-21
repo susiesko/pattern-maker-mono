@@ -30,6 +30,9 @@ Rails.application.routes.draw do
         # This creates all CRUD routes: index, show, create, update, destroy
       end
       
+      # Check if user has a specific bead in inventory
+      get '/inventories/bead/:bead_id', to: 'inventories#show_by_bead'
+
       # User inventory settings - single resource per user
       get '/inventory-settings', to: 'user_inventory_settings#show'
       post '/inventory-settings', to: 'user_inventory_settings#create'

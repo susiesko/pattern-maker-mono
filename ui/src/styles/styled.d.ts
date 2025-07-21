@@ -11,6 +11,9 @@ declare module 'styled-components' {
       lightText: string;
       border: string;
       error: string;
+      success: string;
+      successDark: string;
+      warning: string;
       white: string;
       colorTag: {
         bg: string;

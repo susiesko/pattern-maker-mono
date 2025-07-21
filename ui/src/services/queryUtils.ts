@@ -96,3 +96,67 @@ export async function fetchPaginatedData<T>(
     throw error;
   }
 }
+
+/**
+ * Generic POST function for creating resources
+ *
+ * @param endpoint - API endpoint (without leading slash)
+ * @param data - Data to send in the request body
+ * @returns The response data
+ */
+export async function postData<T>(
+  endpoint: string,
+  data: any
+): Promise<T> {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+
+  try {
+    const response = await api.post<T>(`/${cleanEndpoint}`, data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error posting data to ${cleanEndpoint}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Generic PUT function for updating resources
+ *
+ * @param endpoint - API endpoint (without leading slash)
+ * @param data - Data to send in the request body
+ * @returns The response data
+ */
+export async function putData<T>(
+  endpoint: string,
+  data: any
+): Promise<T> {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+
+  try {
+    const response = await api.put<T>(`/${cleanEndpoint}`, data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error putting data to ${cleanEndpoint}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Generic DELETE function for removing resources
+ *
+ * @param endpoint - API endpoint (without leading slash)
+ * @returns The response data
+ */
+export async function deleteData<T = void>(
+  endpoint: string
+): Promise<T> {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+
+  try {
+    const response = await api.delete<T>(`/${cleanEndpoint}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting data from ${cleanEndpoint}:`, error);
+    throw error;
+  }
+}

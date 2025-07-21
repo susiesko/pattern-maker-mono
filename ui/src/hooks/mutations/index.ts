@@ -1,3 +1,8 @@
 // Barrel file for mutations
-export { default as useCreateBeadMutation } from './useCreateBeadMutation';
-export { default as useUpdateBeadMutation } from './useUpdateBeadMutation';
+export { useCreateBeadMutation } from './useCreateBeadMutation';
+export { useUpdateBeadMutation } from './useUpdateBeadMutation';
+export { 
+  useCreateInventoryMutation, 
+  useUpdateInventoryMutation, 
+  useDeleteInventoryMutation 
+} from './useInventoryMutations';

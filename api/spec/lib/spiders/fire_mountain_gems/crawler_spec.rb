@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Spiders::FireMountainGems::Crawler do
   let(:crawler) { described_class.new }
-  
+
   let(:sample_product_html) do
     <<~HTML
       <div class="product-tile">
@@ -34,13 +34,13 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
     let(:product_item) { doc.at_css('.product-tile') }
 
     before do
-      # Mock the database calls
-      allow(Catalog::BeadColor).to receive(:pluck).with(:name).and_return(['Crystal', 'Silver'])
-      allow(Catalog::BeadFinish).to receive(:pluck).with(:name).and_return(['Silver Lined', 'Matte'])
-      
+      # Mock the helper methods directly on the crawler instance
+      allow(crawler).to receive(:all_colors).and_return(%w[Crystal Silver Blue])
+      allow(crawler).to receive(:all_finishes).and_return(['Silver Lined', 'Matte', 'Opaque'])
+
       # Mock absolute_url method
-      allow(crawler).to receive(:absolute_url) { |url| "https://www.firemountaingems.com#{url.to_s}" }
-      
+      allow(crawler).to receive(:absolute_url) { |url| "https://www.firemountaingems.com#{url}" }
+
       # Mock the attribute method to return strings instead of Nokogiri::XML::Attr objects
       allow_any_instance_of(Nokogiri::XML::Element).to receive(:attribute) do |element, attr_name|
         case attr_name
@@ -56,20 +56,20 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
 
     it 'extracts product information correctly' do
       result = crawler.parse_product(product_item)
-      
+
       expect(result).to include(
         name: 'DB-123 Miyuki Delica Silver Lined Crystal',
         brand_product_code: 'DB-123',
         brand: 'Miyuki',
         type: 'Delica',
-        size: '11/0'
+        size: '11/0',
       )
     end
 
     it 'extracts product code correctly for different types' do
       # Test DB- pattern
       expect(crawler.parse_product(product_item)[:brand_product_code]).to eq('DB-123')
-      
+
       # Test DBS- pattern
       html_dbs = sample_product_html.gsub('DB-123', 'DBS-456')
       doc_dbs = Nokogiri::HTML(html_dbs)
@@ -83,9 +83,9 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
         ['DB-123', '11/0'],
         ['DBS-456', '15/0'],
         ['DBM-789', '10/0'],
-        ['DBL-012', '8/0']
+        ['DBL-012', '8/0'],
       ]
-      
+
       test_cases.each do |code, expected_size|
         html = sample_product_html.gsub('DB-123', code)
         doc = Nokogiri::HTML(html)
@@ -97,7 +97,7 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
     it 'raises error for non-delica products' do
       non_delica_html = sample_product_html.gsub('DB-123', 'ABC-123')
       doc = Nokogiri::HTML(non_delica_html)
-      
+
       result = crawler.parse_product(doc.at_css('.product-tile'))
       expect(result[:error]).to include('Skipping non-delicas')
     end
@@ -105,7 +105,7 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
     it 'handles missing product link gracefully' do
       html_no_link = sample_product_html.gsub('<a href="/product/db-123-silver-lined-crystal" class="link">', '<div>')
       doc = Nokogiri::HTML(html_no_link)
-      
+
       result = crawler.parse_product(doc.at_css('.product-tile'))
       expect(result[:error]).to include('no product link found')
     end
@@ -113,8 +113,8 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
 
   describe '#extract_colors_from_name' do
     before do
-      allow(Catalog::BeadColor).to receive(:pluck).with(:name).and_return(['Crystal', 'Silver', 'Blue'])
-      allow(Catalog::BeadFinish).to receive(:pluck).with(:name).and_return(['Silver Lined', 'Matte'])
+      allow(crawler).to receive(:all_colors).and_return(%w[Crystal Silver Blue])
+      allow(crawler).to receive(:all_finishes).and_return(['Silver Lined', 'Matte'])
     end
 
     it 'extracts known colors from product name' do
@@ -132,7 +132,7 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
 
   describe '#extract_finishes_from_name' do
     before do
-      allow(Catalog::BeadFinish).to receive(:pluck).with(:name).and_return(['Silver Lined', 'Matte', 'Opaque'])
+      allow(crawler).to receive(:all_finishes).and_return(['Silver Lined', 'Matte', 'Opaque'])
     end
 
     it 'extracts known finishes from product name' do
@@ -166,11 +166,6 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
   end
 
   describe 'helper methods' do
-    before do
-      allow(Catalog::BeadColor).to receive(:pluck).with(:name).and_return(['Crystal', 'Silver'])
-      allow(Catalog::BeadFinish).to receive(:pluck).with(:name).and_return(['Silver Lined', 'Matte'])
-    end
-
     describe '#get_clean_name' do
       it 'removes product code and brand prefix' do
         name = 'DB-123 Miyuki Delica Silver Lined Crystal'
@@ -181,8 +176,11 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
 
     describe '#all_colors' do
       it 'caches color names from database' do
-        expect(Catalog::BeadColor).to receive(:pluck).with(:name).once
-        
+        color_relation = double('color_relation')
+        allow(Catalog::Bead).to receive(:distinct).and_return(color_relation)
+        allow(color_relation).to receive(:pluck).with(:color_group).and_return(['Crystal', 'Silver'])
+        allow(color_relation).to receive(:compact).and_return(['Crystal', 'Silver'])
+
         # Call twice to test caching
         crawler.send(:all_colors)
         crawler.send(:all_colors)
@@ -191,8 +189,11 @@ RSpec.describe Spiders::FireMountainGems::Crawler do
 
     describe '#all_finishes' do
       it 'caches finish names from database' do
-        expect(Catalog::BeadFinish).to receive(:pluck).with(:name).once
-        
+        finish_relation = double('finish_relation')
+        allow(Catalog::Bead).to receive(:distinct).and_return(finish_relation)
+        allow(finish_relation).to receive(:pluck).with(:finish).and_return(['Silver Lined', 'Matte'])
+        allow(finish_relation).to receive(:compact).and_return(['Silver Lined', 'Matte'])
+
         # Call twice to test caching
         crawler.send(:all_finishes)
         crawler.send(:all_finishes)

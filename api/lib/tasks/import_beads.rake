@@ -15,7 +15,7 @@ namespace :beads do
     beads_data = JSON.parse(File.read(json_file))
     puts "Found #{beads_data.length} beads to import"
     
-    # Get reference data
+    # Get reference data with caching
     brands = BeadBrand.all.index_by(&:name)
     types = BeadType.all.index_by(&:name)
     sizes = BeadSize.all.index_by(&:name)
@@ -24,47 +24,89 @@ namespace :beads do
     miyuki_brand = brands['Miyuki'] || BeadBrand.create!(name: 'Miyuki')
     delica_type = types['Delica'] || BeadType.create!(name: 'Delica')
     
-    # Import beads
-    imported_count = 0
-    skipped_count = 0
+    # Prepare bulk data
+    bulk_beads = []
+    bulk_sizes = []
+    size_cache = sizes.dup
+    existing_codes = Set.new(Bead.joins(:brand).where(bead_brands: { name: 'Miyuki' }).pluck(:brand_product_code))
     
-    beads_data.each do |bead_data|
+    puts "Processing #{beads_data.length} beads for bulk import..."
+    
+    beads_data.each_with_index do |bead_data, index|
       begin
-        # Find or create size
-        size = sizes[bead_data['size']] || BeadSize.create!(name: bead_data['size'])
-        
-        # Create bead record
-        bead = Bead.find_or_initialize_by(
-          brand: miyuki_brand,
-          brand_product_code: bead_data['product_code']
-        )
-        
-        # Update attributes
-        bead.assign_attributes(
-          type: delica_type,
-          name: bead_data['name'],
-          size: size,
-          image: bead_data['image_url'],
-          has_swatch: false
-        )
-        
-        if bead.save
-          imported_count += 1
-          print "." if imported_count % 10 == 0
-        else
-          skipped_count += 1
-          puts "\nWARNING: Failed to save bead: #{bead_data['name']} - #{bead.errors.full_messages.join(', ')}"
+        # Skip if already exists
+        if existing_codes.include?(bead_data['product_code'])
+          next
         end
         
+        # Handle size creation/lookup
+        size_name = bead_data['size']
+        unless size_cache[size_name]
+          # Add to bulk sizes if not already queued
+          unless bulk_sizes.any? { |s| s[:name] == size_name }
+            bulk_sizes << { 
+              name: size_name, 
+              created_at: Time.current, 
+              updated_at: Time.current 
+            }
+          end
+          # Cache for future lookups
+          size_cache[size_name] = true
+        end
+        
+        # Prepare bead for bulk insert
+        bulk_beads << {
+          brand_id: miyuki_brand.id,
+          type_id: delica_type.id,
+          brand_product_code: bead_data['product_code'],
+          name: bead_data['name'],
+          image: bead_data['image_url'],
+          has_swatch: false,
+          created_at: Time.current,
+          updated_at: Time.current
+        }
+        
+        print "." if (index + 1) % 100 == 0
+        
       rescue => e
-        skipped_count += 1
-        puts "\nERROR: Error importing bead #{bead_data['name']}: #{e.message}"
+        puts "\nERROR: Error processing bead #{bead_data['name']}: #{e.message}"
       end
     end
     
-    puts "\n\nImport complete!"
-    puts "Imported: #{imported_count} beads"
-    puts "Skipped: #{skipped_count} beads"
+    puts "\nStarting bulk operations..."
+    
+    # Bulk insert sizes first
+    if bulk_sizes.any?
+      puts "Creating #{bulk_sizes.size} new sizes..."
+      BeadSize.insert_all(bulk_sizes, returning: false)
+      
+      # Refresh size cache after bulk insert
+      size_cache = BeadSize.all.index_by(&:name)
+    end
+    
+    # Add size_id to bulk beads
+    bulk_beads.each do |bead|
+      size_name = beads_data.find { |bd| bd['product_code'] == bead[:brand_product_code] }&.dig('size')
+      bead[:size_id] = size_cache[size_name]&.id if size_name
+    end
+    
+    # Bulk insert beads
+    if bulk_beads.any?
+      puts "Importing #{bulk_beads.size} beads..."
+      
+      # Use insert_all with batch processing for very large datasets
+      batch_size = 1000
+      bulk_beads.each_slice(batch_size).with_index do |batch, batch_index|
+        Bead.insert_all(batch, returning: false)
+        puts "Imported batch #{batch_index + 1}/#{(bulk_beads.size / batch_size.to_f).ceil}"
+      end
+    end
+    
+    puts "\nImport complete!"
+    puts "Processed: #{beads_data.length} beads"
+    puts "Imported: #{bulk_beads.size} new beads"
+    puts "Skipped: #{beads_data.length - bulk_beads.size} existing beads"
+    puts "Created: #{bulk_sizes.size} new sizes"
     puts "JSON file: #{json_file}"
   end
   

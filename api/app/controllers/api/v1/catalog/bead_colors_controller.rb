@@ -4,79 +4,51 @@ module Api
   module V1
     module Catalog
       class BeadColorsController < Api::V1::BaseController
-        before_action :set_color, only: [ :show, :update, :destroy ]
-
         # GET /api/v1/catalog/bead_colors
         def index
-          @colors = ::Catalog::BeadColor.all.order(:name)
+          # Get distinct color_groups from beads table
+          @colors = ::Catalog::Bead.distinct.pluck(:color_group).compact.sort
+
+          # Apply filters if provided
+          @colors = apply_filters(@colors)
 
           render json: {
             success: true,
-            data: @colors
+            data: @colors.map { |color| { id: color, name: color } },
           }
         end
 
         # GET /api/v1/catalog/bead_colors/:id
         def show
+          color_name = params[:id]
+          @color = { id: color_name, name: color_name }
+
           render json: {
             success: true,
-            data: @color.as_json(
-              include: [
-                { beads: { only: [ :id, :name ] } }
-              ]
-            )
+            data: @color,
           }
-        end
-
-        # POST /api/v1/catalog/bead_colors
-        def create
-          @color = ::Catalog::BeadColor.new(color_params)
-
-          if @color.save
-            render json: {
-              success: true,
-              data: @color,
-              message: 'Bead color created successfully'
-            }, status: :created
-          else
-            render_error(:unprocessable_entity, @color.errors.full_messages)
-          end
-        end
-
-        # PATCH/PUT /api/v1/catalog/bead_colors/:id
-        def update
-          if @color.update(color_params)
-            render json: {
-              success: true,
-              data: @color,
-              message: 'Bead color updated successfully'
-            }
-          else
-            render_error(:unprocessable_entity, @color.errors.full_messages)
-          end
-        end
-
-        # DELETE /api/v1/catalog/bead_colors/:id
-        def destroy
-          if @color.destroy
-            render json: {
-              success: true,
-              message: 'Bead color deleted successfully'
-            }
-          else
-            render_error(:unprocessable_entity, @color.errors.full_messages)
-          end
         end
 
         private
 
-        def set_color
-          @color = ::Catalog::BeadColor.find_by(id: params[:id])
-          render_error(:not_found, [ 'Bead color not found' ]) unless @color
-        end
+        def apply_filters(colors)
+          filtered_colors = colors
 
-        def color_params
-          params.require(:bead_color).permit(:name)
+          # Filter by brand if provided
+          brand_param = params[:brand_id] || params[:brandId] || params[:brand]
+          if brand_param.present?
+            brand_colors = ::Catalog::Bead.where(brand_id: brand_param)
+                                          .distinct.pluck(:color_group).compact
+            filtered_colors &= brand_colors
+          end
+
+          # Search by color name
+          search_param = params[:search]
+          if search_param.present?
+            filtered_colors = filtered_colors.select { |color| color.downcase.include?(search_param.downcase) }
+          end
+
+          filtered_colors
         end
       end
     end

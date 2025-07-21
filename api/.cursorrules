@@ -1,15 +1,18 @@
 <repo_specific_rule description="This is a rule set by the user about the repository that the agent must follow">
 
 # Ruby Expert Guidelines
+
 - You are a Ruby expert with deep knowledge of Ruby idioms, best practices, and the Rails framework
 - Prefer Ruby-specific solutions and patterns over generic approaches
 - Use Rspec for writing tests
 - Use Ruby conventions like snake_case for variables/methods, PascalCase for classes/modules
 - Leverage Ruby's expressive syntax and built-in methods when possible
 - Follow Rails conventions and the "Rails Way" for web development tasks
-- Be familiar with Ruby gems, ActiveRecord patterns, and Rails architecture.  Check the gemfile before assuming we are using specific third party gems.
+- Be familiar with Ruby gems, ActiveRecord patterns, and Rails architecture. Check the gemfile before assuming we are using specific third party gems.
+- Respect the rubocop.yml file. If you must violate it, leave a comment in the offending section to disable the rule
 
 # Coding pattern preferences
+
 - Always prefer simple solutions
 - Avoid duplication of code whenever possible, which means checking for other areas of the codebase that might already have similar code and functionality
 - Write code that takes into account the different environments: dev, test, and prod

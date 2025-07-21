@@ -4,15 +4,15 @@ module Api
   module V1
     module Catalog
       class BeadBrandsController < Api::V1::BaseController
-        before_action :set_brand, only: [ :show, :update, :destroy ]
+        before_action :set_brand, only: %i[show update destroy]
 
         # GET /api/v1/catalog/bead_brands
         def index
-          @brands = ::Catalog::BeadBrand.all.order(:name)
+          @brands = ::Catalog::BeadBrand.order(:name)
 
           render json: {
             success: true,
-            data: @brands
+            data: @brands,
           }
         end
 
@@ -20,11 +20,7 @@ module Api
         def show
           render json: {
             success: true,
-            data: @brand.as_json(
-              include: [
-                { bead_types: { only: [ :id, :name ] } }
-              ]
-            )
+            data: @brand,
           }
         end
 
@@ -36,7 +32,7 @@ module Api
             render json: {
               success: true,
               data: @brand,
-              message: 'Bead brand created successfully'
+              message: 'Bead brand created successfully',
             }, status: :created
           else
             render_error(:unprocessable_entity, @brand.errors.full_messages)
@@ -49,7 +45,7 @@ module Api
             render json: {
               success: true,
               data: @brand,
-              message: 'Bead brand updated successfully'
+              message: 'Bead brand updated successfully',
             }
           else
             render_error(:unprocessable_entity, @brand.errors.full_messages)
@@ -61,7 +57,7 @@ module Api
           if @brand.destroy
             render json: {
               success: true,
-              message: 'Bead brand deleted successfully'
+              message: 'Bead brand deleted successfully',
             }
           else
             render_error(:unprocessable_entity, @brand.errors.full_messages)
@@ -72,11 +68,11 @@ module Api
 
         def set_brand
           @brand = ::Catalog::BeadBrand.find_by(id: params[:id])
-          render_error(:not_found, [ 'Bead brand not found' ]) unless @brand
+          render_error(:not_found, ['Bead brand not found']) unless @brand
         end
 
         def brand_params
-          params.require(:bead_brand).permit(:name, :website)
+          params.expect(bead_brand: [:name, :website])
         end
       end
     end

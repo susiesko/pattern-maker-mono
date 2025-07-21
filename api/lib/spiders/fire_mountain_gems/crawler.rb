@@ -189,11 +189,11 @@ module Spiders
       private
 
       def all_colors
-        @all_colors ||= Catalog::BeadColor.pluck(:name)
+        @all_colors ||= Catalog::Bead.distinct.pluck(:color_group).compact
       end
 
       def all_finishes
-        @all_finishes ||= Catalog::BeadFinish.pluck(:name)
+        @all_finishes ||= Catalog::Bead.distinct.pluck(:finish).compact
       end
 
       def get_clean_name(name)

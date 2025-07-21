@@ -4,79 +4,51 @@ module Api
   module V1
     module Catalog
       class BeadFinishesController < Api::V1::BaseController
-        before_action :set_finish, only: [ :show, :update, :destroy ]
-
         # GET /api/v1/catalog/bead_finishes
         def index
-          @finishes = ::Catalog::BeadFinish.all.order(:name)
+          # Get distinct finishes from beads table
+          @finishes = ::Catalog::Bead.distinct.pluck(:finish).compact.sort
+
+          # Apply filters if provided
+          @finishes = apply_filters(@finishes)
 
           render json: {
             success: true,
-            data: @finishes
+            data: @finishes.map { |finish| { id: finish, name: finish } },
           }
         end
 
         # GET /api/v1/catalog/bead_finishes/:id
         def show
+          finish_name = params[:id]
+          @finish = { id: finish_name, name: finish_name }
+
           render json: {
             success: true,
-            data: @finish.as_json(
-              include: [
-                { beads: { only: [ :id, :name ] } }
-              ]
-            )
+            data: @finish,
           }
-        end
-
-        # POST /api/v1/catalog/bead_finishes
-        def create
-          @finish = ::Catalog::BeadFinish.new(finish_params)
-
-          if @finish.save
-            render json: {
-              success: true,
-              data: @finish,
-              message: 'Bead finish created successfully'
-            }, status: :created
-          else
-            render_error(:unprocessable_entity, @finish.errors.full_messages)
-          end
-        end
-
-        # PATCH/PUT /api/v1/catalog/bead_finishes/:id
-        def update
-          if @finish.update(finish_params)
-            render json: {
-              success: true,
-              data: @finish,
-              message: 'Bead finish updated successfully'
-            }
-          else
-            render_error(:unprocessable_entity, @finish.errors.full_messages)
-          end
-        end
-
-        # DELETE /api/v1/catalog/bead_finishes/:id
-        def destroy
-          if @finish.destroy
-            render json: {
-              success: true,
-              message: 'Bead finish deleted successfully'
-            }
-          else
-            render_error(:unprocessable_entity, @finish.errors.full_messages)
-          end
         end
 
         private
 
-        def set_finish
-          @finish = ::Catalog::BeadFinish.find_by(id: params[:id])
-          render_error(:not_found, [ 'Bead finish not found' ]) unless @finish
-        end
+        def apply_filters(finishes)
+          filtered_finishes = finishes
 
-        def finish_params
-          params.require(:bead_finish).permit(:name)
+          # Filter by brand if provided
+          brand_param = params[:brand_id] || params[:brandId] || params[:brand]
+          if brand_param.present?
+            brand_finishes = ::Catalog::Bead.where(brand_id: brand_param)
+                                            .distinct.pluck(:finish).compact
+            filtered_finishes &= brand_finishes
+          end
+
+          # Search by finish name
+          search_param = params[:search]
+          if search_param.present?
+            filtered_finishes = filtered_finishes.select { |finish| finish.downcase.include?(search_param.downcase) }
+          end
+
+          filtered_finishes
         end
       end
     end

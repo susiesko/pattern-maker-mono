@@ -7,42 +7,75 @@ FactoryBot.define do
     metadata { { material: 'glass', shape: 'round' } }
     image { 'bead.jpg' }
 
-    # Create associations inline to ensure they exist for both build and create
+    # Create brand association
     brand { association :bead_brand }
 
-    # For size and type, we need to ensure they use the same brand
-    size { association :bead_size, brand: brand }
-    type { association :bead_type, brand: brand }
+    # New detailed attributes with default values
+    shape { 'Delica' }
+    size { '11/0' }
+    color_group { 'red' }
+    glass_group { 'Opaque' }
+    finish { 'Matte' }
+    dyed { 'Dyed' }
+    galvanized { 'Non-galvanized' }
+    plating { 'Non-plating' }
 
-    trait :with_colors do
-      transient do
-        colors_count { 2 }
-      end
-
-      after(:create) do |bead, evaluator|
-        evaluator.colors_count.times do
-          color = create(:bead_color)
-          create(:bead_color_link, bead: bead, color: color)
-        end
-      end
+    trait :delica do
+      shape { 'Delica' }
+      size { '11/0' }
     end
 
-    trait :with_finishes do
-      transient do
-        finishes_count { 2 }
-      end
-
-      after(:create) do |bead, evaluator|
-        evaluator.finishes_count.times do
-          finish = create(:bead_finish)
-          create(:bead_finish_link, bead: bead, finish: finish)
-        end
-      end
+    trait :rocailles do
+      shape { 'Rocailles' }
+      size { '8/0' }
     end
 
-    factory :bead_with_colors_and_finishes do
-      with_colors
-      with_finishes
+    trait :red do
+      color_group { 'red' }
+    end
+
+    trait :blue do
+      color_group { 'blue' }
+    end
+
+    trait :opaque do
+      glass_group { 'Opaque' }
+    end
+
+    trait :transparent do
+      glass_group { 'Transparent' }
+    end
+
+    trait :matte do
+      finish { 'Matte' }
+    end
+
+    trait :glossy do
+      finish { 'Glossy' }
+    end
+
+    trait :dyed do
+      dyed { 'Dyed' }
+    end
+
+    trait :non_dyed do
+      dyed { 'Non-dyed' }
+    end
+
+    trait :galvanized do
+      galvanized { 'Galvanized' }
+    end
+
+    trait :non_galvanized do
+      galvanized { 'Non-galvanized' }
+    end
+
+    trait :plating do
+      plating { 'Plating' }
+    end
+
+    trait :non_plating do
+      plating { 'Non-plating' }
     end
   end
 end

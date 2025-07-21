@@ -13,10 +13,10 @@ export interface BeadFilters {
 
   // Filtering
   brand_id?: number;
-  type_id?: number;
-  size_id?: number;
-  color_id?: number;
-  finish_id?: number;
+  shape?: string;
+  size?: string;
+  color_group?: string;
+  finish?: string;
   search?: string;
 }
 

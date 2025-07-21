@@ -10,10 +10,10 @@ import Pagination from '../components/Pagination';
 interface BeadFilters {
   search: string;
   brandId: string;
-  typeId: string;
-  sizeId: string;
-  colorId: string;
-  finishId: string;
+  shape: string;
+  size: string;
+  color_group: string;
+  finish: string;
 }
 
 interface BeadSort {
@@ -28,10 +28,10 @@ const BeadsListPage: React.FC = () => {
   const [filters, setFilters] = useState<BeadFilters>({
     search: '',
     brandId: '',
-    typeId: '',
-    sizeId: '',
-    colorId: '',
-    finishId: '',
+    shape: '',
+    size: '',
+    color_group: '',
+    finish: '',
   });
 
   const [sort, setSort] = useState<BeadSort>({
@@ -50,10 +50,10 @@ const BeadsListPage: React.FC = () => {
     direction: sort.direction,
     search: filters.search || undefined,
     brand_id: filters.brandId ? parseInt(filters.brandId) : undefined,
-    type_id: filters.typeId ? parseInt(filters.typeId) : undefined,
-    size_id: filters.sizeId ? parseInt(filters.sizeId) : undefined,
-    color_id: filters.colorId ? parseInt(filters.colorId) : undefined,
-    finish_id: filters.finishId ? parseInt(filters.finishId) : undefined,
+    shape: filters.shape || undefined,
+    size: filters.size || undefined,
+    color_group: filters.color_group || undefined,
+    finish: filters.finish || undefined,
   }), [filters, sort, pageSize, currentPage]);
 
   // Data fetching
@@ -177,10 +177,10 @@ const BeadsListPage: React.FC = () => {
               () => handleFilterChange({
                 search: '',
                 brandId: '',
-                typeId: '',
-                sizeId: '',
-                colorId: '',
-                finishId: '',
+                shape: '',
+                size: '',
+                color_group: '',
+                finish: '',
               }) :
               handleAddBead
             }

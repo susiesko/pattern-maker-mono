@@ -52,12 +52,8 @@ describe('FinishFilterSelect', () => {
   });
 
   it('renders with finish options', () => {
-    // Mock data for the hook
-    const mockFinishes = [
-      { id: 1, name: 'Matte' },
-      { id: 2, name: 'Glossy' },
-      { id: 3, name: 'Metallic' },
-    ];
+    // Mock data for the hook - now returns string array
+    const mockFinishes = ['Matte', 'Glossy', 'Metallic'];
 
     (useBeadFinishesQuery as jest.Mock).mockReturnValue({
       data: mockFinishes,
@@ -78,11 +74,8 @@ describe('FinishFilterSelect', () => {
   });
 
   it('calls onChange when a finish is selected', () => {
-    // Mock data for the hook
-    const mockFinishes = [
-      { id: 1, name: 'Matte' },
-      { id: 2, name: 'Glossy' },
-    ];
+    // Mock data for the hook - now returns string array
+    const mockFinishes = ['Matte', 'Glossy'];
 
     (useBeadFinishesQuery as jest.Mock).mockReturnValue({
       data: mockFinishes,
@@ -95,29 +88,26 @@ describe('FinishFilterSelect', () => {
     const selectElement = screen.getByLabelText(/finish:/i);
 
     // Simulate selecting an option
-    fireEvent.change(selectElement, { target: { value: '1' } });
+    fireEvent.change(selectElement, { target: { value: 'Matte' } });
 
     // Verify that onChange was called
     expect(mockOnChange).toHaveBeenCalled();
   });
 
   it('displays correct selected value', () => {
-    // Mock data for the hook
-    const mockFinishes = [
-      { id: 1, name: 'Matte' },
-      { id: 2, name: 'Glossy' },
-    ];
+    // Mock data for the hook - now returns string array
+    const mockFinishes = ['Matte', 'Glossy'];
 
     (useBeadFinishesQuery as jest.Mock).mockReturnValue({
       data: mockFinishes,
       isLoading: false,
     });
 
-    render(<FinishFilterSelect onChange={mockOnChange} value="2" />, { wrapper: createWrapper() });
+    render(<FinishFilterSelect onChange={mockOnChange} value="Glossy" />, { wrapper: createWrapper() });
 
     // Check if the correct option is selected
     const selectElement = screen.getByLabelText(/finish:/i) as HTMLSelectElement;
-    expect(selectElement.value).toBe('2');
+    expect(selectElement.value).toBe('Glossy');
   });
 
   it('renders with empty data', () => {
@@ -140,7 +130,7 @@ describe('FinishFilterSelect', () => {
   it('handles disabled state correctly', () => {
     // Mock the hook to return loading state
     (useBeadFinishesQuery as jest.Mock).mockReturnValue({
-      data: [{ id: 1, name: 'Matte' }],
+      data: ['Matte'],
       isLoading: true,
     });
 

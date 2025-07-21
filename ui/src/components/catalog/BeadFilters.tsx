@@ -5,17 +5,17 @@ import { useBeadBrandsQuery, useBeadTypesQuery, useBeadSizesQuery, useBeadColors
 interface BeadFiltersProps {
   filters: {
     brandId: string;
-    typeId: string;
-    sizeId: string;
-    colorId: string;
-    finishId: string;
+    shape: string;
+    size: string;
+    color_group: string;
+    finish: string;
   };
   onChange: (filters: Partial<BeadFiltersProps['filters']>) => void;
 }
 
 const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
   const { data: brands } = useBeadBrandsQuery();
-  const { data: types } = useBeadTypesQuery();
+  const { data: shapes } = useBeadTypesQuery(); // Types query now returns shapes
   const { data: sizes } = useBeadSizesQuery();
   const { data: colors } = useBeadColorsQuery();
   const { data: finishes } = useBeadFinishesQuery();
@@ -27,10 +27,10 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
   const handleClearFilters = () => {
     onChange({
       brandId: '',
-      typeId: '',
-      sizeId: '',
-      colorId: '',
-      finishId: '',
+      shape: '',
+      size: '',
+      color_group: '',
+      finish: '',
     });
   };
 
@@ -56,16 +56,16 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
         </FilterGroup>
 
         <FilterGroup>
-          <FilterLabel htmlFor="type-filter">Type</FilterLabel>
+          <FilterLabel htmlFor="shape-filter">Shape</FilterLabel>
           <FilterSelect
-            id="type-filter"
-            value={filters.typeId}
-            onChange={(e) => handleFilterChange('typeId', e.target.value)}
+            id="shape-filter"
+            value={filters.shape}
+            onChange={(e) => handleFilterChange('shape', e.target.value)}
           >
-            <option value="">All Types</option>
-            {types?.map(type => (
-              <option key={type.id} value={type.id}>
-                {type.name}
+            <option value="">All Shapes</option>
+            {shapes?.map(shape => (
+              <option key={shape} value={shape}>
+                {shape}
               </option>
             ))}
           </FilterSelect>
@@ -75,13 +75,13 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
           <FilterLabel htmlFor="size-filter">Size</FilterLabel>
           <FilterSelect
             id="size-filter"
-            value={filters.sizeId}
-            onChange={(e) => handleFilterChange('sizeId', e.target.value)}
+            value={filters.size}
+            onChange={(e) => handleFilterChange('size', e.target.value)}
           >
             <option value="">All Sizes</option>
             {sizes?.map(size => (
-              <option key={size.id} value={size.id}>
-                {size.size}
+              <option key={size} value={size}>
+                {size}
               </option>
             ))}
           </FilterSelect>
@@ -91,13 +91,13 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
           <FilterLabel htmlFor="color-filter">Color</FilterLabel>
           <FilterSelect
             id="color-filter"
-            value={filters.colorId}
-            onChange={(e) => handleFilterChange('colorId', e.target.value)}
+            value={filters.color_group}
+            onChange={(e) => handleFilterChange('color_group', e.target.value)}
           >
             <option value="">All Colors</option>
             {colors?.map(color => (
-              <option key={color.id} value={color.id}>
-                {color.name}
+              <option key={color} value={color}>
+                {color}
               </option>
             ))}
           </FilterSelect>
@@ -107,13 +107,13 @@ const BeadFilters: React.FC<BeadFiltersProps> = ({ filters, onChange }) => {
           <FilterLabel htmlFor="finish-filter">Finish</FilterLabel>
           <FilterSelect
             id="finish-filter"
-            value={filters.finishId}
-            onChange={(e) => handleFilterChange('finishId', e.target.value)}
+            value={filters.finish}
+            onChange={(e) => handleFilterChange('finish', e.target.value)}
           >
             <option value="">All Finishes</option>
             {finishes?.map(finish => (
-              <option key={finish.id} value={finish.id}>
-                {finish.name}
+              <option key={finish} value={finish}>
+                {finish}
               </option>
             ))}
           </FilterSelect>

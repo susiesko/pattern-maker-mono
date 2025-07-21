@@ -33,25 +33,11 @@ describe('BeadForm', () => {
     { id: 2, name: 'Brand 2', website: 'https://brand2.com' },
   ];
 
-  const mockSizes = [
-    { id: 1, size: '11/0' },
-    { id: 2, size: '8/0' },
-  ];
-
-  const mockTypes = [
-    { id: 1, name: 'Seed' },
-    { id: 2, name: 'Delica' },
-  ];
-
-  const mockColors = [
-    { id: 1, name: 'Red' },
-    { id: 2, name: 'Blue' },
-  ];
-
-  const mockFinishes = [
-    { id: 1, name: 'Matte' },
-    { id: 2, name: 'Glossy' },
-  ];
+  // New schema - these are now string arrays
+  const mockShapes = ['Seed', 'Delica'];
+  const mockSizes = ['11/0', '8/0'];
+  const mockColors = ['Red', 'Blue'];
+  const mockFinishes = ['Matte', 'Glossy'];
 
   const mockBead = {
     id: 1,
@@ -62,10 +48,15 @@ describe('BeadForm', () => {
     created_at: '2023-01-01T00:00:00Z',
     updated_at: '2023-01-01T00:00:00Z',
     brand: { id: 1, name: 'Brand 1', website: 'https://brand1.com' },
-    size: { id: 1, size: '11/0' },
-    type: { id: 1, name: 'Seed' },
-    colors: [{ id: 1, name: 'Red' }],
-    finishes: [{ id: 1, name: 'Matte' }],
+    // New simplified schema - direct string attributes
+    shape: 'Seed',
+    size: '11/0',
+    color_group: 'Red',
+    glass_group: 'Opaque',
+    finish: 'Matte',
+    dyed: 'No',
+    galvanized: 'No',
+    plating: 'None',
   };
 
   const mockCreateMutation = {
@@ -93,7 +84,7 @@ describe('BeadForm', () => {
     });
 
     (useBeadTypesQuery as any).mockReturnValue({
-      data: mockTypes,
+      data: mockShapes,
       isLoading: false,
     });
 
@@ -178,8 +169,8 @@ describe('BeadForm', () => {
       expect(screen.getByText('Name is required')).toBeInTheDocument();
       expect(screen.getByText('Brand is required')).toBeInTheDocument();
       expect(screen.getByText('Size is required')).toBeInTheDocument();
-      expect(screen.getByText('Type is required')).toBeInTheDocument();
-      expect(screen.getByText('At least one color must be selected')).toBeInTheDocument();
+      expect(screen.getByText('Color group is required')).toBeInTheDocument();
+      expect(screen.getByText('Finish is required')).toBeInTheDocument();
     });
 
     // Ensure the mutation was not called
@@ -198,16 +189,9 @@ describe('BeadForm', () => {
     fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'New Bead' } });
     fireEvent.change(screen.getByLabelText(/Product Code/), { target: { value: 'NB-456' } });
     fireEvent.change(screen.getByLabelText(/Brand/), { target: { value: '1' } });
-    fireEvent.change(screen.getByLabelText(/Size/), { target: { value: '1' } });
-    fireEvent.change(screen.getByLabelText(/Type/), { target: { value: '1' } });
-
-    // Mock the multi-select behavior
-    const colorSelect = screen.getByLabelText(/Colors/);
-    Object.defineProperty(colorSelect, 'selectedOptions', {
-      writable: true,
-      value: [{ value: '1' }],
-    });
-    fireEvent.change(colorSelect, { target: { name: 'color_ids' } });
+    fireEvent.change(screen.getByLabelText(/Size/), { target: { value: '11/0' } });
+    fireEvent.change(screen.getByLabelText(/Color Group/), { target: { value: 'Red' } });
+    fireEvent.change(screen.getByLabelText(/Finish/), { target: { value: 'Matte' } });
 
     // Submit the form
     fireEvent.click(screen.getByText('Create Bead'));
@@ -219,10 +203,14 @@ describe('BeadForm', () => {
         brand_product_code: 'NB-456',
         image: undefined,
         brand_id: 1,
-        size_id: 1,
-        type_id: 1,
-        color_ids: [1],
-        finish_ids: [],
+        size: '11/0',
+        color_group: 'Red',
+        finish: 'Matte',
+        shape: undefined,
+        glass_group: undefined,
+        dyed: undefined,
+        galvanized: undefined,
+        plating: undefined,
       });
     });
   });
@@ -249,10 +237,14 @@ describe('BeadForm', () => {
         brand_product_code: 'TB-123',
         image: 'test.jpg',
         brand_id: 1,
-        size_id: 1,
-        type_id: 1,
-        color_ids: [1],
-        finish_ids: [1],
+        size: '11/0',
+        color_group: 'Red',
+        finish: 'Matte',
+        shape: 'Seed',
+        glass_group: 'Opaque',
+        dyed: 'No',
+        galvanized: 'No',
+        plating: 'None',
       });
     });
   });

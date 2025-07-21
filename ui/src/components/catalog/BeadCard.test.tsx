@@ -21,22 +21,15 @@ describe('BeadCard', () => {
       name: 'Test Brand',
       website: 'https://testbrand.com',
     },
-    size: {
-      id: 1,
-      size: '11/0',
-    },
-    type: {
-      id: 1,
-      name: 'Seed',
-    },
-    colors: [
-      { id: 1, name: 'Red' },
-      { id: 2, name: 'Blue' },
-    ],
-    finishes: [
-      { id: 1, name: 'Matte' },
-      { id: 2, name: 'Transparent' },
-    ],
+    // New simplified schema - direct string attributes
+    shape: 'Seed',
+    size: '11/0',
+    color_group: 'Red',
+    glass_group: 'Opaque',
+    finish: 'Matte',
+    dyed: 'No',
+    galvanized: 'No',
+    plating: 'None',
   };
 
   beforeEach(() => {
@@ -89,31 +82,29 @@ describe('BeadCard', () => {
     it('renders colors when available', () => {
       renderBeadCard();
 
-      expect(screen.getByText('Colors:')).toBeInTheDocument();
-      expect(screen.getByText('Red,')).toBeInTheDocument();
-      expect(screen.getByText('Blue')).toBeInTheDocument();
+      expect(screen.getByText('Color:')).toBeInTheDocument();
+      expect(screen.getByText('Red')).toBeInTheDocument();
     });
 
     it('renders finishes when available', () => {
       renderBeadCard();
 
-      expect(screen.getByText('Finishes:')).toBeInTheDocument();
-      expect(screen.getByText('Matte,')).toBeInTheDocument();
-      expect(screen.getByText('Transparent')).toBeInTheDocument();
+      expect(screen.getByText('Finish:')).toBeInTheDocument();
+      expect(screen.getByText('Matte')).toBeInTheDocument();
     });
 
     it('does not render colors section when no colors', () => {
-      const beadWithoutColors = { ...mockBead, colors: [] };
+      const beadWithoutColors = { ...mockBead, color_group: undefined };
       renderBeadCard(beadWithoutColors);
 
-      expect(screen.queryByText('Colors:')).not.toBeInTheDocument();
+      expect(screen.queryByText('Color:')).not.toBeInTheDocument();
     });
 
     it('does not render finishes section when no finishes', () => {
-      const beadWithoutFinishes = { ...mockBead, finishes: [] };
+      const beadWithoutFinishes = { ...mockBead, finish: undefined };
       renderBeadCard(beadWithoutFinishes);
 
-      expect(screen.queryByText('Finishes:')).not.toBeInTheDocument();
+      expect(screen.queryByText('Finish:')).not.toBeInTheDocument();
     });
 
     it('does not render product code when not provided', () => {
@@ -173,58 +164,46 @@ describe('BeadCard', () => {
   });
 
   describe('Multiple Colors and Finishes', () => {
-    it('formats multiple colors correctly with commas', () => {
-      const beadWithManyColors = {
+    it('displays single color correctly', () => {
+      const beadWithColor = {
         ...mockBead,
-        colors: [
-          { id: 1, name: 'Red' },
-          { id: 2, name: 'Blue' },
-          { id: 3, name: 'Green' },
-        ],
+        color_group: 'Red',
       };
-      renderBeadCard(beadWithManyColors);
+      renderBeadCard(beadWithColor);
 
-      expect(screen.getByText('Red,')).toBeInTheDocument();
-      expect(screen.getByText('Blue,')).toBeInTheDocument();
-      expect(screen.getByText('Green')).toBeInTheDocument(); // Last item without comma
+      expect(screen.getByText('Red')).toBeInTheDocument();
     });
 
-    it('formats multiple finishes correctly with commas', () => {
-      const beadWithManyFinishes = {
+    it('displays single finish correctly', () => {
+      const beadWithFinish = {
         ...mockBead,
-        finishes: [
-          { id: 1, name: 'Matte' },
-          { id: 2, name: 'Transparent' },
-          { id: 3, name: 'Shiny' },
-        ],
+        finish: 'Matte',
       };
-      renderBeadCard(beadWithManyFinishes);
+      renderBeadCard(beadWithFinish);
 
-      expect(screen.getByText('Matte,')).toBeInTheDocument();
-      expect(screen.getByText('Transparent,')).toBeInTheDocument();
-      expect(screen.getByText('Shiny')).toBeInTheDocument(); // Last item without comma
+      expect(screen.getByText('Matte')).toBeInTheDocument();
     });
 
     it('handles single color without comma', () => {
       const beadWithOneColor = {
         ...mockBead,
-        colors: [{ id: 1, name: 'Red' }],
+        color_group: 'Red',
       };
       renderBeadCard(beadWithOneColor);
 
       expect(screen.getByText('Red')).toBeInTheDocument();
-      expect(screen.queryByText('Red,')).not.toBeInTheDocument();
+      expect(screen.queryByText(',')).not.toBeInTheDocument();
     });
 
     it('handles single finish without comma', () => {
       const beadWithOneFinish = {
         ...mockBead,
-        finishes: [{ id: 1, name: 'Matte' }],
+        finish: 'Matte',
       };
       renderBeadCard(beadWithOneFinish);
 
       expect(screen.getByText('Matte')).toBeInTheDocument();
-      expect(screen.queryByText('Matte,')).not.toBeInTheDocument();
+      expect(screen.queryByText(',')).not.toBeInTheDocument();
     });
   });
 

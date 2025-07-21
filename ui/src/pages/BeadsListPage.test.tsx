@@ -373,10 +373,10 @@ describe('BeadsListPage', () => {
             expect.objectContaining({
               search: undefined,
               brand_id: undefined,
-              type_id: undefined,
-              size_id: undefined,
-              color_id: undefined,
-              finish_id: undefined,
+              shape: undefined,
+              size: undefined,
+              color_group: undefined,
+              finish: undefined,
             })
           );
         });

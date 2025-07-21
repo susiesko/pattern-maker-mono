@@ -38,33 +38,32 @@ const BeadCard: React.FC<BeadCardProps> = memo(({ bead, onEdit, onView }) => {
         <BrandName>{bead.brand.name}</BrandName>
 
         <TypeSizeInfo>
-          {bead.type.name} • {bead.size.size}
+          {bead.shape} • {bead.size}
         </TypeSizeInfo>
 
-        {bead.colors.length > 0 && (
+        {bead.color_group && (
           <TagsContainer>
-            <TagsLabel>Colors:</TagsLabel>
+            <TagsLabel>Color:</TagsLabel>
             <Tags>
-              {bead.colors.map((color, index) => (
-                <ColorTag key={color.id}>
-                  {color.name}
-                  {index < bead.colors.length - 1 && ', '}
-                </ColorTag>
-              ))}
+              <ColorTag>{bead.color_group}</ColorTag>
             </Tags>
           </TagsContainer>
         )}
 
-        {bead.finishes.length > 0 && (
+        {bead.finish && (
           <TagsContainer>
-            <TagsLabel>Finishes:</TagsLabel>
+            <TagsLabel>Finish:</TagsLabel>
             <Tags>
-              {bead.finishes.map((finish, index) => (
-                <FinishTag key={finish.id}>
-                  {finish.name}
-                  {index < bead.finishes.length - 1 && ', '}
-                </FinishTag>
-              ))}
+              <FinishTag>{bead.finish}</FinishTag>
+            </Tags>
+          </TagsContainer>
+        )}
+
+        {bead.glass_group && (
+          <TagsContainer>
+            <TagsLabel>Glass:</TagsLabel>
+            <Tags>
+              <GlassTag>{bead.glass_group}</GlassTag>
             </Tags>
           </TagsContainer>
         )}
@@ -184,6 +183,11 @@ const ColorTag = styled.span`
 `;
 
 const FinishTag = styled.span`
+  font-size: ${props => props.theme.fontSizes.small};
+  color: ${props => props.theme.colors.text};
+`;
+
+const GlassTag = styled.span`
   font-size: ${props => props.theme.fontSizes.small};
   color: ${props => props.theme.colors.text};
 `;

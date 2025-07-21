@@ -19,7 +19,6 @@ import {
   Label,
   Input,
   Select,
-  MultiSelect,
   ErrorMessage,
   HelperText,
   ButtonGroup,
@@ -42,7 +41,7 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
   // Fetch all the necessary data for dropdowns
   const { data: brands, isLoading: brandsLoading } = useBeadBrandsQuery();
   const { data: sizes, isLoading: sizesLoading } = useBeadSizesQuery();
-  const { data: types, isLoading: typesLoading } = useBeadTypesQuery();
+  const { data: shapes, isLoading: shapesLoading } = useBeadTypesQuery(); // Types query now returns shapes
   const { data: colors, isLoading: colorsLoading } = useBeadColorsQuery();
   const { data: finishes, isLoading: finishesLoading } = useBeadFinishesQuery();
 
@@ -50,10 +49,14 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
     name: '',
     brand_product_code: '',
     brand_id: '',
-    size_id: '',
-    type_id: '',
-    color_ids: [] as string[],
-    finish_ids: [] as string[],
+    shape: '',
+    size: '',
+    color_group: '',
+    finish: '',
+    glass_group: '',
+    dyed: '',
+    galvanized: '',
+    plating: '',
     image: '',
   });
 
@@ -67,10 +70,14 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
         name: bead.name,
         brand_product_code: bead.brand_product_code || '',
         brand_id: bead.brand.id.toString(),
-        size_id: bead.size.id.toString(),
-        type_id: bead.type.id.toString(),
-        color_ids: bead.colors.map(color => color.id.toString()),
-        finish_ids: bead.finishes.map(finish => finish.id.toString()),
+        shape: bead.shape || '',
+        size: bead.size || '',
+        color_group: bead.color_group || '',
+        finish: bead.finish || '',
+        glass_group: bead.glass_group || '',
+        dyed: bead.dyed || '',
+        galvanized: bead.galvanized || '',
+        plating: bead.plating || '',
         image: bead.image || '',
       });
     }
@@ -81,25 +88,6 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
     setFormData(prev => ({
       ...prev,
       [name]: value,
-    }));
-
-    // Clear error for this field if it exists
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
-
-  const handleMultiSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const { name } = e.target;
-    const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: selectedOptions,
     }));
 
     // Clear error for this field if it exists
@@ -124,16 +112,16 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
       newErrors.brand_id = 'Brand is required';
     }
 
-    if (!formData.size_id) {
-      newErrors.size_id = 'Size is required';
+    if (!formData.size) {
+      newErrors.size = 'Size is required';
     }
 
-    if (!formData.type_id) {
-      newErrors.type_id = 'Type is required';
+    if (!formData.color_group) {
+      newErrors.color_group = 'Color group is required';
     }
 
-    if (formData.color_ids.length === 0) {
-      newErrors.color_ids = 'At least one color must be selected';
+    if (!formData.finish) {
+      newErrors.finish = 'Finish is required';
     }
 
     setErrors(newErrors);
@@ -158,10 +146,14 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
           brand_product_code: formData.brand_product_code || undefined,
           image: formData.image || undefined,
           brand_id: parseInt(formData.brand_id),
-          size_id: parseInt(formData.size_id),
-          type_id: parseInt(formData.type_id),
-          color_ids: formData.color_ids.map(id => parseInt(id)),
-          finish_ids: formData.finish_ids.map(id => parseInt(id)),
+          shape: formData.shape || undefined,
+          size: formData.size || undefined,
+          color_group: formData.color_group || undefined,
+          finish: formData.finish || undefined,
+          glass_group: formData.glass_group || undefined,
+          dyed: formData.dyed || undefined,
+          galvanized: formData.galvanized || undefined,
+          plating: formData.plating || undefined,
         });
       } else {
         // Create new bead
@@ -170,10 +162,14 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
           brand_product_code: formData.brand_product_code || undefined,
           image: formData.image || undefined,
           brand_id: parseInt(formData.brand_id),
-          size_id: parseInt(formData.size_id),
-          type_id: parseInt(formData.type_id),
-          color_ids: formData.color_ids.map(id => parseInt(id)),
-          finish_ids: formData.finish_ids.map(id => parseInt(id)),
+          shape: formData.shape || undefined,
+          size: formData.size || undefined,
+          color_group: formData.color_group || undefined,
+          finish: formData.finish || undefined,
+          glass_group: formData.glass_group || undefined,
+          dyed: formData.dyed || undefined,
+          galvanized: formData.galvanized || undefined,
+          plating: formData.plating || undefined,
         });
       }
 
@@ -194,7 +190,7 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
   };
 
   const isLoading =
-    brandsLoading || sizesLoading || typesLoading || colorsLoading || finishesLoading;
+    brandsLoading || sizesLoading || shapesLoading || colorsLoading || finishesLoading;
 
   if (isLoading) {
     return <FormContainer>Loading form data...</FormContainer>;
@@ -263,43 +259,43 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
 
           <FormColumn>
             <FormGroup>
-              <Label htmlFor="size_id">Size *</Label>
+              <Label htmlFor="size">Size *</Label>
               <Select
-                id="size_id"
-                name="size_id"
-                value={formData.size_id}
+                id="size"
+                name="size"
+                value={formData.size}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
               >
                 <option value="">Select a size</option>
                 {sizes?.map(size => (
-                  <option key={size.id} value={size.id}>
-                    {size.size}
+                  <option key={size} value={size}>
+                    {size}
                   </option>
                 ))}
               </Select>
-              {errors.size_id && <ErrorMessage>{errors.size_id}</ErrorMessage>}
+              {errors.size && <ErrorMessage>{errors.size}</ErrorMessage>}
             </FormGroup>
           </FormColumn>
 
           <FormColumn>
             <FormGroup>
-              <Label htmlFor="type_id">Type *</Label>
+              <Label htmlFor="color_group">Color Group *</Label>
               <Select
-                id="type_id"
-                name="type_id"
-                value={formData.type_id}
+                id="color_group"
+                name="color_group"
+                value={formData.color_group}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
               >
-                <option value="">Select a type</option>
-                {types?.map(type => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
+                <option value="">Select a color group</option>
+                {colors?.map(color => (
+                  <option key={color} value={color}>
+                    {color}
                   </option>
                 ))}
               </Select>
-              {errors.type_id && <ErrorMessage>{errors.type_id}</ErrorMessage>}
+              {errors.color_group && <ErrorMessage>{errors.color_group}</ErrorMessage>}
             </FormGroup>
           </FormColumn>
         </FormRow>
@@ -307,44 +303,58 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
         <FormRow>
           <FormColumn>
             <FormGroup>
-              <Label htmlFor="color_ids">Colors *</Label>
-              <MultiSelect
-                id="color_ids"
-                name="color_ids"
-                multiple
-                value={formData.color_ids}
-                onChange={handleMultiSelectChange}
+              <Label htmlFor="finish">Finish *</Label>
+              <Select
+                id="finish"
+                name="finish"
+                value={formData.finish}
+                onChange={handleInputChange}
                 disabled={isSubmitting}
               >
-                {colors?.map(color => (
-                  <option key={color.id} value={color.id}>
-                    {color.name}
+                <option value="">Select a finish</option>
+                {finishes?.map(finish => (
+                  <option key={finish} value={finish}>
+                    {finish}
                   </option>
                 ))}
-              </MultiSelect>
-              <HelperText>Hold Ctrl/Cmd to select multiple colors</HelperText>
-              {errors.color_ids && <ErrorMessage>{errors.color_ids}</ErrorMessage>}
+              </Select>
+              {errors.finish && <ErrorMessage>{errors.finish}</ErrorMessage>}
             </FormGroup>
           </FormColumn>
 
           <FormColumn>
             <FormGroup>
-              <Label htmlFor="finish_ids">Finishes</Label>
-              <MultiSelect
-                id="finish_ids"
-                name="finish_ids"
-                multiple
-                value={formData.finish_ids}
-                onChange={handleMultiSelectChange}
+              <Label htmlFor="glass_group">Glass Group</Label>
+              <Select
+                id="glass_group"
+                name="glass_group"
+                value={formData.glass_group}
+                onChange={handleInputChange}
                 disabled={isSubmitting}
               >
-                {finishes?.map(finish => (
-                  <option key={finish.id} value={finish.id}>
-                    {finish.name}
-                  </option>
-                ))}
-              </MultiSelect>
-              <HelperText>Hold Ctrl/Cmd to select multiple finishes</HelperText>
+                <option value="">Select a glass group</option>
+                {/* Assuming glass groups are fetched or derived */}
+                <option value="A">Group A</option>
+                <option value="B">Group B</option>
+                <option value="C">Group C</option>
+              </Select>
+            </FormGroup>
+          </FormColumn>
+
+          <FormColumn>
+            <FormGroup>
+              <Label htmlFor="dyed">Dyed</Label>
+              <Select
+                id="dyed"
+                name="dyed"
+                value={formData.dyed}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+              >
+                <option value="">Select if dyed</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </Select>
             </FormGroup>
           </FormColumn>
         </FormRow>

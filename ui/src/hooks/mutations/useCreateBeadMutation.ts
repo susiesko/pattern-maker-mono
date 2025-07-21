@@ -9,10 +9,14 @@ interface CreateBeadData {
   brand_product_code?: string;
   image?: string;
   brand_id: number;
-  size_id: number;
-  type_id: number;
-  color_ids: number[];
-  finish_ids: number[];
+  shape?: string;
+  size?: string;
+  color_group?: string;
+  finish?: string;
+  glass_group?: string;
+  dyed?: string;
+  galvanized?: string;
+  plating?: string;
   metadata?: Record<string, unknown>;
 }
 

@@ -35,12 +35,8 @@ describe('ColorFilterSelect', () => {
   });
 
   it('renders with color options', () => {
-    // Mock data for the hook
-    const mockColors = [
-      { id: 1, name: 'Red' },
-      { id: 2, name: 'Blue' },
-      { id: 3, name: 'Green' },
-    ];
+    // Mock data for the hook - now returns string array
+    const mockColors = ['Red', 'Blue', 'Green'];
 
     (useBeadColorsQuery as jest.Mock).mockReturnValue({
       data: mockColors,
@@ -61,11 +57,8 @@ describe('ColorFilterSelect', () => {
   });
 
   it('calls onChange when a color is selected', () => {
-    // Mock data for the hook
-    const mockColors = [
-      { id: 1, name: 'Red' },
-      { id: 2, name: 'Blue' },
-    ];
+    // Mock data for the hook - now returns string array
+    const mockColors = ['Red', 'Blue'];
 
     (useBeadColorsQuery as jest.Mock).mockReturnValue({
       data: mockColors,
@@ -78,29 +71,26 @@ describe('ColorFilterSelect', () => {
     const selectElement = screen.getByLabelText(/color:/i);
 
     // Simulate selecting an option
-    fireEvent.change(selectElement, { target: { value: '1' } });
+    fireEvent.change(selectElement, { target: { value: 'Red' } });
 
     // Verify that onChange was called
     expect(mockOnChange).toHaveBeenCalled();
   });
 
   it('displays correct selected value', () => {
-    // Mock data for the hook
-    const mockColors = [
-      { id: 1, name: 'Red' },
-      { id: 2, name: 'Blue' },
-    ];
+    // Mock data for the hook - now returns string array
+    const mockColors = ['Red', 'Blue'];
 
     (useBeadColorsQuery as jest.Mock).mockReturnValue({
       data: mockColors,
       isLoading: false,
     });
 
-    render(<ColorFilterSelect onChange={mockOnChange} value="2" />, { wrapper });
+    render(<ColorFilterSelect onChange={mockOnChange} value="Blue" />, { wrapper });
 
     // Check if the correct option is selected
     const selectElement = screen.getByLabelText(/color:/i) as HTMLSelectElement;
-    expect(selectElement.value).toBe('2');
+    expect(selectElement.value).toBe('Blue');
   });
 
   it('renders with empty data', () => {
@@ -123,7 +113,7 @@ describe('ColorFilterSelect', () => {
   it('handles disabled state correctly', () => {
     // Mock the hook to return loading state
     (useBeadColorsQuery as jest.Mock).mockReturnValue({
-      data: [{ id: 1, name: 'Red' }],
+      data: ['Red'],
       isLoading: true,
     });
 

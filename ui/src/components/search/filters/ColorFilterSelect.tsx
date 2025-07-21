@@ -12,12 +12,12 @@ const ColorFilterSelect = ({ onChange, value }: ColorFilterSelectionProps) => {
 
   return (
     <>
-      <label htmlFor="color">Color:</label>
-      <StyledSelect name="color" id="color" onChange={onChange} value={value} disabled={isLoading}>
+      <label htmlFor="color_group">Color:</label>
+      <StyledSelect name="color_group" id="color_group" onChange={onChange} value={value} disabled={isLoading}>
         <option value="">All</option>
         {data?.map(color => (
-          <option key={color.id} value={color.id.toString()}>
-            {color.name}
+          <option key={color} value={color}>
+            {color}
           </option>
         ))}
       </StyledSelect>

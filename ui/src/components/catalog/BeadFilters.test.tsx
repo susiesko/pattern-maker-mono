@@ -31,10 +31,10 @@ describe('BeadFilters', () => {
 
   const defaultFilters = {
     brandId: '',
-    typeId: '',
-    sizeId: '',
-    colorId: '',
-    finishId: '',
+    shape: '',
+    size: '',
+    color_group: '',
+    finish: '',
   };
 
   const mockBrands = [
@@ -42,35 +42,46 @@ describe('BeadFilters', () => {
     { id: 2, name: 'Brand B', website: 'https://brand-b.com' },
   ];
 
-  const mockTypes = [
-    { id: 1, name: 'Seed' },
-    { id: 2, name: 'Delica' },
-  ];
-
-  const mockSizes = [
-    { id: 1, size: '11/0' },
-    { id: 2, size: '8/0' },
-  ];
-
-  const mockColors = [
-    { id: 1, name: 'Red' },
-    { id: 2, name: 'Blue' },
-  ];
-
-  const mockFinishes = [
-    { id: 1, name: 'Matte' },
-    { id: 2, name: 'Transparent' },
-  ];
+  // New schema - these are now string arrays
+  const mockShapes = ['Seed', 'Delica'];
+  const mockSizes = ['11/0', '8/0'];
+  const mockColors = ['Red', 'Blue'];
+  const mockFinishes = ['Matte', 'Transparent'];
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Set up default mock responses
-    mockUseBeadBrandsQuery.mockReturnValue({ data: mockBrands });
-    mockUseBeadTypesQuery.mockReturnValue({ data: mockTypes });
-    mockUseBeadSizesQuery.mockReturnValue({ data: mockSizes });
-    mockUseBeadColorsQuery.mockReturnValue({ data: mockColors });
-    mockUseBeadFinishesQuery.mockReturnValue({ data: mockFinishes });
+    // Set up default mock responses with proper query result structure
+    mockUseBeadBrandsQuery.mockReturnValue({ 
+      data: mockBrands,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+    mockUseBeadTypesQuery.mockReturnValue({ 
+      data: mockShapes,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+    mockUseBeadSizesQuery.mockReturnValue({ 
+      data: mockSizes,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+    mockUseBeadColorsQuery.mockReturnValue({ 
+      data: mockColors,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+    mockUseBeadFinishesQuery.mockReturnValue({ 
+      data: mockFinishes,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
   });
 
   const renderBeadFilters = (filters = defaultFilters) => {
@@ -88,7 +99,7 @@ describe('BeadFilters', () => {
       renderBeadFilters();
 
       expect(screen.getByLabelText('Brand')).toBeInTheDocument();
-      expect(screen.getByLabelText('Type')).toBeInTheDocument();
+      expect(screen.getByLabelText('Shape')).toBeInTheDocument();
       expect(screen.getByLabelText('Size')).toBeInTheDocument();
       expect(screen.getByLabelText('Color')).toBeInTheDocument();
       expect(screen.getByLabelText('Finish')).toBeInTheDocument();
@@ -103,13 +114,13 @@ describe('BeadFilters', () => {
       expect(brandSelect).toContainHTML('<option value="2">Brand B</option>');
     });
 
-    it('renders type options correctly', () => {
+    it('renders shape options correctly', () => {
       renderBeadFilters();
 
-      const typeSelect = screen.getByLabelText('Type');
-      expect(typeSelect).toContainHTML('<option value="">All Types</option>');
-      expect(typeSelect).toContainHTML('<option value="1">Seed</option>');
-      expect(typeSelect).toContainHTML('<option value="2">Delica</option>');
+      const shapeSelect = screen.getByLabelText('Shape');
+      expect(shapeSelect).toContainHTML('<option value="">All Shapes</option>');
+      expect(shapeSelect).toContainHTML('<option value="Seed">Seed</option>');
+      expect(shapeSelect).toContainHTML('<option value="Delica">Delica</option>');
     });
 
     it('renders size options correctly', () => {
@@ -117,8 +128,8 @@ describe('BeadFilters', () => {
 
       const sizeSelect = screen.getByLabelText('Size');
       expect(sizeSelect).toContainHTML('<option value="">All Sizes</option>');
-      expect(sizeSelect).toContainHTML('<option value="1">11/0</option>');
-      expect(sizeSelect).toContainHTML('<option value="2">8/0</option>');
+      expect(sizeSelect).toContainHTML('<option value="11/0">11/0</option>');
+      expect(sizeSelect).toContainHTML('<option value="8/0">8/0</option>');
     });
 
     it('renders color options correctly', () => {
@@ -126,8 +137,8 @@ describe('BeadFilters', () => {
 
       const colorSelect = screen.getByLabelText('Color');
       expect(colorSelect).toContainHTML('<option value="">All Colors</option>');
-      expect(colorSelect).toContainHTML('<option value="1">Red</option>');
-      expect(colorSelect).toContainHTML('<option value="2">Blue</option>');
+      expect(colorSelect).toContainHTML('<option value="Red">Red</option>');
+      expect(colorSelect).toContainHTML('<option value="Blue">Blue</option>');
     });
 
     it('renders finish options correctly', () => {
@@ -135,8 +146,8 @@ describe('BeadFilters', () => {
 
       const finishSelect = screen.getByLabelText('Finish');
       expect(finishSelect).toContainHTML('<option value="">All Finishes</option>');
-      expect(finishSelect).toContainHTML('<option value="1">Matte</option>');
-      expect(finishSelect).toContainHTML('<option value="2">Transparent</option>');
+      expect(finishSelect).toContainHTML('<option value="Matte">Matte</option>');
+      expect(finishSelect).toContainHTML('<option value="Transparent">Transparent</option>');
     });
   });
 
@@ -150,40 +161,40 @@ describe('BeadFilters', () => {
       expect(mockOnChange).toHaveBeenCalledWith({ brandId: '1' });
     });
 
-    it('calls onChange when type filter changes', () => {
+    it('calls onChange when shape filter changes', () => {
       renderBeadFilters();
 
-      const typeSelect = screen.getByLabelText('Type');
-      fireEvent.change(typeSelect, { target: { value: '2' } });
+      const shapeSelect = screen.getByLabelText('Shape');
+      fireEvent.change(shapeSelect, { target: { value: 'Delica' } });
 
-      expect(mockOnChange).toHaveBeenCalledWith({ typeId: '2' });
+      expect(mockOnChange).toHaveBeenCalledWith({ shape: 'Delica' });
     });
 
     it('calls onChange when size filter changes', () => {
       renderBeadFilters();
 
       const sizeSelect = screen.getByLabelText('Size');
-      fireEvent.change(sizeSelect, { target: { value: '1' } });
+      fireEvent.change(sizeSelect, { target: { value: '11/0' } });
 
-      expect(mockOnChange).toHaveBeenCalledWith({ sizeId: '1' });
+      expect(mockOnChange).toHaveBeenCalledWith({ size: '11/0' });
     });
 
     it('calls onChange when color filter changes', () => {
       renderBeadFilters();
 
       const colorSelect = screen.getByLabelText('Color');
-      fireEvent.change(colorSelect, { target: { value: '2' } });
+      fireEvent.change(colorSelect, { target: { value: 'Blue' } });
 
-      expect(mockOnChange).toHaveBeenCalledWith({ colorId: '2' });
+      expect(mockOnChange).toHaveBeenCalledWith({ color_group: 'Blue' });
     });
 
     it('calls onChange when finish filter changes', () => {
       renderBeadFilters();
 
       const finishSelect = screen.getByLabelText('Finish');
-      fireEvent.change(finishSelect, { target: { value: '1' } });
+      fireEvent.change(finishSelect, { target: { value: 'Matte' } });
 
-      expect(mockOnChange).toHaveBeenCalledWith({ finishId: '1' });
+      expect(mockOnChange).toHaveBeenCalledWith({ finish: 'Matte' });
     });
   });
 
@@ -196,36 +207,36 @@ describe('BeadFilters', () => {
       expect(brandSelect).toHaveValue('1');
     });
 
-    it('displays selected type value', () => {
-      const filtersWithType = { ...defaultFilters, typeId: '2' };
-      renderBeadFilters(filtersWithType);
+    it('displays selected shape value', () => {
+      const filtersWithShape = { ...defaultFilters, shape: 'Delica' };
+      renderBeadFilters(filtersWithShape);
 
-      const typeSelect = screen.getByLabelText('Type');
-      expect(typeSelect).toHaveValue('2');
+      const shapeSelect = screen.getByLabelText('Shape');
+      expect(shapeSelect).toHaveValue('Delica');
     });
 
     it('displays selected size value', () => {
-      const filtersWithSize = { ...defaultFilters, sizeId: '1' };
+      const filtersWithSize = { ...defaultFilters, size: '11/0' };
       renderBeadFilters(filtersWithSize);
 
       const sizeSelect = screen.getByLabelText('Size');
-      expect(sizeSelect).toHaveValue('1');
+      expect(sizeSelect).toHaveValue('11/0');
     });
 
     it('displays selected color value', () => {
-      const filtersWithColor = { ...defaultFilters, colorId: '2' };
+      const filtersWithColor = { ...defaultFilters, color_group: 'Blue' };
       renderBeadFilters(filtersWithColor);
 
       const colorSelect = screen.getByLabelText('Color');
-      expect(colorSelect).toHaveValue('2');
+      expect(colorSelect).toHaveValue('Blue');
     });
 
     it('displays selected finish value', () => {
-      const filtersWithFinish = { ...defaultFilters, finishId: '1' };
+      const filtersWithFinish = { ...defaultFilters, finish: 'Matte' };
       renderBeadFilters(filtersWithFinish);
 
       const finishSelect = screen.getByLabelText('Finish');
-      expect(finishSelect).toHaveValue('1');
+      expect(finishSelect).toHaveValue('Matte');
     });
   });
 
@@ -246,7 +257,7 @@ describe('BeadFilters', () => {
     });
 
     it('calls onChange with empty filters when clear button is clicked', () => {
-      const activeFilters = { ...defaultFilters, brandId: '1', colorId: '2' };
+      const activeFilters = { ...defaultFilters, brandId: '1', color_group: 'Blue' };
       renderBeadFilters(activeFilters);
 
       const clearButton = screen.getByText('Clear All Filters');
@@ -254,20 +265,20 @@ describe('BeadFilters', () => {
 
       expect(mockOnChange).toHaveBeenCalledWith({
         brandId: '',
-        typeId: '',
-        sizeId: '',
-        colorId: '',
-        finishId: '',
+        shape: '',
+        size: '',
+        color_group: '',
+        finish: '',
       });
     });
 
     it('shows clear button when any filter is active', () => {
       const testCases = [
-        { brandId: '1', typeId: '', sizeId: '', colorId: '', finishId: '' },
-        { brandId: '', typeId: '1', sizeId: '', colorId: '', finishId: '' },
-        { brandId: '', typeId: '', sizeId: '1', colorId: '', finishId: '' },
-        { brandId: '', typeId: '', sizeId: '', colorId: '1', finishId: '' },
-        { brandId: '', typeId: '', sizeId: '', colorId: '', finishId: '1' },
+        { brandId: '1', shape: '', size: '', color_group: '', finish: '' },
+        { brandId: '', shape: 'Seed', size: '', color_group: '', finish: '' },
+        { brandId: '', shape: '', size: '11/0', color_group: '', finish: '' },
+        { brandId: '', shape: '', size: '', color_group: 'Red', finish: '' },
+        { brandId: '', shape: '', size: '', color_group: '', finish: 'Matte' },
       ];
 
       testCases.forEach((filters) => {
@@ -283,28 +294,78 @@ describe('BeadFilters', () => {
 
   describe('Loading States', () => {
     it('handles undefined data gracefully', () => {
-      mockUseBeadBrandsQuery.mockReturnValue({ data: undefined });
-      mockUseBeadTypesQuery.mockReturnValue({ data: undefined });
-      mockUseBeadSizesQuery.mockReturnValue({ data: undefined });
-      mockUseBeadColorsQuery.mockReturnValue({ data: undefined });
-      mockUseBeadFinishesQuery.mockReturnValue({ data: undefined });
+      mockUseBeadBrandsQuery.mockReturnValue({ 
+        data: undefined,
+        isLoading: true,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadTypesQuery.mockReturnValue({ 
+        data: undefined,
+        isLoading: true,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadSizesQuery.mockReturnValue({ 
+        data: undefined,
+        isLoading: true,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadColorsQuery.mockReturnValue({ 
+        data: undefined,
+        isLoading: true,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadFinishesQuery.mockReturnValue({ 
+        data: undefined,
+        isLoading: true,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
 
       renderBeadFilters();
 
       // Should still render the dropdowns with just the "All" options
       expect(screen.getByLabelText('Brand')).toBeInTheDocument();
-      expect(screen.getByLabelText('Type')).toBeInTheDocument();
+      expect(screen.getByLabelText('Shape')).toBeInTheDocument();
       expect(screen.getByLabelText('Size')).toBeInTheDocument();
       expect(screen.getByLabelText('Color')).toBeInTheDocument();
       expect(screen.getByLabelText('Finish')).toBeInTheDocument();
     });
 
     it('handles empty data arrays gracefully', () => {
-      mockUseBeadBrandsQuery.mockReturnValue({ data: [] });
-      mockUseBeadTypesQuery.mockReturnValue({ data: [] });
-      mockUseBeadSizesQuery.mockReturnValue({ data: [] });
-      mockUseBeadColorsQuery.mockReturnValue({ data: [] });
-      mockUseBeadFinishesQuery.mockReturnValue({ data: [] });
+      mockUseBeadBrandsQuery.mockReturnValue({ 
+        data: [],
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadTypesQuery.mockReturnValue({ 
+        data: [],
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadSizesQuery.mockReturnValue({ 
+        data: [],
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadColorsQuery.mockReturnValue({ 
+        data: [],
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadFinishesQuery.mockReturnValue({ 
+        data: [],
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
 
       renderBeadFilters();
 
@@ -320,13 +381,13 @@ describe('BeadFilters', () => {
       renderBeadFilters();
 
       const brandSelect = screen.getByLabelText('Brand');
-      const typeSelect = screen.getByLabelText('Type');
+      const shapeSelect = screen.getByLabelText('Shape');
       const sizeSelect = screen.getByLabelText('Size');
       const colorSelect = screen.getByLabelText('Color');
       const finishSelect = screen.getByLabelText('Finish');
 
       expect(brandSelect).toBeInTheDocument();
-      expect(typeSelect).toBeInTheDocument();
+      expect(shapeSelect).toBeInTheDocument();
       expect(sizeSelect).toBeInTheDocument();
       expect(colorSelect).toBeInTheDocument();
       expect(finishSelect).toBeInTheDocument();
@@ -354,11 +415,36 @@ describe('BeadFilters', () => {
 
     it('handles mixed data availability', () => {
       // Some data available, some not
-      mockUseBeadBrandsQuery.mockReturnValue({ data: mockBrands });
-      mockUseBeadTypesQuery.mockReturnValue({ data: undefined });
-      mockUseBeadSizesQuery.mockReturnValue({ data: [] });
-      mockUseBeadColorsQuery.mockReturnValue({ data: mockColors });
-      mockUseBeadFinishesQuery.mockReturnValue({ data: undefined });
+      mockUseBeadBrandsQuery.mockReturnValue({ 
+        data: mockBrands,
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadTypesQuery.mockReturnValue({ 
+        data: undefined,
+        isLoading: true,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadSizesQuery.mockReturnValue({ 
+        data: [],
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadColorsQuery.mockReturnValue({ 
+        data: mockColors,
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
+      mockUseBeadFinishesQuery.mockReturnValue({ 
+        data: undefined,
+        isLoading: true,
+        error: null,
+        refetch: vi.fn(),
+      } as any);
 
       renderBeadFilters();
 
@@ -370,9 +456,9 @@ describe('BeadFilters', () => {
       const colorSelect = screen.getByLabelText('Color');
       expect(colorSelect.children.length).toBe(3); // "All Colors" + 2 colors
 
-      // Type dropdown should only have "All" option
-      const typeSelect = screen.getByLabelText('Type');
-      expect(typeSelect.children.length).toBe(1); // Only "All Types"
+      // Shape dropdown should only have "All" option
+      const shapeSelect = screen.getByLabelText('Shape');
+      expect(shapeSelect.children.length).toBe(1); // Only "All Shapes"
     });
   });
 }); 

@@ -22,8 +22,8 @@ function FinishFilterSelect({ onChange, value }: FinishFilterSelectionProps) {
       >
         <option value="">All</option>
         {data?.map(finish => (
-          <option key={finish.id} value={finish.id.toString()}>
-            {finish.name}
+          <option key={finish} value={finish}>
+            {finish}
           </option>
         ))}
       </StyledSelect>

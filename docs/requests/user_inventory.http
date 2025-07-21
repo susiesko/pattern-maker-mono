@@ -1,0 +1,182 @@
+### Inventory API Manual Testing
+
+# First, let's register a user and get a token
+POST http://localhost:3000/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "password123",
+  "password_confirmation": "password123"
+}
+
+###
+
+# Login to get the token
+POST http://localhost:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+###
+
+# Replace YOUR_TOKEN_HERE with the token from login response
+@token = eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE3NTMyMjI3NjN9.qaStdJ3FfoKuje_gd1Fup9CmzmNNxnx8guP4uiUTtJw
+
+###
+
+# Get all inventories (should be empty initially)
+GET http://localhost:3000/api/v1/inventories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# First, let's check what beads are available
+GET http://localhost:3000/api/v1/catalog/beads
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Create an inventory item (replace bead_id with actual ID from above)
+POST http://localhost:3000/api/v1/inventories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "inventory": {
+    "bead_id": 31,
+    "quantity": 50.5,
+    "quantity_unit": "grams"
+  }
+}
+
+###
+
+# Get all inventories (should now show our item)
+GET http://localhost:3000/api/v1/inventories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Update inventory quantity (replace :id with actual inventory ID)
+PATCH http://localhost:3000/api/v1/inventories/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "inventory": {
+    "quantity": 75.0,
+    "quantity_unit": "grams"
+  }
+}
+
+###
+
+# Get user inventory settings (should return 404 initially)
+GET http://localhost:3000/api/v1/inventory-settings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Create user inventory settings
+POST http://localhost:3000/api/v1/inventory-settings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "user_inventory_setting": {
+    "field_definitions": [
+      {
+        "fieldName": "location",
+        "fieldType": "text",
+        "label": "Storage Location"
+      },
+      {
+        "fieldName": "purchase_date",
+        "fieldType": "date",
+        "label": "Purchase Date"
+      },
+      {
+        "fieldName": "cost_per_unit",
+        "fieldType": "number",
+        "label": "Cost Per Unit ($)"
+      },
+      {
+        "fieldName": "notes",
+        "fieldType": "textarea",
+        "label": "Notes"
+      }
+    ]
+  }
+}
+
+###
+
+# Get user inventory settings (should now return the settings)
+GET http://localhost:3000/api/v1/inventory-settings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Try to create duplicate settings (should fail with 422)
+POST http://localhost:3000/api/v1/inventory-settings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "user_inventory_setting": {
+    "field_definitions": [
+      {
+        "fieldName": "different_field",
+        "fieldType": "text",
+        "label": "Different Field"
+      }
+    ]
+  }
+}
+
+###
+
+# Update inventory settings
+PATCH http://localhost:3000/api/v1/inventory-settings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "user_inventory_setting": {
+    "field_definitions": [
+      {
+        "fieldName": "storage_bin",
+        "fieldType": "text",
+        "label": "Storage Bin"
+      },
+      {
+        "fieldName": "supplier",
+        "fieldType": "select",
+        "label": "Supplier"
+      }
+    ]
+  }
+}
+
+###
+
+# Delete inventory item (replace :id with actual inventory ID)
+DELETE http://localhost:3000/api/v1/inventories/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Test unauthenticated request (should return 401 or 422)
+GET http://localhost:3000/api/v1/inventories
+Content-Type: application/json 

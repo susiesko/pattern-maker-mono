@@ -25,6 +25,17 @@ Rails.application.routes.draw do
       # Password management
       put '/password', to: 'passwords#update'
 
+      # Inventory management
+      resources :inventories, except: [:new, :edit] do
+        # This creates all CRUD routes: index, show, create, update, destroy
+      end
+      
+      # User inventory settings - single resource per user
+      get '/inventory-settings', to: 'user_inventory_settings#show'
+      post '/inventory-settings', to: 'user_inventory_settings#create'
+      patch '/inventory-settings', to: 'user_inventory_settings#update'
+      put '/inventory-settings', to: 'user_inventory_settings#update'
+
       # Catalog namespace for all bead-related resources
       namespace :catalog do
         # Main bead resources

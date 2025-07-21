@@ -4,6 +4,7 @@ class UserInventorySetting < ApplicationRecord
   belongs_to :user
 
   validates :field_definitions, presence: true
+  validates :user_id, uniqueness: true
   validate :valid_field_definitions_format
 
   scope :by_user, ->(user) { where(user: user) }

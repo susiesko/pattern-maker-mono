@@ -39,6 +39,8 @@ const BeadDetailPage: React.FC = () => {
     setShowAddToInventoryModal(true);
   };
 
+  const hasInventory = !!bead.user_inventory;
+
   return (
     <Container>
       <Header>
@@ -47,7 +49,7 @@ const BeadDetailPage: React.FC = () => {
         </BackButton>
         <HeaderActions>
           <AddToInventoryButton onClick={handleAddToInventory}>
-            Add to Inventory
+            {hasInventory ? 'Update Inventory' : 'Add to Inventory'}
           </AddToInventoryButton>
           <EditButton onClick={handleEditClick}>
             Edit Bead

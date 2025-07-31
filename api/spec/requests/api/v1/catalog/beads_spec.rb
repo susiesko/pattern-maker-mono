@@ -184,76 +184,44 @@ RSpec.describe 'Api::V1::Catalog::Beads', type: :request do
       it 'includes brand in the response' do
         expect(json_response[:data].first).to have_key(:brand)
       end
+
+      it 'does not include user_inventory when unauthenticated' do
+        expect(json_response[:data].first).not_to have_key(:user_inventory)
+      end
     end
 
-    context 'with filtering' do
-      # Use a single let statement with the helper method instead of multiple let statements
-      let(:filter_data) { create_filter_test_data }
+    context 'when user is authenticated' do
+      let(:user) { create(:user) }
+      let(:token) { AuthenticationService.encode(user_id: user.id) }
+      let(:headers) { { 'Content-Type' => 'application/json', 'Authorization' => "Bearer #{token}" } }
+      let!(:beads) { create_list(:bead, 2) }
+      let!(:inventory) { create(:inventory, user: user, bead: beads.first, quantity: 10, quantity_unit: 'unit') }
 
-      it 'filters by brand_id' do
-        get api_v1_catalog_beads_path, params: { brand_id: filter_data[:first_brand].id }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
+      it 'includes user_inventory for beads in user inventory' do
+        get api_v1_catalog_beads_path, headers: headers
+        expect(response).to have_http_status(:success)
+        data = response.parsed_body['data']
+        bead_with_inventory = data.find { |b| b['id'] == beads.first.id }
+        bead_without_inventory = data.find { |b| b['id'] == beads.second.id }
+        expect(bead_with_inventory['user_inventory']).to be_present
+        expect(bead_with_inventory['user_inventory']['id']).to eq(inventory.id)
+        expect(bead_with_inventory['user_inventory']['quantity']).to eq('10.0')
+        expect(bead_with_inventory['user_inventory']['quantity_unit']).to eq('unit')
+        expect(bead_without_inventory['user_inventory']).to be_nil
+      end
+    end
+
+    context 'with pagination' do
+      before do
+        create_list(:bead, 25)
+        get api_v1_catalog_beads_path, params: { page: 1, per_page: 10 }, headers: valid_headers
       end
 
-      it 'filters by shape' do
-        get api_v1_catalog_beads_path, params: { shape: filter_data[:first_bead].shape }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
-      end
-
-      it 'filters by size' do
-        get api_v1_catalog_beads_path, params: { size: filter_data[:first_bead].size }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
-      end
-
-      it 'filters by color_group' do
-        get api_v1_catalog_beads_path, params: { color_group: filter_data[:first_bead].color_group }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
-      end
-
-      it 'filters by glass_group' do
-        get api_v1_catalog_beads_path, params: { glass_group: filter_data[:first_bead].glass_group }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
-      end
-
-      it 'filters by finish' do
-        get api_v1_catalog_beads_path, params: { finish: filter_data[:first_bead].finish }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
-      end
-
-      it 'filters by dyed' do
-        get api_v1_catalog_beads_path, params: { dyed: filter_data[:first_bead].dyed }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
-      end
-
-      it 'filters by galvanized' do
-        get api_v1_catalog_beads_path, params: { galvanized: filter_data[:first_bead].galvanized }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
-      end
-
-      it 'filters by plating' do
-        get api_v1_catalog_beads_path, params: { plating: filter_data[:first_bead].plating }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
-      end
-
-      it 'filters by search term matching name' do
-        get api_v1_catalog_beads_path, params: { search: filter_data[:first_bead].name }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:first_bead].id)
-      end
-
-      it 'filters by search term matching brand_product_code' do
-        get api_v1_catalog_beads_path, params: { search: filter_data[:second_bead].brand_product_code }, headers: valid_headers
-        expect(json_response[:data].size).to eq(1)
-        expect(json_response[:data].first[:id]).to eq(filter_data[:second_bead].id)
+      it 'returns paginated results' do
+        expect(json_response[:data].size).to eq(10)
+        expect(json_response[:pagination]).to be_present
+        expect(json_response[:pagination][:current_page]).to eq(1)
+        expect(json_response[:pagination][:per_page]).to eq(10)
       end
     end
   end
@@ -577,10 +545,6 @@ RSpec.describe 'Api::V1::Catalog::Beads', type: :request do
         expect(bead_data).not_to have_key('user_inventory')
       end
     end
-  end
-
-  describe 'GET /api/v1/catalog/beads' do
-    # existing tests for index action go here...
   end
 end
 

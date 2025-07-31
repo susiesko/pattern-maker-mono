@@ -1,2 +1,2 @@
-api: cd api && bundle exec rails server -b 0.0.0.0 -p 3000
+api: cd api && bundle exec rdbg -n --open -- bin/rails server
 ui: cd ui && npm run dev -- --host 0.0.0.0

@@ -27,9 +27,23 @@ module Api
             per_page: per_page,
           ).paginate
 
+          bead_data = pagination_result[:records].map do |bead|
+            data = bead.as_json(include: :brand)
+            # Only check for inventory if user is authenticated
+            begin
+              if current_user
+                inventory_item = current_user.inventories.find_by(bead_id: bead.id)
+                data['user_inventory'] = inventory_item&.as_json(only: %i[id quantity quantity_unit])
+              end
+            rescue ExceptionHandler::InvalidToken, ExceptionHandler::MissingToken
+              # User not authenticated, continue without inventory info
+            end
+            data
+          end
+
           render json: {
             success: true,
-            data: pagination_result[:records].as_json(include: %i[brand]),
+            data: bead_data,
             pagination: pagination_result[:pagination],
           }
         end

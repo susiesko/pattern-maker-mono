@@ -21,6 +21,8 @@ export default defineConfig({
     },
   },
   server: {
+    port: 5173,
+    host: '0.0.0.0',
     proxy: {
       // Proxy API requests to the Rails server
       '/api': {

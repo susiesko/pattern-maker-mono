@@ -12,7 +12,9 @@ import EditBeadPage from './pages/EditBeadPage';
 import ComingSoon from './components/ComingSoon';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import TokenExpirationTestPage from './pages/TokenExpirationTestPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import AuthErrorToast from './components/ui/AuthErrorToast';
 import { AuthProvider } from './context/AuthContext';
 
 // Create a client for React Query
@@ -43,8 +45,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <GlobalStyles />
-        <AuthProvider>
-          <BrowserRouter>
+        <BrowserRouter>
+          <AuthProvider>
+            <AuthErrorToast />
             <Routes>
               {/* Public routes */}
               <Route path="/login" element={<LoginPage />} />
@@ -65,12 +68,15 @@ function App() {
                   <Route path="projects" element={<ComingSoon title="My Projects" />} />
                 </Route>
 
+                {/* Development/Testing routes */}
+                <Route path="test-token-expiration" element={<TokenExpirationTestPage />} />
+
                 {/* Catch-all redirect */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Routes>
-          </BrowserRouter>
-        </AuthProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>
   );

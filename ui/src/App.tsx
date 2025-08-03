@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'styled-components';
@@ -12,7 +13,10 @@ import EditBeadPage from './pages/EditBeadPage';
 import ComingSoon from './components/ComingSoon';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import TokenExpirationTestPage from './pages/TokenExpirationTestPage';
+// Only import dev routes in development
+const DevRoutes = import.meta.env.DEV 
+  ? React.lazy(() => import('./routes/devRoutes').then(module => ({ default: module.DevRoutes })))
+  : null;
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthErrorToast from './components/ui/AuthErrorToast';
 import { AuthProvider } from './context/AuthContext';
@@ -69,7 +73,7 @@ function App() {
                 </Route>
 
                 {/* Development/Testing routes */}
-                <Route path="test-token-expiration" element={<TokenExpirationTestPage />} />
+                {import.meta.env.DEV && DevRoutes && <DevRoutes />}
 
                 {/* Catch-all redirect */}
                 <Route path="*" element={<Navigate to="/" replace />} />

@@ -14,9 +14,14 @@ import ComingSoon from './components/ComingSoon';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 // Only import dev routes in development
-const DevRoutes = import.meta.env.DEV 
-  ? React.lazy(() => import('./routes/devRoutes').then(module => ({ default: module.DevRoutes })))
-  : null;
+let DevRoutes: React.ComponentType | null = null;
+if (import.meta.env.DEV) {
+  try {
+    DevRoutes = require('./routes/devRoutes').DevRoutes;
+  } catch (e) {
+    // Dev routes not available
+  }
+}
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthErrorToast from './components/ui/AuthErrorToast';
 import { AuthProvider } from './context/AuthContext';

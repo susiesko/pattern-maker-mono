@@ -255,13 +255,6 @@ Each service can be deployed independently:
 - JSON output can be processed by Rails import tasks
 - Configurable via environment variables
 
-## 🤝 Contributing
-
-1. **Follow existing patterns**: Each service has established conventions
-2. **Test your changes**: Comprehensive test suites for all services
-3. **Update documentation**: Keep specs and README current
-4. **Performance aware**: Consider impact on large datasets
-
 ### Code Style
 - **Ruby**: Follow Rails conventions, use RSpec for tests
 - **TypeScript**: Use ESLint + Prettier, comprehensive typing

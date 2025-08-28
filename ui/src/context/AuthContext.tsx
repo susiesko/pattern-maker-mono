@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   User, 
   LoginCredentials, 
@@ -19,6 +20,7 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   error: string | null;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,6 +33,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Initialize auth state from localStorage
@@ -38,7 +41,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const currentUser = getCurrentUser();
     setUser(currentUser);
     setIsLoading(false);
-  }, []);
+
+    // Listen for token expiration events
+    const handleTokenExpired = () => {
+      setUser(null);
+      setError('Your session has expired. Please log in again.');
+      // Redirect to login page
+      navigate('/login');
+    };
+
+    window.addEventListener('tokenExpired', handleTokenExpired);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('tokenExpired', handleTokenExpired);
+    };
+  }, [navigate]);
 
   const login = async (credentials: LoginCredentials) => {
     setError(null);
@@ -46,8 +64,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       const response = await loginApi(credentials);
       setUser(response.user);
+      // Redirect to home page after successful login
+      navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Failed to login');
+      const errorMessage = err.message || 'Failed to login';
+      setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);
@@ -60,8 +81,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       const response = await registerApi(data);
       setUser(response.user);
+      // Redirect to home page after successful registration
+      navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Failed to register');
+      const errorMessage = err.message || 'Failed to register';
+      setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);
@@ -71,6 +95,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     logoutApi();
     setUser(null);
+    setError(null);
+    // Redirect to login page
+    navigate('/login');
+  };
+
+  const clearError = () => {
+    setError(null);
   };
 
   const value = {
@@ -80,7 +111,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
-    error
+    error,
+    clearError
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

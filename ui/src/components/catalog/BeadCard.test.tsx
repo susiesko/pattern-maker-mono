@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import BeadCard from './BeadCard';
 import { createTestWrapper } from '../../test/testUtils';
@@ -13,13 +13,9 @@ describe('BeadCard', () => {
     name: 'Test Bead',
     brand_product_code: 'TB-001',
     image: 'test-bead.jpg',
-    metadata: {},
-    created_at: '2023-01-01T00:00:00Z',
-    updated_at: '2023-01-01T00:00:00Z',
     brand: {
       id: 1,
       name: 'Test Brand',
-      website: 'https://testbrand.com',
     },
     // New simplified schema - direct string attributes
     shape: 'Seed',
@@ -30,6 +26,7 @@ describe('BeadCard', () => {
     dyed: 'No',
     galvanized: 'No',
     plating: 'None',
+    user_inventory: null,
   };
 
   beforeEach(() => {
@@ -112,6 +109,90 @@ describe('BeadCard', () => {
       renderBeadCard(beadWithoutCode);
 
       expect(screen.queryByText('TB-001')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Inventory Button', () => {
+    it('shows plus icon when bead is not in inventory', () => {
+      renderBeadCard();
+
+      const inventoryButton = screen.getByRole('button', { name: /add to inventory/i });
+      expect(inventoryButton).toBeInTheDocument();
+      
+      // Check for plus icon path
+      const plusIcon = inventoryButton.querySelector('path[d*="M12 5V19M5 12H19"]');
+      expect(plusIcon).toBeInTheDocument();
+    });
+
+    it('shows check icon when bead is in inventory', () => {
+      const beadWithInventory = {
+        ...mockBead,
+        user_inventory: {
+          id: 1,
+          quantity: 10,
+          quantity_unit: 'units',
+        },
+      };
+      renderBeadCard(beadWithInventory);
+
+      const inventoryButton = screen.getByRole('button', { name: /in inventory: 10 units/i });
+      expect(inventoryButton).toBeInTheDocument();
+      
+      // Check for check icon path
+      const checkIcon = inventoryButton.querySelector('path[d*="M20 6L9 17L4 12"]');
+      expect(checkIcon).toBeInTheDocument();
+    });
+
+    it('opens inventory modal when clicked', () => {
+      renderBeadCard();
+
+      const inventoryButton = screen.getByRole('button', { name: /add to inventory/i });
+      fireEvent.click(inventoryButton);
+
+      // Check if modal is opened by looking for the modal heading specifically
+      expect(screen.getByRole('heading', { name: 'Add to Inventory' })).toBeInTheDocument();
+      expect(screen.getByLabelText('Quantity *')).toBeInTheDocument();
+    });
+
+    it('prevents card click when inventory button is clicked', () => {
+      renderBeadCard();
+
+      const inventoryButton = screen.getByRole('button', { name: /add to inventory/i });
+      fireEvent.click(inventoryButton);
+
+      expect(mockOnView).not.toHaveBeenCalled();
+    });
+
+    it('shows tooltip on hover', async () => {
+      renderBeadCard();
+
+      const inventoryButton = screen.getByRole('button', { name: /add to inventory/i });
+      
+      fireEvent.mouseEnter(inventoryButton);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Add to inventory')).toBeInTheDocument();
+      });
+    });
+
+    it('shows inventory quantity in tooltip for items in inventory', async () => {
+      const beadWithInventory = {
+        ...mockBead,
+        user_inventory: {
+          id: 1,
+          quantity: 25.5,
+          quantity_unit: 'grams',
+        },
+      };
+      renderBeadCard(beadWithInventory);
+
+      const inventoryButton = screen.getByRole('button', { name: /in inventory: 25.5 grams/i });
+      
+      fireEvent.mouseEnter(inventoryButton);
+      
+      await waitFor(() => {
+        expect(screen.getByText('In inventory: 25.5 grams')).toBeInTheDocument();
+      });
     });
   });
 

@@ -98,42 +98,59 @@ api.interceptors.response.use(
       // that falls out of the range of 2xx
       const status = error.response.status;
       const data = error.response.data;
+      let errorMessage = 'An error occurred';
 
-      let errorMessage = 'An error occurred with the API request';
-
-      // Try to extract a meaningful error message
-      if (data) {
-        if (data.message) {
-          errorMessage = data.message;
-        } else if (data.errors && Array.isArray(data.errors)) {
-          errorMessage = data.errors.join(', ');
-        } else if (typeof data === 'string') {
-          errorMessage = data;
+      if (status === 401) {
+        console.warn('Authentication Error (401): Token may be expired or invalid');
+        const isTokenError = data?.message?.includes('token') || 
+                           data?.message?.includes('expired') ||
+                           data?.message?.includes('unauthorized') ||
+                           errorMessage.toLowerCase().includes('token') ||
+                           errorMessage.toLowerCase().includes('expired') ||
+                           errorMessage.toLowerCase().includes('unauthorized');
+        if (isTokenError) {
+          // Handle token expiration directly here to avoid circular import
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user_data');
+          delete api.defaults.headers.common['Authorization'];
+          window.dispatchEvent(new CustomEvent('tokenExpired'));
+          errorMessage = 'Your session has expired. Please log in again.';
         }
-      }
-
-      // Log with appropriate level based on status code
-      if (status >= 500) {
-        console.error(`Server Error (${status}):`, errorMessage);
-      } else if (status === 401 || status === 403) {
-        console.warn(`Authentication Error (${status}):`, errorMessage);
+      } else if (status === 404) {
+        errorMessage = 'Resource not found';
+      } else if (status === 422) {
+        // Handle validation errors
+        if (data && data.errors) {
+          errorMessage = Object.values(data.errors).flat().join(', ');
+        } else {
+          errorMessage = data?.message || 'Validation error';
+        }
+      } else if (status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
       } else {
-        console.error(`API Error (${status}):`, errorMessage);
+        errorMessage = data?.message || `HTTP ${status} error`;
       }
 
-      // Enhance the error object with more context
-      error.message = errorMessage;
-      error.statusCode = status;
+      console.error('API Error:', {
+        status,
+        message: errorMessage,
+        data
+      });
+
+      // Create a custom error object with the API error details
+      const customError = new ApiError(errorMessage, error.response);
+      return Promise.reject(customError);
     } else if (error.request) {
       // The request was made but no response was received
-      console.error('Network Error: No response received', error.request);
-      error.message = 'Network error: Unable to connect to the server';
+      console.error('Network Error:', error.request);
+      const customError = new ApiError('Network error. Please check your connection.', error.request);
+      return Promise.reject(customError);
     } else {
       // Something happened in setting up the request that triggered an Error
-      console.error('Request Error:', error.message);
+      console.error('Request Setup Error:', error.message);
+      const customError = new ApiError(error.message || 'Request setup error', error);
+      return Promise.reject(customError);
     }
-
-    return Promise.reject(error);
   }
 );
 

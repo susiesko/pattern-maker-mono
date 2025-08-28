@@ -126,7 +126,7 @@ describe('BeadDetailPage', () => {
     expect(screen.getByText('Add to Inventory')).toBeInTheDocument();
   });
 
-  it('shows Add to Inventory button even when user has inventory (modal will handle update)', () => {
+  it('shows Update Inventory button when user has inventory (modal will handle update)', () => {
     mockUseBeadQuery.mockReturnValue({
       data: mockBeadWithInventory,
       isLoading: false,
@@ -135,7 +135,7 @@ describe('BeadDetailPage', () => {
 
     render(<BeadDetailPage />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('Add to Inventory')).toBeInTheDocument();
+    expect(screen.getByText('Update Inventory')).toBeInTheDocument();
   });
 
   it('opens Add to Inventory modal when button is clicked', async () => {

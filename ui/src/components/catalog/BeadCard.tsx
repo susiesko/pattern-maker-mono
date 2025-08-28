@@ -1,86 +1,7 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 import { Bead } from '../../types/beads';
-
-interface BeadCardProps {
-  bead: Bead;
-  onEdit: (id: number) => void;
-  onView: (id: number) => void;
-}
-
-const BeadCard: React.FC<BeadCardProps> = memo(({ bead, onEdit, onView }) => {
-  const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit(bead.id);
-  };
-
-  const handleCardClick = () => {
-    onView(bead.id);
-  };
-
-  return (
-    <CardContainer onClick={handleCardClick}>
-      <ImageContainer>
-        {bead.image && bead.image.trim() ? (
-          <BeadImage src={`/bead-images/${bead.image}`} alt={bead.name} />
-        ) : (
-          <PlaceholderImage />
-        )}
-      </ImageContainer>
-
-      <CardContent>
-        <BeadName>{bead.name}</BeadName>
-
-        {bead.brand_product_code && (
-          <ProductCode>{bead.brand_product_code}</ProductCode>
-        )}
-
-        <BrandName>{bead.brand.name}</BrandName>
-
-        <TypeSizeInfo>
-          {bead.shape} • {bead.size}
-        </TypeSizeInfo>
-
-        {bead.color_group && (
-          <TagsContainer>
-            <TagsLabel>Color:</TagsLabel>
-            <Tags>
-              <ColorTag>{bead.color_group}</ColorTag>
-            </Tags>
-          </TagsContainer>
-        )}
-
-        {bead.finish && (
-          <TagsContainer>
-            <TagsLabel>Finish:</TagsLabel>
-            <Tags>
-              <FinishTag>{bead.finish}</FinishTag>
-            </Tags>
-          </TagsContainer>
-        )}
-
-        {bead.glass_group && (
-          <TagsContainer>
-            <TagsLabel>Glass:</TagsLabel>
-            <Tags>
-              <GlassTag>{bead.glass_group}</GlassTag>
-            </Tags>
-          </TagsContainer>
-        )}
-
-        <CardActions>
-          <EditButton onClick={handleEditClick}>
-            Edit
-          </EditButton>
-        </CardActions>
-      </CardContent>
-    </CardContainer>
-  );
-});
-
-BeadCard.displayName = 'BeadCard';
-
-export default BeadCard;
+import { AddToInventoryModal } from '../modals';
 
 // Styled Components
 const CardContainer = styled.div`
@@ -104,6 +25,7 @@ const ImageContainer = styled.div`
   align-items: center;
   justify-content: center;
   border-bottom: 1px solid ${props => props.theme.colors.border};
+  position: relative;
 `;
 
 const BeadImage = styled.img`
@@ -126,6 +48,65 @@ const PlaceholderImage = styled.div`
   
   &::before {
     content: "No Image";
+  }
+`;
+
+const InventoryButtonOverlay = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+`;
+
+const InventoryButton = styled.button<{ hasInventory: boolean }>`
+  background-color: ${props => props.hasInventory ? props.theme.colors.success : props.theme.colors.primary};
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all ${props => props.theme.transitions.default};
+  position: relative;
+  box-shadow: ${props => props.theme.shadows.small};
+
+  &:hover {
+    background-color: ${props => props.hasInventory ? props.theme.colors.successDark : props.theme.colors.primaryDark};
+    transform: scale(1.1);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const Tooltip = styled.div<{ hasInventory: boolean }>`
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: ${props => props.theme.fontSizes.small};
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
   }
 `;
 
@@ -215,4 +196,150 @@ const EditButton = styled.button`
     background-color: ${props => props.theme.colors.primary};
     color: white;
   }
-`; 
+`;
+
+// Component Interface
+interface BeadCardProps {
+  bead: Bead;
+  onEdit: (id: number) => void;
+  onView: (id: number) => void;
+}
+
+const BeadCard: React.FC<BeadCardProps> = memo(({ bead, onEdit, onView }) => {
+  const [showAddToInventoryModal, setShowAddToInventoryModal] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(bead.id);
+  };
+
+  const handleInventoryClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAddToInventoryModal(true);
+  };
+
+  const handleCardClick = () => {
+    onView(bead.id);
+  };
+
+  const hasInventory = !!bead.user_inventory;
+  const inventoryTooltip = hasInventory 
+    ? `In inventory: ${bead.user_inventory!.quantity} ${bead.user_inventory!.quantity_unit}` 
+    : 'Add to inventory';
+
+  return (
+    <>
+      <CardContainer onClick={handleCardClick}>
+        <ImageContainer>
+          {bead.image && bead.image.trim() ? (
+            <BeadImage src={`/bead-images/${bead.image}`} alt={bead.name} />
+          ) : (
+            <PlaceholderImage />
+          )}
+          
+          {/* Inventory button overlay */}
+          <InventoryButtonOverlay>
+            <InventoryButton 
+              onClick={handleInventoryClick}
+              onMouseEnter={() => setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+              hasInventory={hasInventory}
+              title={inventoryTooltip}
+            >
+              {hasInventory ? (
+                // Check icon for items in inventory
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M20 6L9 17L4 12"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ) : (
+                // Plus icon for items not in inventory
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 5V19M5 12H19"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+              
+              {/* Tooltip */}
+              {showTooltip && (
+                <Tooltip hasInventory={hasInventory}>
+                  {inventoryTooltip}
+                </Tooltip>
+              )}
+            </InventoryButton>
+          </InventoryButtonOverlay>
+        </ImageContainer>
+
+        <CardContent>
+          <BeadName>{bead.name}</BeadName>
+
+          {bead.brand_product_code && (
+            <ProductCode>{bead.brand_product_code}</ProductCode>
+          )}
+
+          <BrandName>{bead.brand.name}</BrandName>
+
+          <TypeSizeInfo>
+            {bead.shape} • {bead.size}
+          </TypeSizeInfo>
+
+          {bead.color_group && (
+            <TagsContainer>
+              <TagsLabel>Color:</TagsLabel>
+              <Tags>
+                <ColorTag>{bead.color_group}</ColorTag>
+              </Tags>
+            </TagsContainer>
+          )}
+
+          {bead.finish && (
+            <TagsContainer>
+              <TagsLabel>Finish:</TagsLabel>
+              <Tags>
+                <FinishTag>{bead.finish}</FinishTag>
+              </Tags>
+            </TagsContainer>
+          )}
+
+          {bead.glass_group && (
+            <TagsContainer>
+              <TagsLabel>Glass:</TagsLabel>
+              <Tags>
+                <GlassTag>{bead.glass_group}</GlassTag>
+              </Tags>
+            </TagsContainer>
+          )}
+
+          <CardActions>
+            <EditButton onClick={handleEditClick}>
+              Edit
+            </EditButton>
+          </CardActions>
+        </CardContent>
+      </CardContainer>
+
+      {/* Inventory Modal */}
+      {showAddToInventoryModal && (
+        <AddToInventoryModal
+          bead={bead}
+          onClose={() => setShowAddToInventoryModal(false)}
+        />
+      )}
+    </>
+  );
+});
+
+BeadCard.displayName = 'BeadCard';
+
+export default BeadCard; 

@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'styled-components';
@@ -12,7 +13,17 @@ import EditBeadPage from './pages/EditBeadPage';
 import ComingSoon from './components/ComingSoon';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+// Only import dev routes in development
+let DevRoutes: React.ComponentType | null = null;
+if (import.meta.env.DEV) {
+  try {
+    DevRoutes = require('./routes/devRoutes').DevRoutes;
+  } catch (e) {
+    // Dev routes not available
+  }
+}
 import ProtectedRoute from './components/ProtectedRoute';
+import AuthErrorToast from './components/ui/AuthErrorToast';
 import { AuthProvider } from './context/AuthContext';
 
 // Create a client for React Query
@@ -43,8 +54,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <GlobalStyles />
-        <AuthProvider>
-          <BrowserRouter>
+        <BrowserRouter>
+          <AuthProvider>
+            <AuthErrorToast />
             <Routes>
               {/* Public routes */}
               <Route path="/login" element={<LoginPage />} />
@@ -65,12 +77,15 @@ function App() {
                   <Route path="projects" element={<ComingSoon title="My Projects" />} />
                 </Route>
 
+                {/* Development/Testing routes */}
+                {import.meta.env.DEV && DevRoutes && <DevRoutes />}
+
                 {/* Catch-all redirect */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Routes>
-          </BrowserRouter>
-        </AuthProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>
   );

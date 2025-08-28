@@ -169,9 +169,7 @@ describe('BeadsListPage', () => {
 
   const renderWithRouter = (initialEntries = ['/beads']) => {
     return render(
-      <MemoryRouter initialEntries={initialEntries}>
-        <BeadsListPage />
-      </MemoryRouter>,
+      <BeadsListPage />,
       { wrapper: createTestWrapper() }
     );
   };

@@ -1,0 +1,12 @@
+{
+  "name": "pattern-maker-mono",
+  "version": "1.0.0",
+  "scripts": {
+    "heroku-postbuild": "cd ui && npm install && npm run build",
+    "start": "cd api && bundle exec puma -C config/puma.rb"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

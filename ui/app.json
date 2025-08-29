@@ -1,0 +1,20 @@
+{
+  "name": "pattern-maker-ui",
+  "description": "Pattern Maker UI - React frontend for bead catalog and inventory management",
+  "repository": "https://github.com/your-username/pattern-maker-mono",
+  "keywords": ["react", "typescript", "vite", "spa"],
+  "stack": "heroku-22",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-static"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "value": "production"
+    }
+  }
+}

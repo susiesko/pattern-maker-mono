@@ -2,6 +2,9 @@
 
 A comprehensive bead catalog and inventory management system for jewelry makers and crafters. This monorepo contains a Rails API, React frontend, and Python web crawler for collecting bead data from various suppliers.
 
+## 📋 Task Management
+Tasks are tracked in [YouTrack](https://pattern-maker.youtrack.cloud) with GitHub integration for automatic commit linking.
+
 ## 🏗️ Architecture
 
 ```

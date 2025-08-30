@@ -1,4 +1,4 @@
-# Pattern Maker Monorepo
+# Pattern Maker Monorepo (WIP)
 
 A comprehensive bead catalog and inventory management system for jewelry makers and crafters. This monorepo contains a Rails API, React frontend, and Python web crawler for collecting bead data from various suppliers.
 

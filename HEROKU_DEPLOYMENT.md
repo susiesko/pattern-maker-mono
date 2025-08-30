@@ -57,7 +57,7 @@ The UI deploys automatically via Netlify's GitHub integration:
 The API URL is configured in `netlify.toml`:
 ```toml
 [build.environment]
-  VITE_API_URL = "https://pattern-maker-api-b7d4a84ca444.herokuapp.com"
+  VITE_API_URL = "https://pattern-maker-api-b7d4a84ca444.herokuapp.com/api/v1"
 ```
 
 ### 3. Features
@@ -158,4 +158,3 @@ netlify logs
 # Manual deploy
 netlify deploy --prod --dir=ui/dist
 ```
-ok 

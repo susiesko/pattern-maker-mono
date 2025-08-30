@@ -1,6 +1,6 @@
 [build]
-  publish = "dist"
-  command = "npm run build"
+  publish = "ui/dist"
+  command = "cd ui && npm install && npm run build"
   base = "."
 
 [[redirects]]

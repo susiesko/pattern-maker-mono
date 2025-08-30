@@ -32,7 +32,7 @@ export const useUpdateInventoryMutation = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateInventoryData }) => 
       putData(`inventories/${id}`, { inventory: data }),
-    onSuccess: (result, variables) => {
+    onSuccess: () => {
       // Invalidate and refetch inventory data
       queryClient.invalidateQueries({ queryKey: ['inventories'] });
       // Also invalidate bead queries to update inventory status

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --skipLibCheck && vite build",
+    "build": "tsc --project tsconfig.build.json --skipLibCheck --noEmit && vite build",
     "heroku-postbuild": "npm run build",
     "lint": "eslint .",
     "preview": "vite preview",

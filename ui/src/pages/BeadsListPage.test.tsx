@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+// import { MemoryRouter } from 'react-router-dom';
 import BeadsListPage from './BeadsListPage';
 import { usePaginatedBeadsQuery } from '../hooks/queries/usePaginatedBeadsQuery';
 import { createTestWrapper } from '../test/testUtils';
@@ -31,7 +31,7 @@ vi.mock('../components/catalog', () => ({
       placeholder="Search beads..."
     />
   ),
-  BeadSort: ({ onChange, sort }: any) => (
+  BeadSort: ({ onChange }: any) => (
     <div data-testid="bead-sort">
       <button onClick={() => onChange({ field: 'name', direction: 'asc' })}>
         Sort by Name
@@ -167,7 +167,7 @@ describe('BeadsListPage', () => {
     mockUsePaginatedBeadsQuery.mockReturnValue(defaultQueryResult);
   });
 
-  const renderWithRouter = (initialEntries = ['/beads']) => {
+  const renderWithRouter = () => {
     return render(
       <BeadsListPage />,
       { wrapper: createTestWrapper() }

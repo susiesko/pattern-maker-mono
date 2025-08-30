@@ -1,6 +1,8 @@
-# Heroku Deployment Guide
+# Deployment Guide
 
-This monorepo is configured for deployment as two separate Heroku apps:
+This monorepo is configured for hybrid deployment:
+- **API**: Heroku (Rails with PostgreSQL)  
+- **UI**: Netlify (React SPA with static hosting)
 
 ## 🔴 API Deployment (Rails)
 
@@ -38,32 +40,31 @@ heroku run rails db:migrate --app your-app-name-api
 heroku run rails db:seed --app your-app-name-api
 ```
 
-## 🔵 UI Deployment (React)
+## 🟢 UI Deployment (Netlify)
 
-### 1. Create and Deploy UI App
+### 1. Automatic GitHub Integration
 
-```bash
-# From the root directory
-heroku create your-app-name-ui
-heroku buildpacks:add heroku/nodejs --app your-app-name-ui
-heroku buildpacks:add https://github.com/heroku/heroku-buildpack-static --app your-app-name-ui
+The UI deploys automatically via Netlify's GitHub integration:
 
-# Deploy from ui subdirectory
-git subtree push --prefix=ui heroku main
+1. **Connect Repository**: Link your GitHub repo to Netlify
+2. **Build Settings** (configured in `netlify.toml`):
+   - **Build command**: `cd ui && npm install && npm run build`
+   - **Publish directory**: `ui/dist`
+   - **Base directory**: `.` (root)
+
+### 2. Environment Variables
+
+The API URL is configured in `netlify.toml`:
+```toml
+[build.environment]
+  VITE_API_URL = "https://pattern-maker-api-b7d4a84ca444.herokuapp.com"
 ```
 
-### 2. Required Environment Variables
-
-Set the API URL in your UI environment:
-
-```bash
-heroku config:set VITE_API_URL="https://your-app-name-api.herokuapp.com" --app your-app-name-ui
-```
-
-Update your `ui/.env.production` file:
-```
-VITE_API_URL=https://your-app-name-api.herokuapp.com
-```
+### 3. Features
+- ✅ Automatic deploys on push to main
+- ✅ SPA routing with fallback to index.html
+- ✅ TypeScript build with test exclusion
+- ✅ Optimized static asset serving
 
 ## 🚀 Deployment Commands
 
@@ -72,20 +73,18 @@ VITE_API_URL=https://your-app-name-api.herokuapp.com
 git subtree push --prefix=api heroku main
 ```
 
-### Deploy UI Only
-```bash
-git subtree push --prefix=ui heroku-ui main
-```
+### Deploy UI (via Netlify)
+UI deploys automatically when changes are pushed to the main branch through Netlify's GitHub integration.
 
-### Deploy Both (separate remotes)
+### Manual Netlify Deploy
 ```bash
-# Add both apps as remotes
-git remote add heroku-api https://git.heroku.com/your-app-name-api.git
-git remote add heroku-ui https://git.heroku.com/your-app-name-ui.git
+# Install Netlify CLI
+npm install -g netlify-cli
 
-# Deploy both
-git subtree push --prefix=api heroku-api main
-git subtree push --prefix=ui heroku-ui main
+# Build and deploy from ui directory
+cd ui
+npm run build
+netlify deploy --prod --dir=dist
 ```
 
 ## 📋 Pre-deployment Checklist
@@ -97,11 +96,11 @@ git subtree push --prefix=ui heroku-ui main
 - [ ] CORS configured for UI domain
 - [ ] JWT secret key set
 
-### UI (React)
-- [ ] Node.js and static buildpacks added
-- [ ] API URL environment variable set
+### UI (React on Netlify)
+- [ ] GitHub repository connected to Netlify
+- [ ] API URL environment variable set in netlify.toml
 - [ ] Build process works locally (`npm run build`)
-- [ ] Static file routing configured
+- [ ] TypeScript compilation passes without errors
 
 ## 🔧 Configuration Files Created
 
@@ -111,8 +110,8 @@ git subtree push --prefix=ui heroku-ui main
 - `api/config/database.yml` - Updated for DATABASE_URL
 
 ### UI Files
-- `ui/static.json` - Static file server configuration
-- `ui/app.json` - App metadata and buildpack configuration
+- `netlify.toml` - Netlify build and deployment configuration
+- `ui/tsconfig.build.json` - TypeScript build configuration excluding tests
 
 ## 🛠 Troubleshooting
 
@@ -121,13 +120,16 @@ git subtree push --prefix=ui heroku-ui main
 - Database issues: Verify DATABASE_URL is set
 - CORS errors: Check ALLOWED_ORIGINS environment variable
 
-### UI Issues
-- Check logs: `heroku logs --tail --app your-app-name-ui`
-- Build failures: Test `npm run build` locally
-- API connection: Verify VITE_API_URL is correct
-- Routing issues: Check `static.json` configuration
+### UI Issues (Netlify)
+- Check build logs in Netlify dashboard
+- Build failures: Test `npm run build` locally in ui directory
+- TypeScript errors: Run `npm run type-check` in ui directory
+- API connection: Verify VITE_API_URL in netlify.toml is correct
+- Routing issues: Check SPA redirect configuration in netlify.toml
 
 ### Common Commands
+
+#### API (Heroku)
 ```bash
 # View app info
 heroku info --app your-app-name-api
@@ -141,3 +143,19 @@ heroku run rails console --app your-app-name-api
 # View config vars
 heroku config --app your-app-name-api
 ```
+
+#### UI (Netlify)
+```bash
+# View site info
+netlify sites:list
+
+# Open site in browser
+netlify open
+
+# View build logs
+netlify logs
+
+# Manual deploy
+netlify deploy --prod --dir=ui/dist
+```
+ok 

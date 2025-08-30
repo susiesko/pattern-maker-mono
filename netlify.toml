@@ -1,0 +1,13 @@
+[build]
+  publish = "ui/dist"
+  command = "cd ui && npm install && npm run build"
+  base = "."
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.environment]
+  VITE_API_URL = "https://pattern-maker-api-b7d4a84ca444.herokuapp.com"
+  

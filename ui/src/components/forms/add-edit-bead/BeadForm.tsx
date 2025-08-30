@@ -41,7 +41,7 @@ const BeadForm = ({ bead, isEdit = false }: BeadFormProps) => {
   // Fetch all the necessary data for dropdowns
   const { data: brands, isLoading: brandsLoading } = useBeadBrandsQuery();
   const { data: sizes, isLoading: sizesLoading } = useBeadSizesQuery();
-  const { data: shapes, isLoading: shapesLoading } = useBeadTypesQuery(); // Types query now returns shapes
+  const { data: shapes } = useBeadTypesQuery(); // Types query now returns shapes
   const { data: colors, isLoading: colorsLoading } = useBeadColorsQuery();
   const { data: finishes, isLoading: finishesLoading } = useBeadFinishesQuery();
 

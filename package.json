@@ -1,0 +1,9 @@
+{
+  "name": "pattern-maker-mono",
+  "version": "1.0.0",
+  "scripts": {},
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

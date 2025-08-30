@@ -29,18 +29,5 @@ test:
 # Store production database in the storage/ directory, which by default
 # is mounted as a persistent Docker volume in config/deploy.yml.
 production:
-  primary:
-    <<: *default
-    database: pattern_maker_production
-  cache:
-    <<: *default
-    database: pattern_maker_production_cache
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *default
-    database: pattern_maker_production_queue
-    migrations_paths: db/queue_migrate
-  cable:
-    <<: *default
-    database: pattern_maker_production_cable
-    migrations_paths: db/cable_migrate
+  <<: *default
+  url: <%= ENV.fetch("DATABASE_URL") %>

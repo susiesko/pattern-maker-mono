@@ -53,6 +53,7 @@ foreman start -f Procfile.dev
 ```
 
 This will start:
+
 - **API**: http://localhost:3000 (Rails server with debugger)
 - **UI**: http://localhost:5173 (Vite dev server)
 
@@ -75,6 +76,7 @@ rails beads:import
 **Rails 8 JSON API** providing bead catalog and inventory management.
 
 **Key Features:**
+
 - Bead catalog with search, filtering, and pagination
 - User inventory management with custom fields
 - JWT authentication
@@ -82,6 +84,7 @@ rails beads:import
 - Performance optimizations for large datasets
 
 **Tech Stack:**
+
 - Rails 8.0.1
 - PostgreSQL
 - JWT authentication
@@ -89,6 +92,7 @@ rails beads:import
 - Docker ready
 
 **Quick Commands:**
+
 ```bash
 cd api
 bundle exec rails server    # Start server
@@ -102,6 +106,7 @@ rails beads:status          # Check bead data status
 **React TypeScript frontend** with modern tooling and responsive design.
 
 **Key Features:**
+
 - Responsive bead catalog browsing
 - Advanced search and filtering
 - Inventory management interface
@@ -109,6 +114,7 @@ rails beads:status          # Check bead data status
 - Modern UI/UX with styled-components
 
 **Tech Stack:**
+
 - React 19
 - TypeScript
 - TanStack Query (React Query)
@@ -117,6 +123,7 @@ rails beads:status          # Check bead data status
 - Vitest (testing)
 
 **Quick Commands:**
+
 ```bash
 cd ui
 npm run dev                 # Start dev server
@@ -130,17 +137,20 @@ npm run format             # Format code
 **Python web crawler** for collecting bead data from supplier websites.
 
 **Key Features:**
+
 - Scrapes Fire Mountain Gems for Miyuki Delica beads
 - Respects robots.txt and rate limiting
 - Outputs structured JSON data
 - Extensible for multiple suppliers
 
 **Tech Stack:**
+
 - Python 3.8+
 - Scrapy framework
 - JSON output format
 
 **Quick Commands:**
+
 ```bash
 cd crawler
 python run_fire_mountain_gem_crawler.py   # Run crawler
@@ -150,18 +160,21 @@ python run_miyuki_directory_crawler.py    # Alternative crawler
 ## 🎯 Key Features
 
 ### Bead Catalog Management
+
 - **Browse & Search**: Paginated catalog with search by name/code
 - **Advanced Filtering**: Filter by brand, type, size, color, finish
 - **Performance Optimized**: Handles 1000+ beads efficiently
 - **Image Management**: Optimized loading and caching
 
 ### Inventory Tracking
+
 - **Personal Inventory**: Track your bead collection
 - **Custom Fields**: Add purchase date, location, notes, etc.
 - **Flexible Data**: JSON-based custom field system
 - **Bulk Operations**: Add multiple items at once
 
 ### Data Collection
+
 - **Automated Crawling**: Regularly update bead catalog
 - **Multiple Sources**: Extensible crawler architecture
 - **Data Quality**: Structured import with validation
@@ -174,7 +187,7 @@ python run_miyuki_directory_crawler.py    # Alternative crawler
 # API only
 cd api && rails server
 
-# UI only  
+# UI only
 cd ui && npm run dev
 
 # Crawler only
@@ -220,19 +233,22 @@ See `/docs/specs/BEAD_LIST_OPTIMIZATION_SPEC.md` for detailed performance target
 ## 🏗️ Architecture Decisions
 
 ### Monorepo Structure
+
 - **Shared Development**: Single repository for all related services
 - **Independent Deployment**: Each service can be deployed separately
 - **Coordinated Development**: Easy to make changes across services
 
 ### Technology Choices
+
 - **Rails API-only**: Fast JSON API with excellent ecosystem
 - **React + TypeScript**: Type-safe frontend development
 - **Scrapy**: Robust and respectful web crawling
 - **PostgreSQL**: Reliable relational database with JSON support
 
 ### Data Flow
+
 1. **Crawler** → JSON files
-2. **Rails Import** → PostgreSQL database  
+2. **Rails Import** → PostgreSQL database
 3. **API** → JSON responses
 4. **React UI** → User interface
 
@@ -241,16 +257,19 @@ See `/docs/specs/BEAD_LIST_OPTIMIZATION_SPEC.md` for detailed performance target
 Each service can be deployed independently:
 
 ### API Deployment
+
 - Docker-ready Rails application
 - Environment variables for configuration
 - Database migrations included
 
-### UI Deployment  
+### UI Deployment
+
 - Static build output (`npm run build`)
 - Can be served from CDN or static hosting
 - Environment-specific API endpoints
 
 ### Crawler Deployment
+
 - Scheduled Python scripts
 - JSON output can be processed by Rails import tasks
 - Configurable via environment variables
@@ -263,6 +282,7 @@ Each service can be deployed independently:
 4. **Performance aware**: Consider impact on large datasets
 
 ### Code Style
+
 - **Ruby**: Follow Rails conventions, use RSpec for tests
 - **TypeScript**: Use ESLint + Prettier, comprehensive typing
 - **Python**: Follow PEP 8, use type hints where helpful
@@ -270,7 +290,7 @@ Each service can be deployed independently:
 ## 📚 Documentation
 
 - `/docs/specs/` - Detailed feature specifications
-- `/docs/diagrams/` - Architecture and data flow diagrams  
+- `/docs/diagrams/` - Architecture and data flow diagrams
 - Service READMEs - Individual service documentation
 - Code comments - Inline documentation for complex logic
 
@@ -279,16 +299,19 @@ Each service can be deployed independently:
 ### Common Issues
 
 **Services won't start:**
+
 - Check that PostgreSQL is running
 - Verify all dependencies are installed
 - Check port conflicts (3000, 5173)
 
 **Database issues:**
+
 - Run `rails db:migrate` in API directory
 - Check PostgreSQL connection settings
 - Verify database exists
 
 **Crawler issues:**
+
 - Check network connectivity
 - Verify Python dependencies installed
 - Review robots.txt compliance

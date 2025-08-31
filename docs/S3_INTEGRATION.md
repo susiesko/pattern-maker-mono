@@ -90,12 +90,8 @@ Files are automatically organized in S3 with this structure:
 ```
 s3://your-bucket/
 └── scraped-data/
-    └── fire_mountain_gems/
-        └── 2025/
-            └── 01/
-                └── 31/
-                    └── 143022/  # HHMMSS timestamp
-                        └── beads.json
+    └── miyuki_directory/
+        └── feed-{timestamp}.json # HHMMSS timestamp
 ```
 
 ### Data Format

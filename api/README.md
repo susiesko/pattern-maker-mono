@@ -116,9 +116,14 @@ rails server
 
 ```bash
 DATABASE_URL=postgresql://username:password@localhost/pattern_maker_development
-JWT_SECRET=your_jwt_secret_here
+JWT_SECRET_KEY=your_jwt_secret_here
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3001
 RAILS_ENV=development
 ```
+
+**Security Configuration:**
+- `JWT_SECRET_KEY`: Separate JWT secret (not Rails secret_key_base)
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed CORS origins
 
 ### UI Setup
 
@@ -296,7 +301,8 @@ Required for production:
 ```bash
 # API
 DATABASE_URL=postgresql://...
-JWT_SECRET=secure_random_string
+JWT_SECRET_KEY=secure_random_string
+ALLOWED_ORIGINS=https://your-frontend-domain.com,https://www.your-domain.com
 RAILS_ENV=production
 RAILS_MASTER_KEY=your_master_key
 

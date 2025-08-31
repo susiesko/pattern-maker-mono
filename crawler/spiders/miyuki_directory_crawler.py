@@ -8,10 +8,19 @@ import json
 import logging
 import os
 import psycopg2
+from datetime import datetime
 from urllib.parse import urljoin
 from scrapy import Spider, Request
 from typing import Dict, Any, Optional, Set
 from pathlib import Path
+
+try:
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+    S3_AVAILABLE = True
+except ImportError:
+    S3_AVAILABLE = False
+    logging.warning("boto3 not installed - S3 upload will be skipped")
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +48,8 @@ class MiyukiDirectoryCrawler(Spider):
         else:
             self.max_pages = None
 
-        self.max_pages = 1
+        # self.max_pages = 1  # Commented out to allow unlimited pages
+        # You can also pass -a max_pages=10 to limit pages from command line
 
         # Open file for streaming JSON output
         self._json_file = None
@@ -81,14 +91,73 @@ class MiyukiDirectoryCrawler(Spider):
             self.existing_product_codes = set()
 
     def closed(self, reason):
-        """Close JSON file and display summary"""
+        """Close JSON file, upload to S3, and display summary"""
         if self._json_file:
             self._json_file.write('\n]')
             self._json_file.close()
             self._json_file = None
+        
+        # Upload to S3 if configured
+        self._upload_to_s3()
+        
         self._display_summary()
         logger.info(f"Spider completed: {self.total_count} beads saved to {self.output_file}")
         logger.info(f"Spider closed with reason: {reason}")
+    
+    def _upload_to_s3(self):
+        """Upload the JSON file to S3"""
+        if not S3_AVAILABLE:
+            logger.info("Skipping S3 upload - boto3 not available")
+            return
+            
+        # Check for required environment variables
+        bucket_name = os.environ.get('AWS_S3_BUCKET')
+        access_key = os.environ.get('AWS_ACCESS_KEY_ID')
+        secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+        region = os.environ.get('AWS_REGION', 'us-east-1')
+        
+        if not all([bucket_name, access_key, secret_key]):
+            logger.warning("Skipping S3 upload - missing AWS credentials or bucket name")
+            logger.info("Required env vars: AWS_S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY")
+            return
+        
+        try:
+            # Create S3 client
+            s3_client = boto3.client(
+                's3',
+                region_name=region,
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret_key
+            )
+            
+            # Create timestamped S3 key
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            site_name = 'miyuki-beads.co.jp'
+            s3_key = f"beads/{site_name}/feed-{timestamp}.json"
+            
+            # Upload file
+            with open(self.output_file, 'rb') as f:
+                s3_client.put_object(
+                    Bucket=bucket_name,
+                    Key=s3_key,
+                    Body=f,
+                    ContentType='application/json',
+                    Metadata={
+                        'spider': self.name,
+                        'scraped_at': datetime.now().isoformat(),
+                        'total_beads': str(self.total_count),
+                        'pages_crawled': str(self.pages_crawled)
+                    }
+                )
+            
+            logger.info(f"Successfully uploaded to s3://{bucket_name}/{s3_key}")
+            
+        except NoCredentialsError:
+            logger.error("AWS credentials not found")
+        except ClientError as e:
+            logger.error(f"AWS S3 error: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error uploading to S3: {e}")
 
     def __del__(self):
         """Destructor to ensure file is always closed"""

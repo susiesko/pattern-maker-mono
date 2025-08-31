@@ -73,3 +73,6 @@ group :test do
 end
 
 gem "vessel"
+
+# AWS S3 for storing scraped data
+gem "aws-sdk-s3", "~> 1.0"

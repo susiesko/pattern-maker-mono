@@ -1,6 +1,22 @@
 require_relative "boot"
 
-require "rails/all"
+# Load environment variables early
+require 'dotenv/load' if defined?(Dotenv)
+
+require "rails"
+# Pick the frameworks you want:
+require "active_model/railtie"
+require "active_job/railtie"
+# Conditionally load ActiveRecord based on DATABASE_TYPE
+require "active_record/railtie" if ENV['DATABASE_TYPE'] == 'postgresql'
+require "active_storage/engine"
+require "action_controller/railtie"
+require "action_mailer/railtie"
+require "action_mailbox/engine"
+require "action_text/engine"
+require "action_view/railtie"
+require "action_cable/engine"
+require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.

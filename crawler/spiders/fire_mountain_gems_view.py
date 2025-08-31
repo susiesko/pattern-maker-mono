@@ -6,10 +6,20 @@ Crawls Miyuki Delica beads and saves them to a JSON file for Rails import
 import re
 import json
 import logging
+import os
+from datetime import datetime
 from urllib.parse import urljoin
 from scrapy import Spider, Request
 from typing import Dict, Any, Optional
 from pathlib import Path
+
+try:
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+    S3_AVAILABLE = True
+except ImportError:
+    S3_AVAILABLE = False
+    logging.warning("boto3 not installed - S3 upload will be skipped")
 
 logger = logging.getLogger(__name__)
 
@@ -137,13 +147,84 @@ class FireMountainGemsSpider(Spider):
             yield Request(next_page_url, callback=self.parse)
     
     def _save_to_json(self):
-        """Save beads data to JSON file"""
+        """Save beads data to JSON file and upload to S3"""
         try:
+            # Prepare data with metadata
+            timestamp = datetime.now().isoformat()
+            output_data = {
+                'metadata': {
+                    'spider': self.name,
+                    'scraped_at': timestamp,
+                    'total_results': len(self.beads_found),
+                    'source': 'Fire Mountain Gems'
+                },
+                'beads': self.beads_found
+            }
+            
+            # Save locally
             with open(self.output_file, 'w') as f:
-                json.dump(self.beads_found, f, indent=2)
+                json.dump(output_data, f, indent=2)
             logger.info(f"Saved {len(self.beads_found)} beads to {self.output_file}")
+            
+            # Upload to S3 if configured
+            self._upload_to_s3()
+            
         except Exception as e:
             logger.error(f"Error saving to JSON: {e}")
+    
+    def _upload_to_s3(self):
+        """Upload the JSON file to S3"""
+        if not S3_AVAILABLE:
+            logger.info("Skipping S3 upload - boto3 not available")
+            return
+            
+        # Check for required environment variables
+        bucket_name = os.environ.get('AWS_S3_BUCKET')
+        access_key = os.environ.get('AWS_ACCESS_KEY_ID')
+        secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+        region = os.environ.get('AWS_REGION', 'us-east-1')
+        
+        if not all([bucket_name, access_key, secret_key]):
+            logger.warning("Skipping S3 upload - missing AWS credentials or bucket name")
+            logger.info("Required env vars: AWS_S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY")
+            return
+        
+        try:
+            # Create S3 client
+            s3_client = boto3.client(
+                's3',
+                region_name=region,
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret_key
+            )
+            
+            # Create timestamped S3 key
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            site_name = 'firemountaingems.com'
+            s3_key = f"beads/{site_name}/feed-{timestamp}.json"
+            
+            # Upload file
+            with open(self.output_file, 'rb') as f:
+                s3_client.put_object(
+                    Bucket=bucket_name,
+                    Key=s3_key,
+                    Body=f,
+                    ContentType='application/json',
+                    Metadata={
+                        'spider': self.name,
+                        'scraped_at': datetime.now().isoformat(),
+                        'total_beads': str(len(self.beads_found))
+                    }
+                )
+            
+            logger.info(f"Successfully uploaded to s3://{bucket_name}/{s3_key}")
+            
+        except NoCredentialsError:
+            logger.error("AWS credentials not found")
+        except ClientError as e:
+            logger.error(f"AWS S3 error: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error uploading to S3: {e}")
     
     def _display_summary(self):
         """Display summary of all beads found"""

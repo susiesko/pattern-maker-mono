@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to run the Miyuki Directory crawler and then import the data to database
+Script to run the Fire Mountain Gems spider with S3 upload capability
 """
 
 import logging
@@ -24,13 +24,16 @@ except Exception as e:
 
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
-from spiders.miyuki_directory_crawler import MiyukiDirectoryCrawler
-from importers.miyuki_directory import MiyukiDirectoryImporter
+from spiders.fire_mountain_gems_view import FireMountainGemsSpider
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s [%(name)s] %(levelname)s: %(message)s'
+    format='%(asctime)s [%(name)s] %(levelname)s: %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('fire_mountain_gems_spider.log')
+    ]
 )
 
 logger = logging.getLogger(__name__)
@@ -54,45 +57,35 @@ def check_s3_config():
         return True
 
 def main():
-    """Run the Miyuki Directory crawler and then import the data"""
-    logger.info("🕷️  Starting Miyuki Directory crawler...")
+    """Run the Fire Mountain Gems spider"""
+    logger.info("🕷️  Starting Fire Mountain Gems spider...")
     
     # Check S3 configuration
     s3_configured = check_s3_config()
     
-    # Step 1: Run the crawler to scrape data to JSON
+    # Get scrapy settings
     settings = get_project_settings()
-    settings.set('SPIDER_MODULES', ['spiders'])
-    settings.set('NEWSPIDER_MODULE', 'spiders')
-
+    
+    # Configure additional settings for this run
+    settings.update({
+        'USER_AGENT': 'PatternMaker/1.0 (+https://kohana-beads.com)',
+        'DOWNLOAD_DELAY': 1.0,  # Be polite to the server
+        'RANDOMIZE_DOWNLOAD_DELAY': 0.5,
+        'COOKIES_ENABLED': True,
+        'ROBOTSTXT_OBEY': True,
+    })
+    
+    # Create and run the crawler
     process = CrawlerProcess(settings)
-    process.crawl(MiyukiDirectoryCrawler)
+    process.crawl(FireMountainGemsSpider)
     process.start()
     
-    logger.info("✅ Crawler completed! JSON file created")
+    logger.info("🎉 Fire Mountain Gems spider completed!")
     
-    # Step 2: Import the JSON data to database
-    logger.info("📊 Starting database import...")
-    
-    try:
-        importer = MiyukiDirectoryImporter()
-        importer.connect_to_database()
-        importer.load_existing_product_codes()
-        
-        result = importer.bulk_import_beads()
-        
-        logger.info(f"🎉 Import completed!")
-        logger.info(f"📊 Total beads in file: {result['total_count']}")
-        logger.info(f"✅ New beads imported: {result['imported_count']}")
-        logger.info(f"🔄 Duplicates skipped: {result['duplicate_count']}")
-        
-        importer.close_connection()
-        
-    except Exception as e:
-        logger.error(f"💥 Database import failed: {e}")
-        raise
-    
-    logger.info("🚀 Complete pipeline finished: Scrape → Import → Done!")
+    if s3_configured:
+        logger.info("📤 Data has been uploaded to S3")
+    else:
+        logger.info("💾 Data saved locally only - configure S3 for cloud storage")
 
 if __name__ == '__main__':
-    main() 
+    main()

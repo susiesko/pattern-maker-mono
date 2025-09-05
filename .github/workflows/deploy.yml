@@ -32,7 +32,14 @@ jobs:
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
         run: |
           PR_APP="beadpantry-api-pr-${{ github.event.number }}"
-          flyctl apps create --name $PR_APP --org personal 2>/dev/null || true
+          
+          # Create app from production config
+          flyctl apps create --name $PR_APP --org personal 2>/dev/null || echo "App may already exist"
+          
+          # Copy production app config
+          flyctl apps clone beadpantry-api --name $PR_APP --copy-secrets || true
+          
+          # Deploy to PR app
           flyctl deploy --remote-only --app $PR_APP
           echo "🚀 PR app deployed: https://$PR_APP.fly.dev" >> $GITHUB_STEP_SUMMARY
         env:

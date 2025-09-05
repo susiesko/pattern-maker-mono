@@ -34,7 +34,11 @@ jobs:
           PR_APP="beadpantry-api-pr-${{ github.event.number }}"
           
           # Create app
-          flyctl apps create $PR_APP --org personal 2>/dev/null || echo "App may already exist"
+          if ! flyctl apps list | grep -q $PR_APP; then
+            flyctl apps create $PR_APP --org personal
+          else
+            echo "App $PR_APP already exists"
+          fi
           
           # Set secrets for PR app
           flyctl secrets set --app $PR_APP \

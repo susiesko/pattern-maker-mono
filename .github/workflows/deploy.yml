@@ -1,0 +1,38 @@
+name: Deploy to Fly.io
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'pr' }}
+    defaults:
+      run:
+        working-directory: ./api
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      
+      - name: Deploy to production
+        if: github.ref == 'refs/heads/main'
+        run: flyctl deploy --remote-only --app beadpantry-api
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      
+      - name: Deploy PR preview
+        if: github.event_name == 'pull_request'
+        run: |
+          PR_APP="beadpantry-api-pr-${{ github.event.number }}"
+          flyctl apps create $PR_APP --copy-config --org personal 2>/dev/null || true
+          flyctl deploy --remote-only --app $PR_APP
+          echo "🚀 PR app deployed: https://$PR_APP.fly.dev" >> $GITHUB_STEP_SUMMARY
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

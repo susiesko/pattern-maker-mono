@@ -43,7 +43,8 @@ jobs:
           # Set secrets for PR app
           flyctl secrets set --app $PR_APP \
             DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-            JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
+            RAILS_MASTER_KEY="${{ secrets.RAILS_MASTER_KEY }}" \
             ALLOWED_ORIGINS="*"
           
           # Deploy to PR app

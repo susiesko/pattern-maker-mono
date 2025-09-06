@@ -37,6 +37,12 @@ jobs:
           PR_APP="beadpantry-api-pr-${{ github.event.number }}"
           echo -e "\033[35m🔧 Setting up PR preview app: $PR_APP\033[0m"
           
+          # Debug: Show all apps and search for our specific app
+          echo -e "\033[36m📋 All apps:\033[0m"
+          flyctl apps list
+          echo -e "\033[36m🔍 Looking for app: $PR_APP\033[0m"
+          flyctl apps list | grep "$PR_APP" || echo "No matching app found"
+          
           # Create app
           if ! flyctl apps list | grep -q $PR_APP; then
             echo -e "\033[33m📦 Creating new app: $PR_APP\033[0m"

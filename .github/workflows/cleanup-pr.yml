@@ -1,0 +1,33 @@
+name: Cleanup PR Apps
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+jobs:
+  cleanup:
+    name: Cleanup PR App
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    
+    steps:
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      
+      - name: Cleanup PR app
+        run: |
+          PR_APP="beadpantry-api-pr-${{ github.event.number }}"
+          echo -e "\033[31m🗑️  Starting cleanup for PR app: $PR_APP\033[0m"
+          
+          # Check if app exists before trying to destroy
+          if flyctl apps list | grep -q $PR_APP; then
+            echo -e "\033[33m💥 Destroying app: $PR_APP\033[0m"
+            flyctl apps destroy $PR_APP --yes
+            echo -e "\033[32m✅ Successfully destroyed: $PR_APP\033[0m"
+            echo "🗑️ PR app destroyed: $PR_APP" >> $GITHUB_STEP_SUMMARY
+          else
+            echo -e "\033[36m🤷 App not found (may have been manually deleted): $PR_APP\033[0m"
+            echo "ℹ️ PR app not found: $PR_APP" >> $GITHUB_STEP_SUMMARY
+          fi
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

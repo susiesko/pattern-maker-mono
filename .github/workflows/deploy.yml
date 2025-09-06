@@ -5,7 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-    types: [opened, synchronize, closed]
+    types: [opened, synchronize]
   workflow_dispatch:
 
 jobs:
@@ -24,14 +24,18 @@ jobs:
       
       - name: Deploy to production
         if: github.ref == 'refs/heads/main'
-        run: flyctl deploy --remote-only --app beadpantry-api --config ./fly.toml
+        run: |
+          echo -e "\033[34m🚀 Deploying to production app: beadpantry-api\033[0m"
+          flyctl deploy --remote-only --app beadpantry-api --config ./fly.toml
+          echo -e "\033[32m✅ Production deployment complete: https://beadpantry-api.fly.dev\033[0m"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       
       - name: Deploy PR preview
-        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        if: github.event_name == 'pull_request'
         run: |
           PR_APP="beadpantry-api-pr-${{ github.event.number }}"
+          echo -e "\033[35m🔧 Setting up PR preview app: $PR_APP\033[0m"
           
           # Debug: Show all apps and search for our specific app
           echo -e "\033[36m📋 All apps:\033[0m"
@@ -41,12 +45,14 @@ jobs:
           
           # Create app
           if ! flyctl apps list | grep -q $PR_APP; then
+            echo -e "\033[33m📦 Creating new app: $PR_APP\033[0m"
             flyctl apps create $PR_APP --org personal
           else
-            echo "App $PR_APP already exists"
+            echo -e "\033[36m♻️  App already exists: $PR_APP\033[0m"
           fi
           
           # Set secrets for PR app
+          echo -e "\033[33m🔐 Setting secrets for: $PR_APP\033[0m"
           flyctl secrets set --app $PR_APP \
             DATABASE_URL="${{ secrets.DATABASE_URL }}" \
             JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
@@ -54,16 +60,9 @@ jobs:
             ALLOWED_ORIGINS="*"
           
           # Deploy to PR app
+          echo -e "\033[34m🚀 Deploying PR app: $PR_APP\033[0m"
           flyctl deploy --remote-only --app $PR_APP --config ./fly.toml
+          echo -e "\033[32m✅ PR deployment complete: https://$PR_APP.fly.dev\033[0m"
           echo "🚀 PR app deployed: https://$PR_APP.fly.dev" >> $GITHUB_STEP_SUMMARY
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      
-      - name: Cleanup PR app
-        if: github.event_name == 'pull_request' && github.event.action == 'closed'
-        run: |
-          PR_APP="beadpantry-api-pr-${{ github.event.number }}"
-          flyctl apps destroy $PR_APP --yes 2>/dev/null || true
-          echo "🗑️ PR app destroyed: $PR_APP" >> $GITHUB_STEP_SUMMARY
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

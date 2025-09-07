@@ -21,8 +21,8 @@ jobs:
           PR_APP_API="beadpantry-api-pr-${{ github.event.number }}"
           echo -e "\033[31m🗑️  Starting cleanup for PR API app: $PR_APP_API\033[0m"
           
-          # Login to Railway
-          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          # Railway CLI will use RAILWAY_TOKEN env var automatically
+          echo -e "\033[36m🔑 Authenticating with Railway...\033[0m"
           
           # Delete API project
           echo -e "\033[33m💥 Destroying API project: $PR_APP_API\033[0m"
@@ -41,8 +41,8 @@ jobs:
           PR_APP_UI="beadpantry-ui-pr-${{ github.event.number }}"
           echo -e "\033[31m🗑️  Starting cleanup for PR frontend: $PR_APP_UI\033[0m"
           
-          # Login to Railway
-          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          # Railway CLI will use RAILWAY_TOKEN env var automatically
+          echo -e "\033[36m🔑 Authenticating with Railway...\033[0m"
           
           # Delete frontend project
           echo -e "\033[33m💥 Destroying frontend project: $PR_APP_UI\033[0m"

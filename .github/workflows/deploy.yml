@@ -30,7 +30,11 @@ jobs:
           echo "ℹ️ Production deployments still use Fly.io" >> $GITHUB_STEP_SUMMARY
       
       - name: Deploy PR API to Railway
-        if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview-app')
+        if: |
+          github.event_name == 'pull_request' && (
+            contains(github.event.pull_request.labels.*.name, 'preview-app') ||
+            (github.event.action == 'labeled' && github.event.label.name == 'preview-app')
+          )
         run: |
           PR_APP="beadpantry-api-pr-${{ github.event.number }}"
           echo -e "\033[35m🔧 Setting up PR API app on Railway: $PR_APP\033[0m"
@@ -72,7 +76,11 @@ jobs:
     name: Deploy Frontend
     runs-on: ubuntu-latest
     needs: deploy-api
-    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview-app')
+    if: |
+      github.event_name == 'pull_request' && (
+        contains(github.event.pull_request.labels.*.name, 'preview-app') ||
+        (github.event.action == 'labeled' && github.event.label.name == 'preview-app')
+      )
     defaults:
       run:
         working-directory: ./ui

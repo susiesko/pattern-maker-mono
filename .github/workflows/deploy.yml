@@ -110,8 +110,7 @@ jobs:
           echo -e "\033[34m🚀 Deploying frontend to Cloudflare: $PROJECT_NAME\033[0m"
           
           npx wrangler pages deploy dist \
-            --project-name="$PROJECT_NAME" \
-            --compatibility-date=2024-01-01
+            --project-name="$PROJECT_NAME"
           
           echo -e "\033[32m✅ Frontend deployed: https://$PROJECT_NAME.pages.dev\033[0m"
           echo "🌐 Frontend deployed: https://$PROJECT_NAME.pages.dev" >> $GITHUB_STEP_SUMMARY

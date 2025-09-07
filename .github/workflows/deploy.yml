@@ -51,8 +51,7 @@ jobs:
           
           # Add PostgreSQL database
           echo -e "\033[33m🗄️ Adding PostgreSQL database\033[0m"
-          railway service create --name postgres
-          railway env set DATABASE_URL='${{POSTGRES.DATABASE_URL}}'
+          railway add --database postgresql
           
           # Deploy API
           echo -e "\033[34m🚀 Deploying API to Railway: $PR_APP\033[0m"

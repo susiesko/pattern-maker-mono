@@ -1,4 +1,4 @@
-name: Cleanup PR Apps
+name: Cleanup PR Apps (Railway)
 
 on:
   pull_request:
@@ -7,34 +7,51 @@ on:
 
 jobs:
   cleanup:
-    name: Cleanup PR App
+    name: Cleanup PR Apps
     runs-on: ubuntu-latest
     environment: pr
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     
     steps:
-      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
       
-      - name: Cleanup PR app
+      - name: Cleanup PR API app
         run: |
-          PR_APP="beadpantry-api-pr-${{ github.event.number }}"
-          echo -e "\033[31m🗑️  Starting cleanup for PR app: $PR_APP\033[0m"
+          PR_APP_API="beadpantry-api-pr-${{ github.event.number }}"
+          echo -e "\033[31m🗑️  Starting cleanup for PR API app: $PR_APP_API\033[0m"
           
-          # Debug: Show all apps and search for our specific app
-          echo -e "\033[36m📋 All apps:\033[0m"
-          flyctl apps list
-          echo -e "\033[36m🔍 Looking for app: $PR_APP\033[0m"
-          flyctl apps list | grep "$PR_APP" || echo "No matching app found"
+          # Login to Railway
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
           
-          # Check if app exists before trying to destroy
-          if flyctl apps list | grep -q $PR_APP; then
-            echo -e "\033[33m💥 Destroying app: $PR_APP\033[0m"
-            flyctl apps destroy $PR_APP --yes
-            echo -e "\033[32m✅ Successfully destroyed: $PR_APP\033[0m"
-            echo "🗑️ PR app destroyed: $PR_APP" >> $GITHUB_STEP_SUMMARY
+          # Delete API project
+          echo -e "\033[33m💥 Destroying API project: $PR_APP_API\033[0m"
+          if railway delete --name $PR_APP_API --yes; then
+            echo -e "\033[32m✅ Successfully destroyed API app: $PR_APP_API\033[0m"
+            echo "🗑️ PR API app destroyed: $PR_APP_API" >> $GITHUB_STEP_SUMMARY
           else
-            echo -e "\033[36m🤷 App not found (may have been manually deleted): $PR_APP\033[0m"
-            echo "ℹ️ PR app not found: $PR_APP" >> $GITHUB_STEP_SUMMARY
+            echo -e "\033[36m🤷 API app not found: $PR_APP_API\033[0m"
+            echo "ℹ️ PR API app not found: $PR_APP_API" >> $GITHUB_STEP_SUMMARY
           fi
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      
+      - name: Cleanup PR frontend app
+        run: |
+          PR_APP_UI="beadpantry-ui-pr-${{ github.event.number }}"
+          echo -e "\033[31m🗑️  Starting cleanup for PR frontend: $PR_APP_UI\033[0m"
+          
+          # Login to Railway
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          
+          # Delete frontend project
+          echo -e "\033[33m💥 Destroying frontend project: $PR_APP_UI\033[0m"
+          if railway delete --name $PR_APP_UI --yes; then
+            echo -e "\033[32m✅ Successfully destroyed frontend: $PR_APP_UI\033[0m"
+            echo "🗑️ PR frontend destroyed: $PR_APP_UI" >> $GITHUB_STEP_SUMMARY
+          else
+            echo -e "\033[36m🤷 Frontend project not found: $PR_APP_UI\033[0m"
+            echo "ℹ️ PR frontend not found: $PR_APP_UI" >> $GITHUB_STEP_SUMMARY
+          fi
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

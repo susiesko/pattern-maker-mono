@@ -1,4 +1,4 @@
-name: Deploy to Fly.io
+name: Deploy to Railway
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-api:
     name: Deploy API
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'pr' }}
@@ -20,55 +20,110 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
       
-      - name: Deploy to production
+      - name: Deploy to production (Fly.io)
         if: github.ref == 'refs/heads/main'
         run: |
-          echo -e "\033[34m🚀 Deploying to production app: beadpantry-api\033[0m"
-          flyctl deploy --remote-only --app beadpantry-api --config ./fly.toml
-          echo -e "\033[32m✅ Production deployment complete: https://beadpantry-api.fly.dev\033[0m"
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          echo -e "\033[34m🚀 Production still uses Fly.io - use deploy-old.yml\033[0m"
+          echo "ℹ️ Production deployments still use Fly.io" >> $GITHUB_STEP_SUMMARY
       
-      - name: Deploy PR preview
+      - name: Deploy PR API to Railway
         if: github.event_name == 'pull_request'
         run: |
           PR_APP="beadpantry-api-pr-${{ github.event.number }}"
-          echo -e "\033[35m🔧 Setting up PR preview app: $PR_APP\033[0m"
+          echo -e "\033[35m🔧 Setting up PR API app on Railway: $PR_APP\033[0m"
           
-          # Debug: Show all apps and search for our specific app
-          echo -e "\033[36m📋 All apps:\033[0m"
-          flyctl apps list
-          echo -e "\033[36m🔍 Looking for app: $PR_APP\033[0m"
-          flyctl apps list | grep "$PR_APP" || echo "No matching app found"
+          # Login to Railway
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
           
-          # Debug: Show all apps and search for our specific app
-          echo -e "\033[36m📋 All apps:\033[0m"
-          flyctl apps list
-          echo -e "\033[36m🔍 Looking for app: $PR_APP\033[0m"
-          flyctl apps list | grep "$PR_APP" || echo "No matching app found"
+          # Create new project
+          echo -e "\033[33m📦 Creating Railway project: $PR_APP\033[0m"
+          railway create $PR_APP
           
-          # Create app
-          if ! flyctl apps list | grep -q $PR_APP; then
-            echo -e "\033[33m📦 Creating new app: $PR_APP\033[0m"
-            flyctl apps create $PR_APP --org personal
-          else
-            echo -e "\033[36m♻️  App already exists: $PR_APP\033[0m"
+          # Set environment variables
+          echo -e "\033[33m🔐 Setting environment variables for: $PR_APP\033[0m"
+          railway env set RAILS_ENV=production
+          railway env set JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
+          railway env set RAILS_MASTER_KEY="${{ secrets.RAILS_MASTER_KEY }}"
+          railway env set ALLOWED_ORIGINS="*"
+          
+          # Add PostgreSQL database
+          echo -e "\033[33m🗄️ Adding PostgreSQL database\033[0m"
+          railway service create --name postgres
+          railway env set DATABASE_URL='${{POSTGRES.DATABASE_URL}}'
+          
+          # Deploy API
+          echo -e "\033[34m🚀 Deploying API to Railway: $PR_APP\033[0m"
+          railway deploy --service $PR_APP
+          
+          # Get deployment URL
+          RAILWAY_URL=$(railway status --json | jq -r '.deployments[0].url // empty')
+          if [ -z "$RAILWAY_URL" ]; then
+            RAILWAY_URL="https://$PR_APP.railway.app"
           fi
           
-          # Set secrets for PR app
-          echo -e "\033[33m🔐 Setting secrets for: $PR_APP\033[0m"
-          flyctl secrets set --app $PR_APP \
-            DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-            JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
-            RAILS_MASTER_KEY="${{ secrets.RAILS_MASTER_KEY }}" \
-            ALLOWED_ORIGINS="*"
-          
-          # Deploy to PR app
-          echo -e "\033[34m🚀 Deploying PR app: $PR_APP\033[0m"
-          flyctl deploy --remote-only --app $PR_APP --config ./fly.toml
-          echo -e "\033[32m✅ PR deployment complete: https://$PR_APP.fly.dev\033[0m"
-          echo "🚀 PR app deployed: https://$PR_APP.fly.dev" >> $GITHUB_STEP_SUMMARY
+          echo -e "\033[32m✅ API deployment complete: $RAILWAY_URL\033[0m"
+          echo "🚀 PR API deployed: $RAILWAY_URL" >> $GITHUB_STEP_SUMMARY
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: deploy-api
+    if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: ./ui
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ui/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      
+      - name: Build and deploy frontend to Railway
+        run: |
+          PR_APP_API="beadpantry-api-pr-${{ github.event.number }}"
+          PR_APP_UI="beadpantry-ui-pr-${{ github.event.number }}"
+          
+          echo -e "\033[35m🔧 Building frontend for PR: $PR_APP_UI\033[0m"
+          
+          # Set API URL for build
+          API_URL="https://$PR_APP_API.railway.app"
+          echo "VITE_API_URL=$API_URL/api/v1" > .env.production
+          echo "VITE_LOG_LEVEL=error" >> .env.production
+          
+          # Build frontend
+          npm run build
+          echo -e "\033[32m✅ Frontend build complete with API: $API_URL/api/v1\033[0m"
+          
+          # Login to Railway
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          
+          # Create frontend project
+          echo -e "\033[33m📦 Creating Railway frontend project: $PR_APP_UI\033[0m"
+          railway create $PR_APP_UI
+          
+          # Deploy frontend (Railway will auto-detect static site)
+          echo -e "\033[34m🚀 Deploying frontend to Railway: $PR_APP_UI\033[0m"
+          railway deploy --service $PR_APP_UI
+          
+          # Get frontend URL
+          FRONTEND_URL="https://$PR_APP_UI.railway.app"
+          echo -e "\033[32m✅ Frontend deployed: $FRONTEND_URL\033[0m"
+          echo "🌐 Frontend deployed: $FRONTEND_URL" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 API URL: $API_URL/api/v1" >> $GITHUB_STEP_SUMMARY
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

@@ -40,7 +40,7 @@ jobs:
           
           # Create new project
           echo -e "\033[33m📦 Creating Railway project: $PR_APP\033[0m"
-          railway create $PR_APP
+          railway new $PR_APP
           
           # Set environment variables
           echo -e "\033[33m🔐 Setting environment variables for: $PR_APP\033[0m"
@@ -113,7 +113,7 @@ jobs:
           
           # Create frontend project
           echo -e "\033[33m📦 Creating Railway frontend project: $PR_APP_UI\033[0m"
-          railway create $PR_APP_UI
+          railway new $PR_APP_UI
           
           # Deploy frontend (Railway will auto-detect static site)
           echo -e "\033[34m🚀 Deploying frontend to Railway: $PR_APP_UI\033[0m"

@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# Database switcher script for Pattern Maker API
+# Usage: ./bin/switch-database [cosmosdb|postgresql]
+
+set -e
+
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 [cosmosdb|postgresql]"
+    echo ""
+    echo "Current database type:"
+    grep "DATABASE_TYPE=" .env || echo "DATABASE_TYPE not set (defaults to cosmosdb)"
+    exit 1
+fi
+
+DATABASE_TYPE=$1
+
+if [[ "$DATABASE_TYPE" != "cosmosdb" && "$DATABASE_TYPE" != "postgresql" ]]; then
+    echo "Error: DATABASE_TYPE must be 'cosmosdb' or 'postgresql'"
+    exit 1
+fi
+
+echo "Switching to $DATABASE_TYPE..."
+
+# Update .env file
+if grep -q "^DATABASE_TYPE=" .env; then
+    # Replace existing DATABASE_TYPE
+    sed -i.bak "s/^DATABASE_TYPE=.*/DATABASE_TYPE=$DATABASE_TYPE/" .env
+else
+    # Add DATABASE_TYPE if it doesn't exist
+    echo "DATABASE_TYPE=$DATABASE_TYPE" >> .env
+fi
+
+echo "Updated DATABASE_TYPE=$DATABASE_TYPE in .env"
+
+if [[ "$DATABASE_TYPE" == "postgresql" ]]; then
+    echo ""
+    echo "⚠️  POSTGRESQL MODE ⚠️"
+    echo "Don't forget to:"
+    echo "1. Uncomment PostgreSQL config in .env:"
+    echo "   DATABASE_URL=postgresql://localhost:5432/pattern_maker_development"
+    echo "   DATABASE_HOST=localhost"
+    echo "   DATABASE_PORT=5432"
+    echo "2. Run: bundle install"
+    echo "3. Run: rails db:setup"
+    echo ""
+    echo "Your old ActiveRecord models will work:"
+    echo "  - User, Catalog::Bead, Inventory, etc."
+else
+    echo ""
+    echo "🌍 COSMOS DB MODE 🌍"
+    echo "Using globally distributed document database"
+    echo "Your document models are ready:"
+    echo "  - Cosmos::UserDocument, Cosmos::BeadDocument"
+    echo ""
+    echo "Run: bundle install"
+fi
+
+echo ""
+echo "Switch complete! Restart your Rails server."

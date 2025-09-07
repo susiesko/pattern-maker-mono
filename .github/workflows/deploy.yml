@@ -38,9 +38,13 @@ jobs:
           # Railway CLI will use RAILWAY_TOKEN env var automatically
           echo -e "\033[36m🔑 Authenticating with Railway...\033[0m"
           
-          # Create new project
-          echo -e "\033[33m📦 Creating Railway project: $PR_APP\033[0m"
-          railway new $PR_APP
+          # Initialize Railway project
+          echo -e "\033[33m📦 Initializing Railway project: $PR_APP\033[0m"
+          railway init --name $PR_APP
+          
+          # Add PostgreSQL database
+          echo -e "\033[33m🗄️ Adding PostgreSQL database\033[0m"
+          railway add postgresql
           
           # Set environment variables
           echo -e "\033[33m🔐 Setting environment variables for: $PR_APP\033[0m"
@@ -49,13 +53,9 @@ jobs:
           railway env set RAILS_MASTER_KEY="${{ secrets.RAILS_MASTER_KEY }}"
           railway env set ALLOWED_ORIGINS="*"
           
-          # Add PostgreSQL database
-          echo -e "\033[33m🗄️ Adding PostgreSQL database\033[0m"
-          railway add --database postgresql
-          
           # Deploy API
           echo -e "\033[34m🚀 Deploying API to Railway: $PR_APP\033[0m"
-          railway deploy --service $PR_APP
+          railway up
           
           # Get deployment URL
           RAILWAY_URL=$(railway status --json | jq -r '.deployments[0].url // empty')
@@ -111,13 +111,13 @@ jobs:
           # Railway CLI will use RAILWAY_TOKEN env var automatically
           echo -e "\033[36m🔑 Authenticating with Railway...\033[0m"
           
-          # Create frontend project
-          echo -e "\033[33m📦 Creating Railway frontend project: $PR_APP_UI\033[0m"
-          railway new $PR_APP_UI
+          # Initialize frontend project
+          echo -e "\033[33m📦 Initializing Railway frontend project: $PR_APP_UI\033[0m"
+          railway init --name $PR_APP_UI
           
           # Deploy frontend (Railway will auto-detect static site)
           echo -e "\033[34m🚀 Deploying frontend to Railway: $PR_APP_UI\033[0m"
-          railway deploy --service $PR_APP_UI
+          railway up
           
           # Get frontend URL
           FRONTEND_URL="https://$PR_APP_UI.railway.app"

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Coming Soon</title>
+    <meta name="description" content="Coming soon." />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <style>
+        :root{
+            --bg: #0f1220;
+            --card: #151a2f;
+            --text: #e7ecff;
+            --muted: #a7b0d1;
+            --accent: #7aa2ff;
+            --ring: rgba(122,162,255,.25);
+        }
+        @media (prefers-color-scheme: light){
+            :root{
+                --bg:#f7f8fd; --card:#ffffff; --text:#101323; --muted:#5f6687; --accent:#3b63ff; --ring:rgba(59,99,255,.2);
+            }
+        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            margin: 0;
+            font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text);
+            background:
+                    radial-gradient(1000px 600px at 80% -10%, rgba(122,162,255,.12), transparent 60%),
+                    radial-gradient(800px 500px at -10% 90%, rgba(122,162,255,.10), transparent 55%),
+                    var(--bg);
+            display: grid;
+            place-items: center;
+            padding: 2rem;
+        }
+        .card {
+            width: min(640px, 90vw);
+            max-width: 500px;
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,.06);
+            border-radius: 20px;
+            padding: clamp(2rem, 5vw, 3rem);
+            box-shadow:
+                    0 10px 25px rgba(0,0,0,.25),
+                    0 0 0 8px var(--ring);
+            text-align: center;
+        }
+        .logo {
+            width: clamp(56px, 8vw, 72px); 
+            height: clamp(56px, 8vw, 72px);
+            margin: 0 auto 1.5rem;
+            display: grid; place-items: center;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent), #9ad0ff);
+            color: white;
+            font-weight: 700;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 16px rgba(122,162,255,0.35);
+            user-select: none;
+        }
+        h1 {
+            margin: .25rem 0 .5rem;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            line-height: 1.15;
+            letter-spacing: .02em;
+        }
+        p {
+            margin: 0 0 1rem;
+            color: var(--muted);
+            font-size: clamp(1rem, 2.5vw, 1.125rem);
+        }
+        .small {
+            font-size: .9rem;
+            opacity: .9;
+        }
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+            margin: 1rem 0 1.25rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: .35rem .6rem;
+            border-radius: 999px;
+            background: rgba(122,162,255,.12);
+            color: var(--accent);
+            font-weight: 600;
+            font-size: .8rem;
+            letter-spacing: .02em;
+        }
+    </style>
+</head>
+<body>
+<main class="card" role="main" aria-labelledby="title">
+    <div class="logo" aria-hidden="true">BP</div>
+    <span class="badge">Coming Soon</span>
+    <h1 id="title">We’re building something new</h1>
+    <p class="small">Check back here soon.</p>
+    <div class="divider" aria-hidden="true"></div>
+    <p class="small">© <span id="y"></span></p>
+</main>
+
+<script>
+    // year stamp
+    document.getElementById('y').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

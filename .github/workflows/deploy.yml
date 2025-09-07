@@ -12,7 +12,7 @@ jobs:
   deploy-api:
     name: Deploy API
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'pr' }}
+    environment: pr
     defaults:
       run:
         working-directory: ./api
@@ -35,8 +35,9 @@ jobs:
           PR_APP="beadpantry-api-pr-${{ github.event.number }}"
           echo -e "\033[35m🔧 Setting up PR API app on Railway: $PR_APP\033[0m"
           
-          # Railway CLI will use RAILWAY_TOKEN env var automatically
+          # Login to Railway
           echo -e "\033[36m🔑 Authenticating with Railway...\033[0m"
+          echo "${{ secrets.RAILWAY_TOKEN }}" | railway login
           
           # Initialize Railway project
           echo -e "\033[33m📦 Initializing Railway project: $PR_APP\033[0m"
@@ -108,8 +109,9 @@ jobs:
           npm run build
           echo -e "\033[32m✅ Frontend build complete with API: $API_URL/api/v1\033[0m"
           
-          # Railway CLI will use RAILWAY_TOKEN env var automatically
+          # Login to Railway
           echo -e "\033[36m🔑 Authenticating with Railway...\033[0m"
+          echo "${{ secrets.RAILWAY_TOKEN }}" | railway login
           
           # Initialize frontend project
           echo -e "\033[33m📦 Initializing Railway frontend project: $PR_APP_UI\033[0m"

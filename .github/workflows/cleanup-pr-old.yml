@@ -1,8 +1,8 @@
-name: Cleanup PR Apps
+name: Cleanup PR Apps (DISABLED)
 
 on:
   pull_request:
-    branches: [main]
+    branches: [disabled-never-run]  # Changed to disable
     types: [closed]
 
 jobs:

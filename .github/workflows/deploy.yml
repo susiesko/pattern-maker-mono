@@ -72,3 +72,49 @@ jobs:
           echo "🚀 PR app deployed: https://$PR_APP.fly.dev" >> $GITHUB_STEP_SUMMARY
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: ./ui
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ui/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build frontend with PR API URL
+        run: |
+          PR_APP="beadpantry-api-pr-${{ github.event.number }}"
+          echo -e "\033[35m🔧 Building frontend for PR: $PR_APP\033[0m"
+          echo "VITE_API_URL=https://$PR_APP.fly.dev/api/v1" > .env.production
+          echo "VITE_LOG_LEVEL=error" >> .env.production
+          npm run build
+          echo -e "\033[32m✅ Frontend build complete with API: https://$PR_APP.fly.dev/api/v1\033[0m"
+      
+      - name: Deploy to Cloudflare Pages
+        run: |
+          PR_APP="beadpantry-api-pr-${{ github.event.number }}"
+          PROJECT_NAME="beadpantry-ui-pr-${{ github.event.number }}"
+          echo -e "\033[34m🚀 Deploying frontend to Cloudflare: $PROJECT_NAME\033[0m"
+          
+          npx wrangler pages deploy dist \
+            --project-name="$PROJECT_NAME" \
+            --compatibility-date=2024-01-01
+          
+          echo -e "\033[32m✅ Frontend deployed: https://$PROJECT_NAME.pages.dev\033[0m"
+          echo "🌐 Frontend deployed: https://$PROJECT_NAME.pages.dev" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 API URL: https://$PR_APP.fly.dev/api/v1" >> $GITHUB_STEP_SUMMARY
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

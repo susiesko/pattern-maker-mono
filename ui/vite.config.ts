@@ -26,7 +26,7 @@ export default defineConfig({
     proxy: {
       // Proxy API requests to the Rails server
       '/api': {
-        target: 'http://localhost:3000', // Rails server running on port 3000
+        target: process.env.VITE_TARGET_API_URL || 'http://localhost:3000', // Rails server running on port 3000
         changeOrigin: true,
         secure: false,
       },

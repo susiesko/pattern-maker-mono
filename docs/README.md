@@ -18,7 +18,7 @@ API documentation and specifications
 
 ### `/deployment/`
 Deployment guides and infrastructure documentation
-- [`HEROKU_DEPLOYMENT.md`](deployment/HEROKU_DEPLOYMENT.md) - Hybrid Heroku/Netlify deployment guide
+- Railway deployment guide (in development)
 
 ### `/development/`
 Development guides and best practices
@@ -50,4 +50,4 @@ Tasks are tracked in [YouTrack](https://pattern-maker.youtrack.cloud) with GitHu
 
 ## 🚀 Quick Start
 
-See [`deployment/HEROKU_DEPLOYMENT.md`](deployment/HEROKU_DEPLOYMENT.md) for setup instructions.
+See the main [`README.md`](../README.md) for setup instructions.

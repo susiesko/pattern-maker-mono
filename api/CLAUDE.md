@@ -76,7 +76,7 @@ Uses JWT-based authentication with the AuthenticationService. The JWT secret is 
 
 ### Development Notes
 - This is part of a monorepo with a React frontend (`../ui/`) and Python crawlers (`../crawler/`)
-- The application is designed to be deployed on Heroku with PostgreSQL
+- The application is designed to be deployed on Railway with PostgreSQL
 - Environment variables required: `DATABASE_URL`, `JWT_SECRET_KEY`, `ALLOWED_ORIGINS`, `RAILS_MASTER_KEY`
 - CORS is configured with environment-based origin allowlist for security
 - JWT authentication uses separate secret key (not Rails secret_key_base)

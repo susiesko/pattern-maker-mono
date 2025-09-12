@@ -19,7 +19,7 @@ gem "jwt"
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
-# Use simpler adapters for Heroku deployment
+# Use Redis for caching and background jobs
 # gem "solid_cache"
 # gem "solid_queue" 
 # gem "solid_cable"
